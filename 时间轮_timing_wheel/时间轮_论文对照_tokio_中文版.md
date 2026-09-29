@@ -6,13 +6,13 @@ let now\_slot = ((now / slot\_range(self.level)) % LEVEL\_MULT as u64) as usize 
 
 为什么一个成熟的 Rust 库（tokio-util），时间轮里要在这里**凭空 `+1`**？
 
-这一行是 2026 年 9 月刚合入的（[tokio#8334](https://github.com/tokio-rs/tokio/pull/8334) 的移植）。它修的是一个真实生产事故：一个 PostgreSQL 代理 **pgdog 连续运行 12 天后，所有定时任务集体"挂起"**——不报错、不 panic，就是安静地不再触发。
+这个修复 2026 年 9 月先在 runtime 侧合入（[tokio#8334](https://github.com/tokio-rs/tokio/pull/8334)，9 月 7 日）；**tokio-util 侧的同一行修复目前还在等审（[tokio#8519](https://github.com/tokio-rs/tokio/pull/8519)）**——本文引用的代码取自 #8519 分支，不是 tokio-util 的 master。它修的是一个真实生产事故：一个 PostgreSQL 代理 **pgdog 连续运行 12 天后，所有定时任务集体"挂起"**——不报错、不 panic，就是安静地不再触发。
 
 先看图，再给结论。
 
 !\[tokio-util 时间轮：6 层 × 64 槽](assets/fig1\_levels.png)
 
-**去掉这个 `+1`，一个 12 天后到期的定时器，会被推迟到 807 天后才触发。** 整整多睡了一年多。
+**去掉这个 `+1`，一个 12 天后到期的定时器，会被推迟到 807 天后才触发。** 整整多睡了两年多。
 
 !\[同一组 timer，两种实现的触发时刻](assets/fig3\_timeline.png)
 
@@ -135,7 +135,7 @@ pgdog 的 runtime driver 每次 `park` 前只取**一次** `poll\_at`，然后�
 
 > 顺带纠正一个流传的说法：#8334 的 PR 描述里写"short sleeps got queued on the top level 5"（短 sleep 被排到顶层）。这话本身没错，但\*\*原因不是"短"，而是"跨边界导致异或距离爆炸"\*\*。场景 B 证明了：不跨边界的短定时器落在低层，完全不受影响。
 
-三个场景 + 移植过去的 9 个单元测试全绿，tokio-audit 里时间轮的 12 个测试也全绿。
+三个场景 + 移植过去的 9 个单元测试全绿，本地 tokio checkout 里时间轮的 12 个测试也全绿。
 
 \---
 
@@ -201,5 +201,5 @@ Lawn 的核心思想：**不按"到期时刻"分桶，按 TTL 值分桶。** 每
 
 ② 方法注记：定位/元数据/引文网络/摘要用 OpenAlex REST（无 key）；参考文献用 Crossref（按 DOI）；图谱可视化用 Semantic Scholar 网页；**代码行为用独立 crate 双版本实测**（fixed/buggy 逐字节相同、只差 `+1`，release 模式跑）。每个"论文声称 X"标了来源级别，每个代码断言带行号或实测输出。
 
-③ 代码引用自 `tokio-util/src/time/wheel/`（MIT 协议；行号对应本文写作时的本地 checkout）。
+③ 代码引用自 PR [#8519](https://github.com/tokio-rs/tokio/pull/8519) 分支的 `tokio-util/src/time/wheel/`（MIT 协议；行号对应本文写作时的本地 checkout）。注意：该 PR 截至本文发布时仍为 open，tokio-util 的 master 上尚无此修复。
 

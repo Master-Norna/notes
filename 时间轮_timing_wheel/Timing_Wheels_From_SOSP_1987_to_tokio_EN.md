@@ -6,13 +6,13 @@ let now_slot = ((now / slot_range(self.level)) % LEVEL_MULT as u64) as usize + 1
 
 Why does a mature Rust library — tokio-util — need to **add one** out of nowhere, right in the middle of its timing wheel?
 
-That line was merged in September 2026 (a port of [tokio#8334](https://github.com/tokio-rs/tokio/pull/8334)). It fixes a real production incident: **pgdog**, a PostgreSQL proxy, ran for 12 days and then *every* periodic task quietly stopped firing. No error, no panic — just silence.
+The fix landed on the runtime side first in September 2026 ([tokio#8334](https://github.com/tokio-rs/tokio/pull/8334), merged Sept 7); **the same one-line fix for tokio-util is still waiting in review ([tokio#8519](https://github.com/tokio-rs/tokio/pull/8519))** — the code quoted in this post is from the #8519 branch, not tokio-util's master. It fixes a real production incident: **pgdog**, a PostgreSQL proxy, ran for 12 days and then *every* periodic task quietly stopped firing. No error, no panic — just silence.
 
 Let's look at the pictures first, then the punchline.
 
 ![tokio-util's timing wheel: 6 levels × 64 slots](assets/fig1_levels.png)
 
-**Without that `+1`, a timer due in 12 days fires 807 days late.** An extra year and a half of sleep.
+**Without that `+1`, a timer due in 12 days fires 807 days late.** An extra two-plus years of sleep.
 
 ![Same timers, two implementations](assets/fig3_timeline.png)
 
@@ -201,4 +201,4 @@ Two data structures, two preconditions, each covering its own ground. This is no
 
 ② Method note: discovery, metadata, citation networks and abstracts via the OpenAlex REST API (no key); reference lists via Crossref (by DOI); citation-graph visualization via Semantic Scholar web pages; **code behavior via a standalone two-version crate** (fixed/buggy byte-identical except the `+1`, run in release mode). Every "paper claims X" is tagged with its evidence level; every code claim carries a line number or a measured output.
 
-③ Code quoted from `tokio-util/src/time/wheel/` (MIT license; line numbers refer to the local checkout at time of writing).
+③ Code quoted from `tokio-util/src/time/wheel/` on the [#8519](https://github.com/tokio-rs/tokio/pull/8519) branch (MIT license; line numbers refer to the local checkout at time of writing). Note: that PR was still open at the time of writing; tokio-util's master does not yet carry the fix.
