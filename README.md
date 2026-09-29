@@ -16,6 +16,7 @@
 
 ### 时间轮：从 SOSP '87 到 tokio
 
+- 博客：[《时间轮里那行凭空出现的 +1》](https://juejin.cn/post/7690596943454437427)（掘金，2026-09-29 首发）
 - 笔记：[中文版](笔记/时间轮_论文对照_tokio_中文版.md) / [English](笔记/Timing_Wheels_From_SOSP_1987_to_tokio_EN.md)
 - 验证工程：[`代码/wheel_demo/`](代码/wheel_demo/)
 
