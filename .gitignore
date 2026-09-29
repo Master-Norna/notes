@@ -1,0 +1,10 @@
+# Rust 构建产物
+代码/wheel_demo/target/
+
+# Python
+__pycache__/
+*.pyc
+
+# 系统
+Thumbs.db
+.DS_Store
