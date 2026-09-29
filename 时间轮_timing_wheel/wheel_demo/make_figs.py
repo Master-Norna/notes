@@ -10,7 +10,7 @@ plt.rcParams["font.sans-serif"] = ["Microsoft YaHei", "SimHei"]
 plt.rcParams["axes.unicode_minus"] = False
 
 VER = "v7"  # 右下角版本标记，验证管线用
-OUT = r"E:\项目\Tset\笔记\assets"
+OUT = r"E:\项目\Tset\时间轮_timing_wheel\assets"
 os.makedirs(OUT, exist_ok=True)
 
 PAPER = "#fafaf7"

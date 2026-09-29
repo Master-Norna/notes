@@ -1,5 +1,5 @@
 # Rust 构建产物
-代码/wheel_demo/target/
+**/target/
 
 # Python
 __pycache__/

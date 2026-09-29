@@ -1,24 +1,30 @@
-# tset-notes
+# notes
 
 技术笔记原稿仓库：**论文对照真实实现**系列。每篇笔记的断言都尽量落到可运行的代码上——
-笔记里有 claim，`代码/` 里就有复现它的工程。
+笔记里有 claim，专题文件夹里就有复现它的工程。
 
 > 博客版（掘金 / dev.to）从这里长出来；仓库是原稿，博客是发布物。
 
-## 目录
+## 结构约定
 
-| 目录 | 内容 |
-|---|---|
-| `笔记/` | 笔记原稿（中英双语），配图为 `笔记/assets/` |
-| `代码/` | 与笔记配套的验证工程 |
+每个专题一个文件夹，笔记、配图、验证代码都放在里面：
 
-## 已发 / 已写
+```
+<专题名>/
+├── xxx.md          # 笔记原稿（中英双语）
+├── assets/         # 配图
+└── <工程名>/       # 验证工程（可运行）
+```
+
+## 专题
 
 ### 时间轮：从 SOSP '87 到 tokio
 
+`时间轮_timing_wheel/`
+
 - 博客：[《时间轮里那行凭空出现的 +1》](https://juejin.cn/post/7690596943454437427)（掘金，2026-09-29 首发）
-- 笔记：[中文版](笔记/时间轮_论文对照_tokio_中文版.md) / [English](笔记/Timing_Wheels_From_SOSP_1987_to_tokio_EN.md)
-- 验证工程：[`代码/wheel_demo/`](代码/wheel_demo/)
+- 笔记：[中文版](时间轮_timing_wheel/时间轮_论文对照_tokio_中文版.md) / [English](时间轮_timing_wheel/Timing_Wheels_From_SOSP_1987_to_tokio_EN.md)
+- 验证工程：[`时间轮_timing_wheel/wheel_demo/`](时间轮_timing_wheel/wheel_demo/)
 
 内容要点：
 - Varghese & Lauck 1987 SOSP 时间轮 → BSD 内核落地 → Soft timers → Lawn → Carousel 的谱系，逐篇核实
@@ -28,7 +34,7 @@
 ## 运行验证代码
 
 ```sh
-cd 代码/wheel_demo
+cd 时间轮_timing_wheel/wheel_demo
 cargo test        # 5 个测试：fixed 版行为 + buggy 版反例（含 pgdog 场景复现）
 cargo run --release --example demo    # 打印三个场景的实测时间线
 ```
