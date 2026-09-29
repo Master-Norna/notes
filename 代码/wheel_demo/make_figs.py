@@ -9,7 +9,7 @@ import numpy as np, os
 plt.rcParams["font.sans-serif"] = ["Microsoft YaHei", "SimHei"]
 plt.rcParams["axes.unicode_minus"] = False
 
-VER = "v4"  # 右下角版本标记，验证管线用
+VER = "v7"  # 右下角版本标记，验证管线用
 OUT = r"E:\项目\Tset\笔记\assets"
 os.makedirs(OUT, exist_ok=True)
 
@@ -46,9 +46,9 @@ y0, gap, r = 2.35, 0.98, 0.44
 for i, (name, sw, rng) in enumerate(levels):
     y = y0 - i * gap
     top = (name == "L5")
-    ax.add_patch(plt.Circle((0.75, y), r, fc=ACCENT if top else "none",
-                            alpha=0.14 if top else 0.0, ec=ACCENT if top else INK,
-                            lw=2.2 if top else 1.4, zorder=1))
+    ax.add_patch(plt.Circle((0.75, y), r, fc=ACCENT if top else "#d8d8d2",
+                            alpha=0.16 if top else 0.40, ec=ACCENT if top else MUTED,
+                            lw=2.2 if top else 1.2, zorder=1))
     for k in range(0, 64, 8):
         a = np.deg2rad(k * 360 / 64)
         ax.plot([0.75 + r * np.cos(a), 0.75 + (r + 0.05) * np.cos(a)],
@@ -76,7 +76,7 @@ SLOT1 = 90.0 - 30.0
 
 def draw_ring(ax, title, start_slot, result_text, result_color):
     ax.set_facecolor(PAPER)
-    ax.set_xlim(-1.6, 1.6); ax.set_ylim(-1.55, 1.75); ax.axis("off")
+    ax.set_xlim(-1.6, 1.6); ax.set_ylim(-1.55, 1.90); ax.axis("off")
     r = 1.0
     ax.add_patch(plt.Circle((0, 0), r, fill=False, ec=INK, lw=1.6))
     for k in range(64):
@@ -96,18 +96,14 @@ def draw_ring(ax, title, start_slot, result_text, result_color):
     p1 = np.array([r * np.cos(np.deg2rad(SLOT1)), r * np.sin(np.deg2rad(SLOT1))])
     ax.add_patch(plt.Circle(p0, 0.07, fc=ACCENT, ec="none"))
     ax.add_patch(plt.Circle(p1, 0.07, fc=ORANGE, ec="none"))
-    ax.annotate("FAR = 2^36+1 ms（~795 天）\n伪环条目：逻辑在一整圈之后",
-                xy=p0, xytext=(-1.55, 1.30), fontsize=9.2, color=ACCENT,
-                ha="left", va="center",
+    ax.annotate("FAR = 2^36+1 ms（~795 天）\n伪环条目 · now 也落在这槽（槽 0）",
+                xy=(p0[0] - 0.08, p0[1] - 0.05), xytext=(-1.55, 1.18), fontsize=9.2,
+                color=ACCENT, ha="left", va="center",
                 arrowprops=dict(arrowstyle="-", color=ACCENT, lw=0.9))
     ax.annotate("NEAR = 2^30+1000 ms（12 天 + 1 秒）",
-                xy=p1, xytext=(0.42, 1.22), fontsize=9.2, color=ORANGE,
-                ha="left", va="center",
+                xy=(p1[0] + 0.06, p1[1] + 0.03), xytext=(1.55, 1.82), fontsize=9.2,
+                color=ORANGE, ha="right", va="center",
                 arrowprops=dict(arrowstyle="-", color=ORANGE, lw=0.9))
-    ax.annotate("now（elapsed 落在槽 0）", xy=p0, xytext=(-0.62, -1.42),
-                fontsize=9.5, color=INK, ha="center",
-                arrowprops=dict(arrowstyle="-|>", color=INK, lw=1.1,
-                                connectionstyle="arc3,rad=0.25"))
 
     ps = p0 if start_slot == 0 else p1
     col = result_color
@@ -117,12 +113,13 @@ def draw_ring(ax, title, start_slot, result_text, result_color):
     arr = FancyArrowPatch(c + np.array([0.10, 0.02]), c + np.array([0.03, -0.08]),
                           arrowstyle="-|>", mutation_scale=15, color=col, lw=2.4)
     ax.add_patch(arr)
-    ax.text(c[0] + 0.28, c[1] + 0.14, "扫描从这开始\n→ 立刻命中", fontsize=9.0,
-            color=col, weight="bold", ha="left", va="center")
+    ax.text(0, 0.30, "扫描从这开始\n→ 立刻命中", fontsize=9.0, color=col,
+            weight="bold", ha="center", va="center")
 
     ax.set_title(title, fontsize=12.5, weight="bold", color=INK)
-    ax.text(0, -1.50, result_text, ha="center", fontsize=9.6, color=result_color)
-    ax.text(0, 1.68, "槽间距为示意（实际相邻槽 5.6°）", ha="right",
+    ax.text(0, -1.32, result_text, ha="center", va="top", fontsize=9.6,
+            color=result_color)
+    ax.text(0, 1.86, "槽间距为示意（实际相邻槽 5.6°）", ha="right",
             fontsize=8.2, color=MUTED)
 
 
@@ -135,9 +132,9 @@ draw_ring(axes[1], "fixed（含 +1）：扫描从槽 1 开始", 1,
 save(fig, "fig2_ring_scan.png")
 
 # ---------- 图 3：触发时间线 ----------
-fig, ax = plt.subplots(figsize=(10.5, 4.4), dpi=150)
+fig, ax = plt.subplots(figsize=(11.5, 4.6), dpi=150)
 fig.patch.set_facecolor(PAPER); ax.set_facecolor(PAPER)
-ax.set_xlim(-10, 880); ax.set_ylim(-1.45, 2.05)
+ax.set_xlim(-60, 880); ax.set_ylim(-1.55, 2.15)
 ax.axhline(0, color=INK, lw=1.4)
 for d, lab, dy in [(0, "0", -0.32), (12, "12天", 0.30),
                    (795, "795天（顶层一整圈）", -0.32), (807, "807天", 0.30)]:
@@ -145,25 +142,26 @@ for d, lab, dy in [(0, "0", -0.32), (12, "12天", 0.30),
     ax.text(d, dy, lab, ha="center", fontsize=9, color=MUTED)
 ax.set_yticks([]); ax.set_xticks([])
 
-ax.text(-8, 1.55, "fixed", fontsize=11, weight="bold", color=GOOD, ha="left")
+ax.text(-4, 1.55, "fixed", fontsize=11, weight="bold", color=GOOD, ha="right")
 ax.plot([0, 795], [1.55, 1.55], color=GOOD, lw=1.6, alpha=0.35)
 ax.plot([12], [1.55], "o", color=GOOD, ms=9)
-ax.text(30, 1.72, "NEAR 准点（12天+1秒）", ha="left", fontsize=9, color=GOOD)
+ax.text(45, 1.72, "NEAR 准点（12天+1秒）", ha="left", fontsize=9, color=GOOD)
 ax.plot([795], [1.55], "o", color=GOOD, ms=9)
 ax.text(795, 1.72, "FAR 准点（795天）", ha="center", fontsize=9, color=GOOD)
 
-ax.text(-8, 0.72, "buggy", fontsize=11, weight="bold", color=ACCENT, ha="left")
+ax.text(-4, 0.72, "buggy", fontsize=11, weight="bold", color=ACCENT, ha="right")
 ax.plot([0, 807], [0.72, 0.72], color=ACCENT, lw=1.6, alpha=0.35)
 ax.plot([795], [0.72], "o", color=ACCENT, ms=9)
-ax.text(795, 0.90, "FAR 准点", ha="center", fontsize=9, color=ACCENT)
+ax.text(795, 0.88, "FAR 准点", ha="left", fontsize=9, color=ACCENT)
 ax.plot([807], [0.72], "o", color=ACCENT, ms=9)
-ax.text(807, 0.90, "NEAR 才触发", ha="right", fontsize=9, color=ACCENT)
+ax.text(807, 0.50, "NEAR 才触发", ha="right", fontsize=9, color=ACCENT)
 
 ax.plot([12], [0.72], "x", color=MUTED, ms=10, mew=1.8)
-ax.text(12, 0.48, "本应在这", ha="center", fontsize=8.6, color=MUTED)
-ax.annotate("", xy=(806, 0.14), xytext=(12, 0.14),
+ax.plot([12, 12], [0.66, -0.16], color=MUTED, lw=0.9, ls=":")
+ax.text(30, -0.14, "本应在这（12天）", ha="left", fontsize=8.6, color=MUTED)
+ax.annotate("", xy=(806, 0.22), xytext=(12, 0.22),
             arrowprops=dict(arrowstyle="<->", color=ACCENT, lw=1.4))
-ax.text(409, 0.24, "NEAR 被推迟整整一圈（795 天）—— pgdog 事故里的“挂起”",
+ax.text(409, 0.30, "NEAR 被推迟整整一圈（795 天）—— pgdog 事故里的“挂起”",
         ha="center", fontsize=9.8, color=ACCENT)
 ax.set_title("同一组 timer，两种实现的触发时刻（release 实测）",
              fontsize=12.5, weight="bold", color=INK)
