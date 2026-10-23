@@ -1,7 +1,7 @@
 # 时间轮里那行凭空出现的 `+1`
 
 ```rust
-let now\_slot = ((now / slot\_range(self.level)) % LEVEL\_MULT as u64) as usize + 1;
+let now_slot = ((now / slot_range(self.level)) % LEVEL_MULT as u64) as usize + 1;
 ```
 
 为什么一个成熟的 Rust 库（tokio-util），时间轮里要在这里**凭空 `+1`**？
@@ -10,15 +10,15 @@ let now\_slot = ((now / slot\_range(self.level)) % LEVEL\_MULT as u64) as usize 
 
 先看图，再给结论。
 
-!\[tokio-util 时间轮：6 层 × 64 槽](assets/fig1\_levels.png)
+![tokio-util 时间轮：6 层 × 64 槽](assets/fig1_levels.png)
 
 **去掉这个 `+1`，一个 12 天后到期的定时器，会被推迟到 807 天后才触发。** 整整多睡了两年多。
 
-!\[同一组 timer，两种实现的触发时刻](assets/fig3\_timeline.png)
+![同一组 timer，两种实现的触发时刻](assets/fig3_timeline.png)
 
 下面倒着讲：先看清楚它到底修了什么，再回溯时间轮为什么会长成这样，最后放回那篇 1987 年的论文里。
 
-\---
+---
 
 ## 一、时间轮：把"谁下一个到期"从 O(n) 降到 O(1)
 
@@ -38,28 +38,28 @@ tokio-util 用的是层级轮，6 层 × 64 槽：
 |层|槽宽|覆盖范围|
 |-|-|-|
 |L0|1ms|64ms|
-|L1|64ms|\~4s|
-|L2|\~4s|\~4min|
-|L3|\~4min|\~4hr|
-|L4|\~4hr|\~12day|
-|L5（顶）|\~12day|\~2yr|
+|L1|64ms|~4s|
+|L2|~4s|~4min|
+|L3|~4min|~4hr|
+|L4|~4hr|~12day|
+|L5（顶）|~12day|~2yr|
 
-1ms 精度，覆盖约两年。找下一个占用槽靠一个 `occupied` 位图 + `rotate\_right` + `trailing\_zeros`，也是 O(1)。
+1ms 精度，覆盖约两年。找下一个占用槽靠一个 `occupied` 位图 + `rotate_right` + `trailing_zeros`，也是 O(1)。
 
 到这里一切都很美好。问题出在**边界**。
 
-\---
+---
 
 ## 二、边界：最远的定时器往哪放？
 
-层级轮不是无限层。一个定时器如果比顶层一圈还远，`level\_for` 没地方放它——于是 tokio 做了两件事：
+层级轮不是无限层。一个定时器如果比顶层一圈还远，`level_for` 没地方放它——于是 tokio 做了两件事：
 
-1. 用 `MAX\_DURATION`（顶层一圈，约 2 年）当上限，再远的直接拒绝；
+1. 用 `MAX_DURATION`（顶层一圈，约 2 年）当上限，再远的直接拒绝；
 2. **逻辑上属于"顶层 +1"的定时器，被强行塞进顶层的某个槽。**
 
 代码注释自己把这事说得很直白（`level.rs`）：
 
-> What this means is that the top level's slots act as a \*\*pseudo-ring buffer\*\*, and we rotate around them indefinitely.
+> What this means is that the top level's slots act as a **pseudo-ring buffer**, and we rotate around them indefinitely.
 
 翻译过来：**顶层的槽变成了一个"伪环形缓冲"，无限期地绕圈。** 一个槽里，可能同时躺着"逻辑上在很后面、物理上绕了一圈回来"的条目。
 
@@ -67,7 +67,7 @@ tokio-util 用的是层级轮，6 层 × 64 槽：
 
 现在把镜头拉到顶层。假设 `now`（已流逝时间）落在顶层的**槽 0**，而槽 0 里恰好躺着一个伪环条目（逻辑上整整一圈之后才到期）：
 
-!\[顶层环扫描对比](assets/fig2\_ring\_scan.png)
+![顶层环扫描对比](assets/fig2_ring_scan.png)
 
 找下一个到期槽的逻辑，是"从 `now` 所在的槽开始，顺时针找第一个非空槽"。
 
@@ -75,9 +75,9 @@ tokio-util 用的是层级轮，6 层 × 64 槽：
 
 `+1` 干的就是这一件事：**扫描起点从 `now` 槽往后挪一格，跳过它。** 因为 `now` 槽里能装的，最多就是"一整圈之后"的那个最远条目，把它跳过，才能看到槽 1 里真正更近的定时器。
 
-对低层来说，`+1` 是个无害的 no-op——`level\_for` 保证条目永远不会落在 `now` 所在的低层槽（那个槽永远是空的），跳不跳都一样。**所以这一行只在顶层生效，而顶层恰恰是唯一会出事的层。**
+对低层来说，`+1` 是个无害的 no-op——`level_for` 保证条目永远不会落在 `now` 所在的低层槽（那个槽永远是空的），跳不跳都一样。**所以这一行只在顶层生效，而顶层恰恰是唯一会出事的层。**
 
-\---
+---
 
 ## 三、去掉 `+1` 会怎样（代码实测）
 
@@ -91,15 +91,15 @@ tokio-util 用的是层级轮，6 层 × 64 槽：
 FAR  = 2^36+1 ms   (≈795 天)   → 顶层槽 0（伪环，与 now 同槽）
 NEAR = 2^30+1000 ms (12 天+1秒) → 顶层槽 1
 
-BUGGY  poll\_at = 2^36 (795 天后)      ← 被伪环条目劫持
+BUGGY  poll_at = 2^36 (795 天后)      ← 被伪环条目劫持
        fires near @ 2^36+2^30+1000    ← NEAR 被推迟整整一圈，807 天才触发
-FIXED  poll\_at = 2^30 (12 天后)
+FIXED  poll_at = 2^30 (12 天后)
        fires near @ 2^30+1000         ← NEAR 准点（12 天+1 秒）
 ```
 
 **buggy 把 12 天到期的定时器推迟到了 807 天。** 推的幅度恰好是顶层一整圈（`2^36` ms ≈ 795 天）。
 
-（一个佐证"跑出来的比写下来的可靠"的小细节：移植 commit 的 message 里把推迟幅度写成了 "\~19 days"，但 `2^36 - 2^31 ms` 实际是 770 天——上面是 release 实测值。）
+（一个佐证"跑出来的比写下来的可靠"的小细节：移植 commit 的 message 里把推迟幅度写成了 "~19 days"，但 `2^36 - 2^31 ms` 实际是 770 天——上面是 release 实测值。）
 
 ### 场景 B：低层短定时器免疫（对照）
 
@@ -111,33 +111,33 @@ FIXED  poll\_at = 2^30 (12 天后)
 
 ### 场景 B2：pgdog 的精确机制
 
-那 pgdog 的 interval 为什么中招？关键在 `level\_for` 用的是 **`elapsed ^ when`（异或距离）**，不是简单的 `when - elapsed`。
+那 pgdog 的 interval 为什么中招？关键在 `level_for` 用的是 **`elapsed ^ when`（异或距离）**，不是简单的 `when - elapsed`。
 
 构造：`elapsed = 2^30 - 1000`（紧贴 12 天边界之下），一个贴近 max 时长的长 sleep，一个 5 秒的 interval：
 
 ```
 elapsed   = 2^30 - 1000            （12 天 - 1 秒）
-MAX\_TIMER = elapsed + 2^36 - 2000  （顶层 now\_slot，伪环条目）
+MAX_TIMER = elapsed + 2^36 - 2000  （顶层 now_slot，伪环条目）
 INTERVAL  = elapsed + 5000         （跨过 2^30 边界！）
 
   → INTERVAL 的 elapsed^when ≈ 2^31（异或距离爆炸）
-  → level\_for 把它 fudge 进顶层，槽 1
+  → level_for 把它 fudge 进顶层，槽 1
 
-BUGGY  poll\_at = 2^36 (795 天后)   ← 伪环条目劫持
-       fires interval\_5s @ 807 天  ← 5 秒的 interval 挂起 795 天
-FIXED  poll\_at = 2^30 (1 秒后)
-       fires interval\_5s 准点
+BUGGY  poll_at = 2^36 (795 天后)   ← 伪环条目劫持
+       fires interval_5s @ 807 天  ← 5 秒的 interval 挂起 795 天
+FIXED  poll_at = 2^30 (1 秒后)
+       fires interval_5s 准点
 ```
 
-**触发条件全齐了**：运行时长贴近 12 天边界 + 一个长定时器占住顶层 `now` 槽 + 短定时器恰好跨过 `2^30` 边界（异或距离爆炸、被 `level\_for` 推进顶层）。三者一碰，短定时器就被伪环条目劫持，`poll\_at` 跳到一整圈之后。
+**触发条件全齐了**：运行时长贴近 12 天边界 + 一个长定时器占住顶层 `now` 槽 + 短定时器恰好跨过 `2^30` 边界（异或距离爆炸、被 `level_for` 推进顶层）。三者一碰，短定时器就被伪环条目劫持，`poll_at` 跳到一整圈之后。
 
-pgdog 的 runtime driver 每次 `park` 前只取**一次** `poll\_at`，然后睡到那个时刻、期间没有别的唤醒源——所以 `poll\_at` 被劫持 = driver 睡一整圈 = 所有短周期定时器"挂起"。这正是事故现象。
+pgdog 的 runtime driver 每次 `park` 前只取**一次** `poll_at`，然后睡到那个时刻、期间没有别的唤醒源——所以 `poll_at` 被劫持 = driver 睡一整圈 = 所有短周期定时器"挂起"。这正是事故现象。
 
-> 顺带纠正一个流传的说法：#8334 的 PR 描述里写"short sleeps got queued on the top level 5"（短 sleep 被排到顶层）。这话本身没错，但\*\*原因不是"短"，而是"跨边界导致异或距离爆炸"\*\*。场景 B 证明了：不跨边界的短定时器落在低层，完全不受影响。
+> 顺带纠正一个流传的说法：#8334 的 PR 描述里写"short sleeps got queued on the top level 5"（短 sleep 被排到顶层）。这话本身没错，但**原因不是"短"，而是"跨边界导致异或距离爆炸"**。场景 B 证明了：不跨边界的短定时器落在低层，完全不受影响。
 
 三个场景 + 移植过去的 9 个单元测试全绿，本地 tokio checkout 里时间轮的 12 个测试也全绿。
 
-\---
+---
 
 ## 四、一条三十年的谱系
 
@@ -162,7 +162,7 @@ pgdog 的 runtime driver 每次 `park` 前只取**一次** `poll\_at`，然后�
 
 同一颗时间轮，三种宿主：**1987 的数据结构、1998 内核的中断锁约束、tokio 的用户态单线程**。BSD 1998 那条"关中断时间必须有界"的工程约束，在 tokio-util 里不存在——`DelayQueue` 跑在用户态，它用一个 `tokio::time::Sleep` 等下一个 deadline，被唤醒后再推进自己的时间轮，没有需要关硬件中断的临界区。
 
-\---
+---
 
 ## 五、为什么 Lawn 不太适合这个场景
 
@@ -175,7 +175,7 @@ Lawn 的核心思想：**不按"到期时刻"分桶，按 TTL 值分桶。** 每
 ||tokio-util（层级轮）|Lawn（TTL 分桶）|
 |-|-|-|
 |前提假设|TTL 任意（用户 `sleep(Duration)` 随便给）|不同 TTL 种类数 ≪ 并发 timer 数|
-|边界处理|顶层伪环 + `+1` 偏移 + `MAX\_DURATION` 上限|无 overflow（结构上消失）|
+|边界处理|顶层伪环 + `+1` 偏移 + `MAX_DURATION` 上限|无 overflow（结构上消失）|
 |代价|边界逻辑微妙、易写错（这次就是）|PerTick O(t)，t = TTL 种类数|
 |适用|通用用户态运行时|Redis streams / RDMA 这类 TTL 高度集中的场景|
 
@@ -185,7 +185,7 @@ Lawn 的核心思想：**不按"到期时刻"分桶，按 TTL 值分桶。** 每
 
 两个数据结构，两个前提，各管一段。这不是"谁更先进"，也不是"tokio 看了 Lawn 然后拒绝"——工程设计很少能仅凭一组条件证明"唯一正确"，只能说**哪个前提和当前需求对得上**。
 
-\---
+---
 
 ## 六、存疑与未决
 
@@ -193,7 +193,7 @@ Lawn 的核心思想：**不按"到期时刻"分桶，按 TTL 值分桶。** 每
 2. **1987 与 Soft timers 全文**：ACM 付费墙（Cloudflare 挑战 + 镜像 401），本文对这两篇止于摘要。
 3. **Carousel 的 pacing 内部**：只验证到"它引用了 1987 原文"，"pacing 用时间轮"未读到全文，不作断言。
 
-\---
+---
 
 ## 脚注
 
