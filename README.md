@@ -36,7 +36,7 @@
 `方差稳定性_nushell_variance/`
 
 - 博客：待发
-- 笔记：[中文版](方差稳定性_nushell_variance/nushell_math_variance_中文版.md)
+- 笔记：[中文版](方差稳定性_nushell_variance/nushell_math_variance_中文版.md) / [English](方差稳定性_nushell_variance/Nushell_Math_Variance_EN.md)
 - 验证工程：[`方差稳定性_nushell_variance/variance_demo/`](方差稳定性_nushell_variance/variance_demo/)
 
 内容要点：
