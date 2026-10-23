@@ -35,7 +35,7 @@
 
 `方差稳定性_nushell_variance/`
 
-- 博客：待发
+- 博客：[《方差怎么会是 −32》](https://juejin.cn/spost/7699685792612679715)（掘金，2026-10-23 首发）
 - 笔记：[中文版](方差稳定性_nushell_variance/nushell_math_variance_中文版.md) / [English](方差稳定性_nushell_variance/Nushell_Math_Variance_EN.md)
 - 验证工程：[`方差稳定性_nushell_variance/variance_demo/`](方差稳定性_nushell_variance/variance_demo/)
 
