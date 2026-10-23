@@ -8,3 +8,6 @@ __pycache__/
 # 系统
 Thumbs.db
 .DS_Store
+
+# 本地渲染校样（笔记正文以 .md 为准）
+preview.html
