@@ -210,5 +210,3 @@ Two data structures, two preconditions, each covering its own ground. This is no
 [#8519](https://github.com/tokio-rs/tokio/pull/8519) merged on October 11, with `+1` restricted to the **top level**. The claim above — that lower-level current slots are always empty and an all-level `+1` is harmless — does not hold. `level_for` does avoid placing a freshly inserted entry in a lower-level current slot, but cascading is a second write path: `add_entry` computes the slot from `when` alone and descends only one level, so an entry can land in the current slot of a lower level. See [the follow-up](Timing_Wheel_Followup_Top_Level_Only_EN.md) for the `64/65ms` and `4096/4160ms` counterexamples, and for why the runtime's all-level `+1` still holds.
 
 ![After the 64ms cascade, L0's current slot holds the entry `a` that is due](assets/fig4_cascade_current_slot.png)
-
-The initial code and top-level experiments above are retained; the historical `fixed` module implements the all-level `+1` and is not the merged fix.
