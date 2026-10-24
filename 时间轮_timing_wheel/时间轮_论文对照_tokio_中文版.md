@@ -1,14 +1,12 @@
 # 时间轮里那行凭空出现的 `+1`
 
-> **2026-10-23 更正与后续**：[#8519](https://github.com/tokio-rs/tokio/pull/8519) 已于 10 月 11 日合并，但最终只在**顶层** `+1`。本文原先“低层当前槽永远为空、全层 `+1` 无害”的说法不成立：级联会把到期条目放进低层当前槽。原因与 `64/65ms`、`4096/4160ms` 两组反例见[续篇《时间轮的 `+1`，为什么最后只留在顶层》](时间轮_续篇_只在顶层加一_中文版.md)。下文保留首篇的初稿代码与顶层实验，不能把其中的 `fixed` 当作最终合并版。
-
 ```rust
 let now_slot = ((now / slot_range(self.level)) % LEVEL_MULT as u64) as usize + 1;
 ```
 
 为什么一个成熟的 Rust 库（tokio-util），时间轮里要在这里**凭空 `+1`**？
 
-这个修复 2026 年 9 月先在 runtime 侧合入（[tokio#8334](https://github.com/tokio-rs/tokio/pull/8334)，9 月 7 日）；**在首发时，tokio-util 侧的修复还在等审（[tokio#8519](https://github.com/tokio-rs/tokio/pull/8519)）；现在已修改后合并，见文首更正**——本文最初引用的代码取自 #8519 的初稿分支。它修的是一个真实生产事故：一个 PostgreSQL 代理 **pgdog 连续运行 12 天后，所有定时任务集体"挂起"**——不报错、不 panic，就是安静地不再触发。
+这个修复 2026 年 9 月先在 runtime 侧合入（[tokio#8334](https://github.com/tokio-rs/tokio/pull/8334)，9 月 7 日）；**在首发时，tokio-util 侧的修复还在等审（[tokio#8519](https://github.com/tokio-rs/tokio/pull/8519)）；现在已修改后合并，见文末更正**——本文最初引用的代码取自 #8519 的初稿分支。它修的是一个真实生产事故：一个 PostgreSQL 代理 **pgdog 连续运行 12 天后，所有定时任务集体"挂起"**——不报错、不 panic，就是安静地不再触发。
 
 先看图，再给结论。
 
@@ -204,4 +202,14 @@ Lawn 的核心思想：**不按"到期时刻"分桶，按 TTL 值分桶。** 每
 ② 方法注记：定位/元数据/引文网络/摘要用 OpenAlex REST（无 key）；参考文献用 Crossref（按 DOI）；图谱可视化用 Semantic Scholar 网页；**代码行为用独立 crate 双版本实测**（fixed/buggy 逐字节相同、只差 `+1`，release 模式跑）。每个"论文声称 X"标了来源级别，每个代码断言带行号或实测输出。
 
 ③ 代码引用自 PR [#8519](https://github.com/tokio-rs/tokio/pull/8519) 分支的 `tokio-util/src/time/wheel/`（MIT 协议；行号对应本文写作时的本地 checkout）。该 PR 在首发时仍为 open，后于 2026-10-11 合并；最终版仅顶层偏移，不是本文展示的初稿全层偏移。
+
+---
+
+## 2026-10-24 更正与后续
+
+[#8519](https://github.com/tokio-rs/tokio/pull/8519) 已于 10 月 11 日合并，最终只在**顶层** `+1`。上文“低层当前槽永远为空、全层 `+1` 无害”的推论不成立：`level_for` 确实不会把新插入的条目放进低层当前槽，但级联是另一条写入路径——`add_entry` 只按 `when` 算槽号、只下沉一级，会把到期条目放进低层当前槽。`64ms` 与 `4096ms` 两组反例，以及为什么 runtime 那边全层 `+1` 仍然成立，见续篇[《时间轮的 `+1`，为什么最后只留在顶层》](时间轮_续篇_只在顶层加一_中文版.md)。
+
+![64ms 级联之后，L0 当前槽里正好有该到期的 a](assets/fig4_cascade_current_slot.png)
+
+上文保留首篇的初稿代码与顶层实验；其中的 `fixed` 是按全层 `+1` 做的历史版本，不是最终合并版。
 

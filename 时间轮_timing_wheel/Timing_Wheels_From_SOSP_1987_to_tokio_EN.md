@@ -1,14 +1,12 @@
 # The `+1` That Wasn't Supposed to Be There
 
-> **Correction and follow-up, 2026-10-23:** [#8519](https://github.com/tokio-rs/tokio/pull/8519) merged on October 11, with `+1` restricted to the **top level**. My original claim that lower-level current slots are always empty was wrong: cascading can populate them with timers ready to expire. See [the follow-up](Timing_Wheel_Followup_Top_Level_Only_EN.md) for the `64/65ms` and `4096/4160ms` counterexamples. The initial patch and top-level experiments below are retained for context; the historical `fixed` module is not the final merged fix.
-
 ```rust
 let now_slot = ((now / slot_range(self.level)) % LEVEL_MULT as u64) as usize + 1;
 ```
 
 Why does a mature Rust library — tokio-util — need to **add one** out of nowhere, right in the middle of its timing wheel?
 
-The fix landed on the runtime side first in September 2026 ([tokio#8334](https://github.com/tokio-rs/tokio/pull/8334), merged Sept 7); **at first publication, the tokio-util patch was still in review ([tokio#8519](https://github.com/tokio-rs/tokio/pull/8519)); it has since merged with changes, as noted above** — the code originally quoted here came from the initial #8519 branch. It fixes a real production incident: **pgdog**, a PostgreSQL proxy, ran for 12 days and then *every* periodic task quietly stopped firing. No error, no panic — just silence.
+The fix landed on the runtime side first in September 2026 ([tokio#8334](https://github.com/tokio-rs/tokio/pull/8334), merged Sept 7); **at first publication, the tokio-util patch was still in review ([tokio#8519](https://github.com/tokio-rs/tokio/pull/8519)); it has since merged with changes, as noted at the end** — the code originally quoted here came from the initial #8519 branch. It fixes a real production incident: **pgdog**, a PostgreSQL proxy, ran for 12 days and then *every* periodic task quietly stopped firing. No error, no panic — just silence.
 
 Let's look at the pictures first, then the punchline.
 
@@ -204,3 +202,13 @@ Two data structures, two preconditions, each covering its own ground. This is no
 ② Method note: discovery, metadata, citation networks and abstracts via the OpenAlex REST API (no key); reference lists via Crossref (by DOI); citation-graph visualization via Semantic Scholar web pages; **code behavior via a standalone two-version crate** (fixed/buggy byte-identical except the `+1`, run in release mode). Every "paper claims X" is tagged with its evidence level; every code claim carries a line number or a measured output.
 
 ③ Code was originally extracted from the initial [#8519](https://github.com/tokio-rs/tokio/pull/8519) branch (MIT license). The PR was open at first publication and merged on 2026-10-11 with a top-level-only offset, not the all-level offset shown in this historical article.
+
+---
+
+## Correction and follow-up, 2026-10-24
+
+[#8519](https://github.com/tokio-rs/tokio/pull/8519) merged on October 11, with `+1` restricted to the **top level**. The claim above — that lower-level current slots are always empty and an all-level `+1` is harmless — does not hold. `level_for` does avoid placing a freshly inserted entry in a lower-level current slot, but cascading is a second write path: `add_entry` computes the slot from `when` alone and descends only one level, so an entry can land in the current slot of a lower level. See [the follow-up](Timing_Wheel_Followup_Top_Level_Only_EN.md) for the `64/65ms` and `4096/4160ms` counterexamples, and for why the runtime's all-level `+1` still holds.
+
+![After the 64ms cascade, L0's current slot holds the entry `a` that is due](assets/fig4_cascade_current_slot.png)
+
+The initial code and top-level experiments above are retained; the historical `fixed` module implements the all-level `+1` and is not the merged fix.
