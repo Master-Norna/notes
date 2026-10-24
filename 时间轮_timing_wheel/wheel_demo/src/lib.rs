@@ -1,13 +1,15 @@
-//! 时间轮 +1 偏移验证工程
+//! Three versions of the tokio-util wheel for the timing-wheel articles.
 //!
-//! `wheel_fixed` = tokio-audit 当前 checkout（含 +1 修复，level.rs L117）
-//! `wheel_buggy` = 同一份代码去掉 +1（即 #8334 之前的行为）
+//! `wheel_buggy`: no offset (before #8519).
+//! `wheel_fixed`: all-level +1 (the first article's historical, incomplete fix).
+//! `wheel_merged`: top-level-only +1, as merged in tokio #8519.
 //!
-//! 两个模块逐字节相同，唯一差异是 `next_occupied_slot` 里的 `+ 1`。
+//! Standalone wheel extraction with a test storage adapter, not a full DelayQueue.
 
-pub mod counterexample;
+#[cfg(test)]
+mod counterexample;
+pub mod followup;
 pub mod stack;
-#[path = "wheel_fixed/mod.rs"]
 pub mod wheel_fixed;
-#[path = "wheel_buggy/mod.rs"]
 pub mod wheel_buggy;
+pub mod wheel_merged;

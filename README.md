@@ -1,78 +1,72 @@
 # notes
 
-技术笔记原稿仓库：**论文对照真实实现**系列。每篇笔记的断言都尽量落到可运行的代码上——
-笔记里有 claim，专题文件夹里就有复现它的工程。
+从真实的 bug 出发，读源码、对照论文，再用小程序把问题跑出来。
 
-> 博客版（掘金 / dev.to）从这里长出来；仓库是原稿，博客是发布物。
+这里收录中英文技术笔记、配图和复现代码。博客版发布在掘金；原稿和后续更正在这里保留。
 
-## 结构约定
+## 时间轮：那行 `+1`，后来怎么样了？
 
-每个专题一个文件夹，笔记、配图、验证代码都放在里面：
+一个 PostgreSQL 代理运行约 12 天后，周期任务开始不再触发。追到时间轮里，修复看起来只是把扫描起点往后挪一格。
 
-```
-<专题名>/
-├── xxx.md          # 笔记原稿（中英双语）
-├── assets/         # 配图
-└── <工程名>/       # 验证工程（可运行）
-```
+但这个 `+1` 不能加在每一层。维护者用 `64ms / 65ms` 和 `4096ms / 4160ms` 两组定时器，找到了初稿没覆盖的级联错误。
 
-## 专题
+|文章|中文|English|
+|---|---|---|
+|首篇 · 时间轮里那行凭空出现的 `+1`|[阅读](时间轮_timing_wheel/时间轮_论文对照_tokio_中文版.md)|[Read](时间轮_timing_wheel/Timing_Wheels_From_SOSP_1987_to_tokio_EN.md)|
+|续篇 · 时间轮的 `+1`，为什么最后只留在顶层|[阅读](时间轮_timing_wheel/时间轮_续篇_只在顶层加一_中文版.md)|[Read](时间轮_timing_wheel/Timing_Wheel_Followup_Top_Level_Only_EN.md)|
 
-### 时间轮：从 SOSP '87 到 tokio
+首篇从顶层伪环讲到时间轮的论文谱系；续篇接着讲 review 中发现的两组反例、漏掉的级联写入路径，以及 runtime 与 tokio-util 不同的级联方式。**首篇已补更正，建议连同续篇一起读。**
 
-`时间轮_timing_wheel/`
+- 已发布：[首篇博客](https://juejin.cn/post/7690596943454437427)（2026-09-29）
+- 对应修复：[tokio #8519](https://github.com/tokio-rs/tokio/pull/8519)（2026-10-11 合并）
+- 复现：[三版本时间轮对照](时间轮_timing_wheel/wheel_demo/)，包含原实现、首篇初稿和最终修复
 
-- 博客：[《时间轮里那行凭空出现的 +1》](https://juejin.cn/post/7690596943454437427)（掘金，2026-09-29 首发）
-- 笔记：[中文版](时间轮_timing_wheel/时间轮_论文对照_tokio_中文版.md) / [English](时间轮_timing_wheel/Timing_Wheels_From_SOSP_1987_to_tokio_EN.md)
-- 验证工程：[`时间轮_timing_wheel/wheel_demo/`](时间轮_timing_wheel/wheel_demo/)
+## 方差：两个相差 1 的数，怎么算出 −32？
 
-内容要点：
-- Varghese & Lauck 1987 SOSP 时间轮 → BSD 内核落地 → Soft timers → Lawn → Carousel 的谱系，逐篇核实
-- tokio-util 时间轮 `next_occupied_slot` 里 `+1` 偏移的完整剖析：顶层伪环形缓冲（pseudo-ring buffer）问题
-- `+1` 修的是哪个 bug（对应 [tokio PR #8519](https://github.com/tokio-rs/tokio/pull/8519)），去掉它会怎样
+对 `506250000` 和 `506250001` 求总体方差，正确结果是 `0.25`。Nushell 的旧实现却能算出 `−32`。
 
-### 方差怎么会是 −32：nushell `math variance` 的一次数值修复
+普通两遍法修好了这个输入，又在大数常数序列上引入新问题。文章沿着修复过程，比较六种算法，也保留了最终方案仍然存在的数值边界。
 
-`方差稳定性_nushell_variance/`
+- 原稿：[中文版](方差稳定性_nushell_variance/nushell_math_variance_中文版.md) / [English](方差稳定性_nushell_variance/Nushell_Math_Variance_EN.md)
+- 已发布：[博客](https://juejin.cn/post/7699685792612679715)（2026-10-23）
+- 对应修复：[nushell #19108](https://github.com/nushell/nushell/pull/19108)
+- 复现：[六种算法与量级扫描](方差稳定性_nushell_variance/variance_demo/)
 
-- 博客：[《方差怎么会是 −32》](https://juejin.cn/post/7699685792612679715)（掘金，2026-10-23 首发）
-- 笔记：[中文版](方差稳定性_nushell_variance/nushell_math_variance_中文版.md) / [English](方差稳定性_nushell_variance/Nushell_Math_Variance_EN.md)
-- 验证工程：[`方差稳定性_nushell_variance/variance_demo/`](方差稳定性_nushell_variance/variance_demo/)
+## 跑一遍
 
-内容要点：
-- 单遍恒等式 `Σx² − (Σx)²/n` 在两个相差 1 的 `5.0625×10⁸` 浮点上算出 `−32`（真值 0.25），在三个连续大整数上算出 `0`（真值 2/3）
-- PR 第一版的普通两遍法修好了报告里的用例，却让常数序列从 `0` 变成 `2.97×10²⁶⁹`；最终落地的是 `r = x − min` 再两遍
-- 六个变体 × 11 个用例的实测对比、256 组的量级扫描、10 个测试各钉住了什么
-- 没解决的部分也写明：平方和仍可能先溢出、求和仍有末位顺序依赖、`2⁵³` 以上的整数转 f64 是近似
+两个工程都使用 Rust。下面的命令在各自工程目录运行，详细说明见工程内的 README。
 
-## 运行验证代码
-
-### 时间轮
+**时间轮**
 
 ```sh
 cd 时间轮_timing_wheel/wheel_demo
-cargo test        # 5 个测试：fixed 版行为 + buggy 版反例（含 pgdog 场景复现）
-cargo run --release --example demo    # 打印三个场景的实测时间线
+cargo test
+cargo test --release
+cargo run --release --example followup
 ```
 
-依赖 Rust 工具链。`wheel_fixed/` 是 tokio-util 当前修复版代码（原样搬运），
-`wheel_buggy/` 是去掉 `+1` 的对照版，两者共用同一套测试场景，行为差异即 bug 本身。
+`followup` 打印顶层伪环与两组级联反例的三版本对照；不需要等现实中的 12 天过去。debug 模式的断言差异见[工程说明](时间轮_timing_wheel/wheel_demo/README.md)。
 
-### 方差稳定性
+**方差**
 
 ```sh
 cd 方差稳定性_nushell_variance/variance_demo
-cargo test --release     # 7 个测试：合并后的行为、候选方案的反例、两处浮点边界
-cargo run --release      # 打印文中全部表格与扫描数据，写出 out/*.csv
-python plot_fig1.py      # 从 out/curve.csv 重画 assets/fig1_variance_error.png
+cargo test --release
+cargo run --release
 ```
 
-`naive` / `two_pass_plain` / `mean_div_n` / `corrected_two_pass` / `welford` / `shifted`
-六个函数对应文中的六个变体；`naive` 的运算顺序与旧的 `sum_of_squares` 一致。
-`out/` 是运行产物，已在 `.gitignore` 里排除。
+运行后会打印文章里的对照表，并输出 CSV。重画曲线另需 Python 与 Matplotlib，见[工程说明](方差稳定性_nushell_variance/variance_demo/README.md)。
 
-## 约定
+## 目录
 
-- 笔记里的每个数字（触发时刻、推迟量、层级放置）都来自 `cargo` 实测输出，不手算
-- 论文引用标证据级别：【全文读过】/【摘要】/【仅引用关系】
-- 没把握的断言（如 GD-Wheel 的元数据疑点）显式标注存疑，不硬写
+```text
+时间轮_timing_wheel/
+├── *.md             中英文首篇与续篇
+├── assets/          配图
+└── wheel_demo/      三版本复现
+
+方差稳定性_nushell_variance/
+├── *.md             中英文笔记
+├── assets/          配图
+└── variance_demo/   算法对照与数据扫描
+```

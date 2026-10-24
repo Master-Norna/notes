@@ -1,22 +1,22 @@
 //! 反例：顶层伪环形缓冲 + 无 +1 偏移 → 近端条目被推迟一整圈
 //!
 //! 可达场景（全部通过合法 insert 构造，tokio-util 的 MAX_DURATION 检查可过）：
-//! - 先插入 NEAR = 2^30 + 100（12 天 + 1 秒，顶层槽 1），把 elapsed 推到 2；
+//! - 先插入 NEAR = 2^30 + 1000（12 天 + 1 秒，顶层槽 1），把 elapsed 推到 2；
 //! - 再插入 FAR = 2^36 + 1：slot_for 落在顶层槽 0 —— 与 now（elapsed=2，也在槽 0）
 //!   同槽。它是"逻辑上整整一圈之后"的条目（伪环 wrap）：物理在槽 0，
-//!   真实 deadline 在 256 天后。
+//!   真实 deadline 在 795 天后。
 //!
 //! 顶层 now 槽被伪环条目占据时，+1 才起作用：
 //! - fixed（含 +1）：扫描从槽 1 开始 → 命中 NEAR → poll_at = 2^30（12 天）。
 //! - buggy（无 +1）：扫描从槽 0 开始 → 命中 FAR → deadline 算成槽起点 0（< now）
-//!   → +level_range 修正 → poll_at = 2^36（256 天）。
-//!   结果：NEAR 本应 12 天 + 1 秒到期，实际被推迟整整一圈（256 天）。
+//!   → +level_range 修正 → poll_at = 2^36（795 天）。
+//!   结果：NEAR 本应 12 天 + 1 秒到期，实际被推迟整整一圈（795 天）。
 
 use crate::stack::{Item, SlotStack, VecStore};
 
-const FAR: u64 = (1 << 36) + 1; // 256 天后到期 → 顶层槽 0（伪环 wrap，与 now 同槽）
+const FAR: u64 = (1 << 36) + 1; // 795 天后到期 → 顶层槽 0（伪环 wrap，与 now 同槽）
 const NEAR: u64 = (1 << 30) + 1_000; // 12 天 + 1 秒后到期 → 顶层槽 1
-const LAP: u64 = 1 << 36; // 顶层一圈 ≈ 256 天
+const LAP: u64 = 1 << 36; // 顶层一圈 ≈ 795 天
 
 fn setup_buggy() -> (crate::wheel_buggy::Wheel<SlotStack>, VecStore) {
     let mut store = VecStore::default();
@@ -83,7 +83,7 @@ mod tests {
         assert_eq!(
             crate::wheel_buggy::Wheel::poll_at(&wheel),
             Some(LAP),
-            "buggy: 应被伪环条目劫持到 256 天（2^36），而非 12 天（2^30）"
+            "buggy: 应被伪环条目劫持到 795 天（2^36），而非 12 天（2^30）"
         );
     }
 
@@ -98,10 +98,11 @@ mod tests {
     }
 
     #[test]
+    #[cfg_attr(debug_assertions, should_panic(expected = "assertion `left == right` failed"))]
     fn buggy_schedule_delays_near_by_a_full_lap() {
         let (mut wheel, mut store) = setup_buggy();
         let schedule = schedule_buggy(&mut wheel, &mut store);
-        // far 准点（256 天后）；near 被推迟整整一圈（2^36）
+        // far 准点（795 天后）；near 被推迟整整一圈（2^36）
         assert_eq!(
             schedule,
             vec![("far", FAR), ("near", LAP + NEAR)],
@@ -116,14 +117,14 @@ mod tests {
         assert_eq!(
             schedule,
             vec![("near", NEAR), ("far", FAR)],
-            "fixed: near 12 天 + 1 秒到期，far 256 天 + 1 秒到期"
+            "fixed: near 在 2^30+1000ms 到期，far 在 2^36+1ms 到期"
         );
     }
 
-    /// 低层不变量：now 槽在低层永远空（level_for 按相对距离放置，
-    /// 同槽 ⇒ XOR 距离 < 槽宽 ⇒ 不会落到顶层），所以 +1 在低层是无害的 no-op。
+    /// Historical smoke case only: it does NOT prove that lower current slots
+    /// stay empty after cascading. See followup for counterexamples.
     #[test]
-    fn lower_level_now_slot_is_empty() {
+    fn historical_lower_level_smoke_case() {
         let mut store = VecStore::default();
         store.items.push(Item(10, "ten_ms"));
         let k_ten = 0usize;

@@ -1,18 +1,20 @@
 # The `+1` That Wasn't Supposed to Be There
 
+> **Correction and follow-up, 2026-10-23:** [#8519](https://github.com/tokio-rs/tokio/pull/8519) merged on October 11, with `+1` restricted to the **top level**. My original claim that lower-level current slots are always empty was wrong: cascading can populate them with timers ready to expire. See [the follow-up](Timing_Wheel_Followup_Top_Level_Only_EN.md) for the `64/65ms` and `4096/4160ms` counterexamples. The initial patch and top-level experiments below are retained for context; the historical `fixed` module is not the final merged fix.
+
 ```rust
 let now_slot = ((now / slot_range(self.level)) % LEVEL_MULT as u64) as usize + 1;
 ```
 
 Why does a mature Rust library — tokio-util — need to **add one** out of nowhere, right in the middle of its timing wheel?
 
-The fix landed on the runtime side first in September 2026 ([tokio#8334](https://github.com/tokio-rs/tokio/pull/8334), merged Sept 7); **the same one-line fix for tokio-util is still waiting in review ([tokio#8519](https://github.com/tokio-rs/tokio/pull/8519))** — the code quoted in this post is from the #8519 branch, not tokio-util's master. It fixes a real production incident: **pgdog**, a PostgreSQL proxy, ran for 12 days and then *every* periodic task quietly stopped firing. No error, no panic — just silence.
+The fix landed on the runtime side first in September 2026 ([tokio#8334](https://github.com/tokio-rs/tokio/pull/8334), merged Sept 7); **at first publication, the tokio-util patch was still in review ([tokio#8519](https://github.com/tokio-rs/tokio/pull/8519)); it has since merged with changes, as noted above** — the code originally quoted here came from the initial #8519 branch. It fixes a real production incident: **pgdog**, a PostgreSQL proxy, ran for 12 days and then *every* periodic task quietly stopped firing. No error, no panic — just silence.
 
 Let's look at the pictures first, then the punchline.
 
 ![tokio-util's timing wheel: 6 levels × 64 slots](assets/fig1_levels.png)
 
-**Without that `+1`, a timer due in 12 days fires 807 days late.** An extra two-plus years of sleep.
+**Without that `+1`, a timer due around day 12 does not fire until around day 807.** An extra two-plus years of sleep.
 
 ![Same timers, two implementations](assets/fig3_timeline.png)
 
@@ -75,7 +77,7 @@ The "next expiration" scan starts at the slot that `now` occupies and walks cloc
 
 The `+1` does exactly one thing: **shift the scan start one slot past the `now` slot, skipping it.** The `now` slot can only ever hold the farthest possible entry — one whole turn away — so skipping it is what lets the scan see the genuinely closer timer in slot 1.
 
-At lower levels the `+1` is a harmless no-op: `level_for` guarantees no entry ever lands in the `now` slot at a lower level (it's always empty there), so skipping or not makes no difference. **The fix only bites at the top level — which is precisely the only level where this can happen.**
+**Correction:** I originally claimed that lower-level current slots were always empty and an all-level `+1` was harmless. That reasoning missed cascading, which can populate those slots. The final fix applies the offset only at the top level. The top-level explanation remains relevant; see [the follow-up](Timing_Wheel_Followup_Top_Level_Only_EN.md) for the lower-level counterexamples.
 
 ---
 
@@ -101,13 +103,13 @@ FIXED  poll_at = 2^30 (12 days out)
 
 (A small "measured beats written" footnote: the port commit's message claims the delay is "~19 days", but `2^36 − 2^31 ms` is actually 770 days — the numbers above are release-mode measurements.)
 
-### Scenario B: lower-level short timers are immune (control)
+### Scenario B: a short timer away from the top-level boundary (control)
 
 Running 12 days, one long sleep occupying the top level, one 5-second interval. Prediction: buggy and fixed behave identically.
 
 They do — because the 5-second interval, measured by relative distance, lands in a lower level (L2) and never enters the top level. The pseudo-ring can't reach it.
 
-This draws the bug's boundary precisely: **the problem lives only at the top level; short timers at lower levels are naturally immune.** Not every timer is affected — only the ones that also happen to sit at the top.
+This control shows that this particular short timer does not encounter the top-level pseudo-ring bug. It does not establish that an all-level `+1` is safe during lower-level cascading; review later supplied counterexamples.
 
 ### Scenario B2: pgdog's exact mechanism
 
@@ -135,7 +137,7 @@ tokio's runtime driver takes `poll_at` **once** before each `park`, then sleeps 
 
 > One correction to a claim that has been floating around: #8334's PR description says "short sleeps got queued on the top level 5". That's true, but the reason is **not "short" — it's "straddling the boundary, so the XOR distance explodes"**. Scenario B proves it: short timers that don't straddle the boundary sit at lower levels and are untouched.
 
-All three scenarios, plus the nine unit tests ported over, pass; the 12 wheel tests in the local tokio checkout also pass.
+The original scenarios and tests did not cover the cascading regression. Passing them did not establish that the all-level patch was correct. See the [demo README](wheel_demo/README.md) for the current scope. Full-turn delays here were measured in release mode; debug assertions can stop the faulty version earlier.
 
 ---
 
@@ -201,4 +203,4 @@ Two data structures, two preconditions, each covering its own ground. This is no
 
 ② Method note: discovery, metadata, citation networks and abstracts via the OpenAlex REST API (no key); reference lists via Crossref (by DOI); citation-graph visualization via Semantic Scholar web pages; **code behavior via a standalone two-version crate** (fixed/buggy byte-identical except the `+1`, run in release mode). Every "paper claims X" is tagged with its evidence level; every code claim carries a line number or a measured output.
 
-③ Code quoted from `tokio-util/src/time/wheel/` on the [#8519](https://github.com/tokio-rs/tokio/pull/8519) branch (MIT license; line numbers refer to the local checkout at time of writing). Note: that PR was still open at the time of writing; tokio-util's master does not yet carry the fix.
+③ Code was originally extracted from the initial [#8519](https://github.com/tokio-rs/tokio/pull/8519) branch (MIT license). The PR was open at first publication and merged on 2026-10-11 with a top-level-only offset, not the all-level offset shown in this historical article.
