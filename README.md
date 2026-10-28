@@ -2,7 +2,7 @@
 
 从真实的 bug 出发，读源码、对照论文，再用小程序把问题跑出来。
 
-这里收录中英文技术笔记、配图和复现代码。博客版发布在掘金和知乎；原稿和后续更正在这里保留。
+这里收录中英文技术笔记、配图和复现代码。博客版同步至掘金、知乎和 CSDN；原稿和后续更正在这里保留。
 
 ## 时间轮：那行 `+1`，后来怎么样了？
 
@@ -39,7 +39,7 @@ quinn 的 CUBIC 用事件前的 `cwnd` 计算 `ssthresh`，乘一次 0.7，并�
 在固定 RTT、每个 RTT 一次性确认整个窗口的控制器演示中，矮掉的界线把窗口恢复从 2 个 RTT 拖成 12 个。[quinn #2903](https://github.com/quinn-rs/quinn/pull/2903) 删的就是那五行。
 
 - 原稿：[中文版](拥塞控制_cubic/cubic_持久拥塞_ssthresh_二次削减_中文版.md) / [English](拥塞控制_cubic/Cubic_Persistent_Congestion_Second_Cut_EN.md)
-- 博客：[掘金](https://juejin.cn/spost/7701604765432545289) / [知乎](https://zhuanlan.zhihu.com/p/2098906464999969780)
+- 博客：[掘金](https://juejin.cn/spost/7701604765432545289) / [知乎](https://zhuanlan.zhihu.com/p/2098906464999969780) / [CSDN](https://blog.csdn.net/MsterNZ/article/details/169368038)
 - 对应修复：[quinn #2903](https://github.com/quinn-rs/quinn/pull/2903)（2026-09-30 合并）
 - 复现：[持久拥塞两版对照](拥塞控制_cubic/cubic_demo/)
 
