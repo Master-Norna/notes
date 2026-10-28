@@ -28,7 +28,7 @@
 普通两遍法修好了这个输入，又在大数常数序列上引入新问题。文章沿着修复过程，比较六种算法，也保留了最终方案仍然存在的数值边界。
 
 - 原稿：[中文版](方差稳定性_nushell_variance/nushell_math_variance_中文版.md) / [English](方差稳定性_nushell_variance/Nushell_Math_Variance_EN.md)
-- 已发布：[博客](https://juejin.cn/post/7699685792612679715)（2026-10-23）
+- 博客：[掘金](https://juejin.cn/post/7699685792612679715) / [知乎](https://zhuanlan.zhihu.com/p/2098926232993846374) / [CSDN](https://blog.csdn.net/MsterNZ/article/details/169368433)
 - 对应修复：[nushell #19108](https://github.com/nushell/nushell/pull/19108)
 - 复现：[六种算法与量级扫描](方差稳定性_nushell_variance/variance_demo/)
 
