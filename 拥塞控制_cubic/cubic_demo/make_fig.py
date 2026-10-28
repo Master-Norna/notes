@@ -2,7 +2,7 @@
 
 - ../assets/fig1_ssthresh_two_cuts.png（Pillow）：讲机制——事件后 ssthresh 去了哪里，
   事件前窗口、一次 0.7、0.49 画在同一把尺子上。数字与单元测试断言一致
-  （4704/6720/2352→2400/3360）。
+  （9600→6720/4704）。
 - ../assets/fig2_recovery.png（matplotlib）：讲后果——持久拥塞事件后两版窗口的
   逐 RTT 轨迹，数据经 `cargo run --example plot_data` 实时导出。
 
@@ -28,64 +28,58 @@ if not FONT_BOLD.exists():
 INK, MUTED, LINE = "#202c33", "#59676e", "#d4dbda"
 BLUE, GREEN, RED = "#306ca0", "#20725a", "#ad5144"
 BG = "#f6f5f0"
-SCALE = 0.125  # px / byte：9600B → 1200px，三行条共用这一把尺子
+SCALE = 0.125  # px / byte：9600B → 1200px，各行条形共用这一把尺子
 
 
 def make_fig1() -> Path:
     from PIL import Image, ImageDraw, ImageFont
 
-    W, H = 1600, 1150
+    W, H = 1600, 1200
+    M = 120
     im = Image.new("RGB", (W, H), BG)
     d = ImageDraw.Draw(im)
+    text_boxes = []
 
     def text(x, y, value, size=28, color=INK, bold=False):
-        d.text(
-            (x, y),
-            value,
-            font=ImageFont.truetype(str(FONT_BOLD if bold else FONT), size),
-            fill=color,
-        )
+        font = ImageFont.truetype(str(FONT_BOLD if bold else FONT), size)
+        box = d.textbbox((x, y), value, font=font, anchor="lt")
+        assert M <= box[0] and box[2] <= W - M, (value, box)
+        assert 0 <= box[1] and box[3] <= H, (value, box)
+        for previous, previous_box in text_boxes:
+            overlap = (min(box[2], previous_box[2]) > max(box[0], previous_box[0])
+                       and min(box[3], previous_box[3]) > max(box[1], previous_box[1]))
+            assert not overlap, (previous, value)
+        text_boxes.append((value, box))
+        d.text((x, y), value, font=font, fill=color, anchor="lt")
+        return box
 
-    def bar(x, y, value, fill, outline, label, lab_color, note=None, note_y=18):
-        w = int(value * SCALE)
-        d.rounded_rectangle((x, y, x + w, y + 60), radius=10, fill=fill, outline=outline, width=2)
-        text(x + 22, y + 12, label, 30, lab_color, bold=True)
+    def row(label_y, value, fill, outline, label, color=INK, note=None):
+        # 行标题、条形和下一行之间均留独立净空；不是靠画布变大后缩小字号。
+        bar_y = label_y + 50
+        bar_h = 64
+        title_box = text(M, label_y, label, 28, color)
+        assert bar_y - title_box[3] >= 20
+        width = int(value * SCALE)
+        d.rounded_rectangle((M, bar_y, M + width, bar_y + bar_h), radius=10,
+                            fill=fill, outline=outline, width=2)
+        text(M + 22, bar_y + 17, f"{value}B", 32, color, bold=True)
         if note:
-            text(x + w + 20, y + note_y, note, 23, MUTED)
+            text(M + width + 24, bar_y + 21, note, 25, MUTED)
 
-    M = 120  # 全图统一左边距（文字与条形共用）
-    B1, B2, B3, B0 = 224, 478, 604, 6720 * int(SCALE)  # 各行 y 与 6720 的位置
-    text(M, 55, "两次削减之后的 ssthresh", 46, bold=True)
-    text(M, 122, "quinn 修复前，一次持久拥塞事件过后 ssthresh 落在哪里 · 事件前窗口 9600B（上游回归测试初值）", 27, MUTED)
+    text(M, 64, "两次削减之后的 ssthresh", 46, bold=True)
+    text(M, 144, "同一尺度对照 · 事件前 cwnd = 9600B · quinn #2903", 28, MUTED)
 
-    text(M, 192, "事件前窗口（两版相同）", 26, MUTED)
-    bar(M, 224, 9600, "#e9eef7", BLUE, "9600B（8 × 1200B）", INK)
+    row(230, 9600, "#e9eef7", BLUE, "事件前 cwnd（两版相同）")
+    row(400, 6720, "#e9eef7", BLUE, "① 公共路径：两版都乘一次 0.7",
+        note="= 0.7 × 9600B")
+    row(570, 6720, "#dcebe4", GREEN, "② 修复后：分支不再削减", GREEN)
+    row(740, 4704, "#f6e3df", RED, "③ 修复前：分支对 6720B 又乘一次 0.7", RED,
+        note="= 0.7 × 6720B")
 
-    text(M, 320, "① 公共路径：乘一次 0.7（两版都走）", 26)
-    bar(M, 352, 6720, "#e9eef7", BLUE, "6720B", INK, note="= 0.7 × 9600B")
-
-    text(M, 446, "② 修复后（#2903）：持久拥塞分支不再加削", 26, GREEN)
-    bar(M, 478, 6720, "#dcebe4", GREEN, "6720B", GREEN)
-
-    text(M, 572, "③ 修复前：分支又走一遍同一个公式，读到的已是削过的 6720B", 26, RED)
-    bar(M, 604, 4704, "#f6e3df", RED, "4704B", RED, note="= 0.7 × 6720B")
-
-    # 6720 的刻度位置：从 ① 条底缘向下引浅灰虚线（与条形右边框错开 12px），
-    # ③ 条下方用红线标出 4704 到 6720 的差距，虚线落到红线之上的位置形成 L 形标记
-    x6720 = M + int(6720 * SCALE)  # ①② 条右缘 = 6720 的位置
-    xr = x6720 + 12                # 虚线 x，避开条形 2px 边框
-    for y in range(412, 676, 14):
-        d.line((xr, y, xr, min(y + 7, 676)), fill="#b7c4c7", width=2)
-    d.line((M + int(4704 * SCALE), 676, xr, 676), fill=RED, width=2)  # ③ 条右缘 → 6720 刻度
-    text(M, 708, "差距 2016B：修复前的 ssthresh 比应有的矮 30%", 25, RED, bold=True)
-
-    text(M, 772, "两版 cwnd 都压到最小窗口 2400B（= 2 × 1200B），差别只在 ssthresh。", 24)
-    text(M, 822, "小窗口（事件前 4800B）：0.49 × 4800 = 2352 已在最小窗口之下，被钳制顶到 2400B；0.7 × 4800 = 3360B 不受影响。", 24, MUTED)
-
-    text(M, 896, "0.7 × 0.7 = 0.49，不是 0.7", 44, bold=True)
-    text(M, 968, "公式和注释单独看都对；错在第二次削减到来时，乘数基准已经从 9600 变成了 6720。", 26, MUTED)
-
-    text(M, 1062, "复现：cargo run --example recovery（cubic_demo） · 出处：quinn 2a9f45e congestion/cubic.rs", 23, MUTED)
+    # 不再叠加跨行虚线、小窗口算例和重复的大公式；小窗口在正文第四节解释。
+    text(M, 950, "多出的那次 0.7，让 ssthresh 少了 2016B（30%）。", 32, RED, bold=True)
+    text(M, 1020, "两版 cwnd 都压到最小窗口 2400B，差别只在 ssthresh。", 28)
+    text(M, 1132, "来源：quinn 2a9f45e · congestion/cubic.rs · cubic_demo", 23, MUTED)
 
     out = ASSETS / "fig1_ssthresh_two_cuts.png"
     im.save(out)

@@ -34,9 +34,9 @@
 
 ## CUBIC：quinn 的持久拥塞，ssthresh 怎么成了 0.49
 
-一次持久拥塞事件之后，`ssthresh` 该是事件前窗口的 0.7 倍（[RFC 9438 §4.8](https://www.rfc-editor.org/rfc/rfc9438.html#section-4.8)）。修复前的 quinn 在分支里把 0.7 乘了第二遍，拿到 0.7 × 0.7 的窗口。
+quinn 的 CUBIC 用事件前的 `cwnd` 计算 `ssthresh`，乘一次 0.7，并以最小窗口为下限。修复前的持久拥塞分支把 0.7 乘了第二遍，未触及下限时便成了事件前窗口的 0.49 倍。文章也区分了这里的 `cwnd` 与 RFC 9438 基本公式中的 `flight_size`。
 
-矮掉的界线把事件后窗口的恢复从 2 个 RTT 拖成 12 个。[quinn #2903](https://github.com/quinn-rs/quinn/pull/2903) 删的就是那五行。
+在固定 RTT、每个 RTT 一次性确认整个窗口的控制器演示中，矮掉的界线把窗口恢复从 2 个 RTT 拖成 12 个。[quinn #2903](https://github.com/quinn-rs/quinn/pull/2903) 删的就是那五行。
 
 - 原稿：[中文版](拥塞控制_cubic/cubic_持久拥塞_ssthresh_二次削减_中文版.md) / [English](拥塞控制_cubic/Cubic_Persistent_Congestion_Second_Cut_EN.md)
 - 对应修复：[quinn #2903](https://github.com/quinn-rs/quinn/pull/2903)（2026-09-30 合并）
@@ -66,7 +66,7 @@ cargo test --release
 cargo run --example recovery
 ```
 
-`recovery` 打印两组逐 RTT 轨迹：标准窗口 2 / 12 个 RTT 回事件前，小窗口 1 / 6，列头依次是修复前 / 修复后。
+`recovery` 打印控制器模拟的两组逐 RTT 轨迹：事件前窗口 9600B，修复后 / 修复前分别需 2 / 12 个 RTT 回到事件前大小；4800B 则是 1 / 6。每个 RTT 用一次 ACK 调用确认整个窗口，不跑完整 QUIC 连接；场景设定见[工程说明](拥塞控制_cubic/cubic_demo/README.md)。
 
 **方差**
 
