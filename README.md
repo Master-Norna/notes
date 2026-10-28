@@ -32,9 +32,19 @@
 - 对应修复：[nushell #19108](https://github.com/nushell/nushell/pull/19108)
 - 复现：[六种算法与量级扫描](方差稳定性_nushell_variance/variance_demo/)
 
+## CUBIC：quinn 的持久拥塞，ssthresh 怎么成了 0.49
+
+一次持久拥塞事件之后，`ssthresh` 该是事件前窗口的 0.7 倍（[RFC 9438 §4.8](https://www.rfc-editor.org/rfc/rfc9438.html#section-4.8)）。修复前的 quinn 在分支里把 0.7 乘了第二遍，拿到 0.7 × 0.7 的窗口。
+
+矮掉的界线把事件后窗口的恢复从 2 个 RTT 拖成 12 个。[quinn #2903](https://github.com/quinn-rs/quinn/pull/2903) 删的就是那五行。
+
+- 原稿：[中文版](拥塞控制_cubic/cubic_持久拥塞_ssthresh_二次削减_中文版.md) / [English](拥塞控制_cubic/Cubic_Persistent_Congestion_Second_Cut_EN.md)
+- 对应修复：[quinn #2903](https://github.com/quinn-rs/quinn/pull/2903)（2026-09-30 合并）
+- 复现：[持久拥塞两版对照](拥塞控制_cubic/cubic_demo/)
+
 ## 跑一遍
 
-两个工程都使用 Rust。下面的命令在各自工程目录运行，详细说明见工程内的 README。
+三个工程都使用 Rust。下面的命令在各自工程目录运行，详细说明见工程内的 README。
 
 **时间轮**
 
@@ -46,6 +56,17 @@ cargo run --release --example followup
 ```
 
 `followup` 打印顶层伪环与两组级联反例的三版本对照；不需要等现实中的 12 天过去。debug 模式的断言差异见[工程说明](时间轮_timing_wheel/wheel_demo/README.md)。
+
+**CUBIC**
+
+```sh
+cd 拥塞控制_cubic/cubic_demo
+cargo test
+cargo test --release
+cargo run --example recovery
+```
+
+`recovery` 打印两组逐 RTT 轨迹：标准窗口 2 / 12 个 RTT 回事件前，小窗口 1 / 6，列头依次是修复前 / 修复后。
 
 **方差**
 
@@ -69,4 +90,9 @@ cargo run --release
 ├── *.md             中英文笔记
 ├── assets/          配图
 └── variance_demo/   算法对照与数据扫描
+
+拥塞控制_cubic/
+├── *.md             中英文笔记
+├── assets/          配图
+└── cubic_demo/      持久拥塞两版对照
 ```
