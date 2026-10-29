@@ -16,6 +16,18 @@
 
 <table>
 <tr>
+<td width="88" align="center" valign="top"><a href="导入排序语义_isort/isort_noqa去哪了_中文版.md"><img src="导入排序语义_isort/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[isort 格式化一遍，两条 F401 回来了](导入排序语义_isort/isort_noqa去哪了_中文版.md)**
+
+一行挂着 `# noqa: F401` 的导入，过一遍 isort 注释就没了，flake8 当场报出两条 F401。我沿着注释在 isort 内部走的路找到了那个出口：十来种折行模式里，只有 grid 的注释全靠折行分支接住，语句不超宽就没人管它。
+
+<sub>2026-10-29 · [English](导入排序语义_isort/Isort_Two_F401s_Are_Back_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
 <td width="88" align="center" valign="top"><a href="锁文件哈希_pdm/pdm_锁文件里的哈希去哪了_中文版.md"><img src="锁文件哈希_pdm/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
@@ -100,3 +112,4 @@ PostgreSQL 代理 pgdog 连续跑了 12 天以后，定时任务全都不再触�
 | [cubic_demo](拥塞控制_cubic/cubic_demo/) | 同一次持久拥塞，修复前后的 `ssthresh`，以及之后每个 RTT 的窗口变化 |
 | [variance_demo](方差稳定性_nushell_variance/variance_demo/) | 六种方差算法在同一批输入上的误差，包括反例和数量级扫描 |
 | [wheel_demo](时间轮_timing_wheel/wheel_demo/) | 原实现、首篇引用的初稿、最终修复，三版放在一起跑，也包括那两组级联反例 |
+| [isort_demo](导入排序语义_isort/isort_demo/) | 同一份带 noqa 的导入交给修复前后两版 isort 快照，看注释在哪一版丢失、flake8 如何当场翻脸，折行与无注释场景两版逐字一致 |

@@ -1,0 +1,2 @@
+mypy_extensions>=1.0
+flake8>=7.0  # 可选：lint 对照；不装请用 --offline

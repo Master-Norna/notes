@@ -1,0 +1,23 @@
+{
+  "what": "isort 修复前/修后两版源码快照的来源记录（isort_demo/isort_before 与 isort_after，各为对应提交的 isort/ 包目录原样）",
+  "upstream": "https://github.com/PyCQA/isort",
+  "license": "MIT（原文随附于本目录 LICENSE）",
+  "snapshots": [
+    {
+      "dir": "isort_before/",
+      "git_sha": "1745766e5cc705eec7179c1122fcdf5b5b6e7546",
+      "role": "PR #2675 的基线（合并提交的父提交），含丢失 noqa 的 grid()",
+      "source_tarball": "https://github.com/PyCQA/isort/archive/1745766e5cc705eec7179c1122fcdf5b5b6e7546.tar.gz",
+      "tarball_sha256": "682EB1FB7F656B644833403E4B3352F8EFF54C3AC32B9F4E3537F641287AFD82"
+    },
+    {
+      "dir": "isort_after/",
+      "git_sha": "3415efa3668f5514c57dfa4291d83021a575b56f",
+      "role": "PR #2675 的合并提交，grid() 出口经 add_to_line() 返回",
+      "source_tarball": "https://github.com/PyCQA/isort/archive/3415efa3668f5514c57dfa4291d83021a575b56f.tar.gz",
+      "tarball_sha256": "5F86EA4E103CABBCB8AFC0657A121DF367408E333356DB63E802F21EE8C29D80"
+    }
+  ],
+  "extraction": "tarball 解包后取顶层 isort/ 包目录整份拷入，文件内容与 tarball 逐字节一致；run.py 加载后核验模块路径确实来自快照目录",
+  "date": "2026-10-29"
+}
