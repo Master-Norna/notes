@@ -1,7 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
-<rect x="28" y="20" width="39" height="6" rx="3" fill="#8c959f"/>
-<rect x="34" y="32" width="27" height="6" rx="3" fill="#8c959f"/>
-<rect x="34" y="44" width="27" height="6" rx="3" fill="#8c959f"/>
-<rect x="36" y="56" width="24" height="6" rx="3" fill="#d1603d"/>
-<rect x="27" y="68" width="42" height="6" rx="3" fill="#8c959f"/>
+<circle cx="24.0" cy="16.0" r="3" fill="#8c959f"/>
+<circle cx="40.0" cy="16.0" r="3" fill="#8c959f"/>
+<circle cx="56.0" cy="16.0" r="3" fill="#8c959f"/>
+<circle cx="72.0" cy="16.0" r="3" fill="#8c959f"/>
+<circle cx="24.0" cy="32.0" r="3" fill="#8c959f"/>
+<circle cx="40.0" cy="32.0" r="3" fill="#8c959f"/>
+<circle cx="56.0" cy="32.0" r="3" fill="#8c959f"/>
+<circle cx="72.0" cy="32.0" r="3" fill="#8c959f"/>
+<circle cx="24.0" cy="48.0" r="3" fill="#8c959f"/>
+<circle cx="40.0" cy="48.0" r="3" fill="#8c959f"/>
+<circle cx="56.0" cy="48.0" r="3" fill="#8c959f"/>
+<circle cx="72.0" cy="48.0" r="3" fill="#8c959f"/>
+<circle cx="24.0" cy="64.0" r="3" fill="#8c959f"/>
+<circle cx="40.0" cy="64.0" r="3" fill="#8c959f"/>
+<circle cx="56.0" cy="64.0" r="3" fill="#8c959f"/>
+<circle cx="72.0" cy="64.0" r="3" fill="#8c959f"/>
+<circle cx="24.0" cy="80.0" r="4.5" fill="#d1603d"/>
+<circle cx="40.0" cy="80.0" r="4.5" fill="#d1603d"/>
 </svg>
