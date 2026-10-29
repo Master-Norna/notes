@@ -16,6 +16,18 @@
 
 <table>
 <tr>
+<td width="88" align="center" valign="top"><a href="转义往返_tomlkit/tomlkit_自己写的TOML读不回_中文版.md"><img src="转义往返_tomlkit/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[追加一个引号，自己写出的 TOML 自己读不回](转义往返_tomlkit/tomlkit_自己写的TOML读不回_中文版.md)**
+
+tomlkit 为保真给每个字符串存两份：逻辑值和源文本。给值追加一个引号，值是对的，序列化出来却成了它自己的解析器都读不回的 TOML。2022 年那行拼接保住了左半边，右半边这一洞开了四年，直到 #612 把普通文本也领过转义那道刷子。
+
+<sub>2026-10-29 · [English](转义往返_tomlkit/TOML_tomlkit_Cannot_Read_Back_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
 <td width="88" align="center" valign="top"><a href="导入排序语义_isort/isort_noqa去哪了_中文版.md"><img src="导入排序语义_isort/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
@@ -113,3 +125,4 @@ PostgreSQL 代理 pgdog 连续跑了 12 天以后，定时任务全都不再触�
 | [variance_demo](方差稳定性_nushell_variance/variance_demo/) | 六种方差算法在同一批输入上的误差，包括反例和数量级扫描 |
 | [wheel_demo](时间轮_timing_wheel/wheel_demo/) | 原实现、首篇引用的初稿、最终修复，三版放在一起跑，也包括那两组级联反例 |
 | [isort_demo](导入排序语义_isort/isort_demo/) | 同一份带 noqa 的导入交给修复前后两版 isort 快照，看注释在哪一版丢失、flake8 如何当场翻脸，折行与无注释场景两版逐字一致 |
+| [tomlkit_demo](转义往返_tomlkit/tomlkit_demo/) | 同一组追加操作喂给修复前后两版 tomlkit 快照，看引号与反斜杠在哪一版把源文本拼坏、文档级往返哪一版当场翻车，String 拼 String 与追加普通文本两版逐字一致 |
