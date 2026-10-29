@@ -1,0 +1,144 @@
+{
+  "repository": "https://github.com/pdm-project/pdm",
+  "before": "3b82f5291988aa8d6a5c1f92b695c5b18ce170bd",
+  "after": "adfdb5dccacc0153ad7bf6b14354ad8e46b9801b",
+  "license_sha256": "9db7ebdae98d7719291030f5b26bed1e798cf9dcbd1850d498714d859908f220",
+  "extracts": [
+    {
+      "file": "upstream/before.py",
+      "commit": "3b82f5291988aa8d6a5c1f92b695c5b18ce170bd",
+      "source": "src/pdm/models/repositories/lock.py",
+      "source_sha256": "a29214fb5efec238d3f66c7428cc1aa7ff72f5beada4a59a6c67d38c694734b0",
+      "sha256": "8a330ebcce7035437058a809f2e02534cf33026d218ed7ca33a0775a4098e2bd",
+      "functions": [
+        {
+          "symbol": "LockedRepository._read_lockfile",
+          "start": 104,
+          "end": 108,
+          "sha256": "f7b37f041362561681c9d4a3ab4d2dc0b7c1827c94941ac2bdc0aca33cd43f91",
+          "url": "https://github.com/pdm-project/pdm/blob/3b82f5291988aa8d6a5c1f92b695c5b18ce170bd/src/pdm/models/repositories/lock.py#L104-L108"
+        },
+        {
+          "symbol": "LockedRepository._read_pylock",
+          "start": 110,
+          "end": 161,
+          "sha256": "627f21cdc9ecde3f7a4004a5481398881ebb7329807f5620b8bfcea95e943edb",
+          "url": "https://github.com/pdm-project/pdm/blob/3b82f5291988aa8d6a5c1f92b695c5b18ce170bd/src/pdm/models/repositories/lock.py#L110-L161"
+        },
+        {
+          "symbol": "LockedRepository._identify_candidate",
+          "start": 204,
+          "end": 217,
+          "sha256": "cc5fddd4faa6ce946c0bb8446fa0a347adbae88b144509d35168a4d118358f41",
+          "url": "https://github.com/pdm-project/pdm/blob/3b82f5291988aa8d6a5c1f92b695c5b18ce170bd/src/pdm/models/repositories/lock.py#L204-L217"
+        },
+        {
+          "symbol": "LockedRepository.get_hashes",
+          "start": 283,
+          "end": 284,
+          "sha256": "7b9cb095dc909bd09603e6e8fbb4cf8bb70850777839d09e39facb1b13a54d3d",
+          "url": "https://github.com/pdm-project/pdm/blob/3b82f5291988aa8d6a5c1f92b695c5b18ce170bd/src/pdm/models/repositories/lock.py#L283-L284"
+        }
+      ]
+    },
+    {
+      "file": "upstream/after.py",
+      "commit": "adfdb5dccacc0153ad7bf6b14354ad8e46b9801b",
+      "source": "src/pdm/models/repositories/lock.py",
+      "source_sha256": "98d82997a1ea877cf94e253c812d62ba01058a2b15b7c488e0adf0789be7f2f3",
+      "sha256": "3d412a339fa242ac8e6e749863fb832e4d35677a3f47ad4020a44294ab62e375",
+      "functions": [
+        {
+          "symbol": "LockedRepository._read_lockfile",
+          "start": 104,
+          "end": 108,
+          "sha256": "f7b37f041362561681c9d4a3ab4d2dc0b7c1827c94941ac2bdc0aca33cd43f91",
+          "url": "https://github.com/pdm-project/pdm/blob/adfdb5dccacc0153ad7bf6b14354ad8e46b9801b/src/pdm/models/repositories/lock.py#L104-L108"
+        },
+        {
+          "symbol": "LockedRepository._read_pylock",
+          "start": 110,
+          "end": 168,
+          "sha256": "ac11fa7a92e3bf81aacb0f69ed2bf457938b71fa2424dc61c1e9bbadbd83e913",
+          "url": "https://github.com/pdm-project/pdm/blob/adfdb5dccacc0153ad7bf6b14354ad8e46b9801b/src/pdm/models/repositories/lock.py#L110-L168"
+        },
+        {
+          "symbol": "LockedRepository._identify_candidate",
+          "start": 211,
+          "end": 224,
+          "sha256": "cc5fddd4faa6ce946c0bb8446fa0a347adbae88b144509d35168a4d118358f41",
+          "url": "https://github.com/pdm-project/pdm/blob/adfdb5dccacc0153ad7bf6b14354ad8e46b9801b/src/pdm/models/repositories/lock.py#L211-L224"
+        },
+        {
+          "symbol": "LockedRepository.get_hashes",
+          "start": 290,
+          "end": 291,
+          "sha256": "7b9cb095dc909bd09603e6e8fbb4cf8bb70850777839d09e39facb1b13a54d3d",
+          "url": "https://github.com/pdm-project/pdm/blob/adfdb5dccacc0153ad7bf6b14354ad8e46b9801b/src/pdm/models/repositories/lock.py#L290-L291"
+        }
+      ]
+    },
+    {
+      "file": "upstream/candidate.py",
+      "commit": "adfdb5dccacc0153ad7bf6b14354ad8e46b9801b",
+      "source": "src/pdm/models/candidates.py",
+      "source_sha256": "6ac15f5135f3580bd11d588485f593f9d8f9cfaad980e267bf6198fc203ebff4",
+      "sha256": "891a5a25e3cec504fd26d47e9c976cce6f0fafbd27623965e1e5aedd4978d718",
+      "functions": [
+        {
+          "symbol": "Candidate.__init__",
+          "start": 136,
+          "end": 163,
+          "sha256": "fc3732de04ece5177576a6d4067feb50d88cfe07cbea9b37105060c4d4d8d654",
+          "url": "https://github.com/pdm-project/pdm/blob/adfdb5dccacc0153ad7bf6b14354ad8e46b9801b/src/pdm/models/candidates.py#L136-L163"
+        },
+        {
+          "symbol": "Candidate.identify",
+          "start": 165,
+          "end": 166,
+          "sha256": "95af6527fd6f7df468d76c7864456bfbc57cf0abb06ea1d72b4e1342d6f1d441",
+          "url": "https://github.com/pdm-project/pdm/blob/adfdb5dccacc0153ad7bf6b14354ad8e46b9801b/src/pdm/models/candidates.py#L165-L166"
+        },
+        {
+          "symbol": "Candidate.__str__",
+          "start": 213,
+          "end": 217,
+          "sha256": "e2a4f79c15bf575effb840b3cec71451604911c43a07845bbcb7a6548d06e21e",
+          "url": "https://github.com/pdm-project/pdm/blob/adfdb5dccacc0153ad7bf6b14354ad8e46b9801b/src/pdm/models/candidates.py#L213-L217"
+        }
+      ]
+    },
+    {
+      "file": "upstream/requirements.py",
+      "commit": "adfdb5dccacc0153ad7bf6b14354ad8e46b9801b",
+      "source": "src/pdm/formats/requirements.py",
+      "source_sha256": "759272d6f7644a3c8d332bdc3afc96e43e899cf16418320e447a991533334763",
+      "sha256": "f62037521245ecd0e6afb20814f4f140341c7f826d8e6c0b5d08a5c806b7fd72",
+      "functions": [
+        {
+          "symbol": "export",
+          "start": 248,
+          "end": 304,
+          "sha256": "ed2b2727ec18bc7cc21a50060cff29f32a1f282c01b35a7c84b1eb826fb728aa",
+          "url": "https://github.com/pdm-project/pdm/blob/adfdb5dccacc0153ad7bf6b14354ad8e46b9801b/src/pdm/formats/requirements.py#L248-L304"
+        }
+      ]
+    },
+    {
+      "file": "upstream/pylock.py",
+      "commit": "adfdb5dccacc0153ad7bf6b14354ad8e46b9801b",
+      "source": "src/pdm/formats/pylock.py",
+      "source_sha256": "e16bdd9c4fff73a41886320d889f83f76ddf3bceb29ecf8decfe91b2bf5b120e",
+      "sha256": "bf7d5bf6ddae8061e67f83c7ba5b2ac69ece6b4cf2c2be6be749148f0dd78487",
+      "functions": [
+        {
+          "symbol": "PyLockConverter.make_package",
+          "start": 33,
+          "end": 94,
+          "sha256": "93a61aa4dadd5572f27c4e5bf06fa5c8d6182bbf6bec8eb10ded74239b8828c7",
+          "url": "https://github.com/pdm-project/pdm/blob/adfdb5dccacc0153ad7bf6b14354ad8e46b9801b/src/pdm/formats/pylock.py#L33-L94"
+        }
+      ]
+    }
+  ]
+}

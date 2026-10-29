@@ -16,6 +16,18 @@
 
 <table>
 <tr>
+<td width="88" align="center" valign="top"><a href="锁文件哈希_pdm/pdm_锁文件里的哈希去哪了_中文版.md"><img src="锁文件哈希_pdm/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[锁文件里明明有哈希，PDM 为什么说没有？](锁文件哈希_pdm/pdm_锁文件里的哈希去哪了_中文版.md)**
+
+`pylock.toml` 里有哈希，导出 requirements 却说没有；换成导出 pylock，命令成功了，哈希却丢了。我沿着“写出 → 读入 → 再导出”跑了一遍，发现两种结果都从同一个空列表开始。七行修复补在读入处，而不是两个出口。
+
+<sub>2026-10-29 · [English](锁文件哈希_pdm/PDM_Archive_Hashes_Roundtrip_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
 <td width="88" align="center" valign="top"><a href="取消与背压_anyio/anyio_取消接收与背压_中文版.md"><img src="取消与背压_anyio/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
@@ -83,6 +95,7 @@ PostgreSQL 代理 pgdog 连续跑了 12 天以后，定时任务全都不再触�
 
 | 工程 | 跑出来的是什么 |
 | --- | --- |
+| [hash_demo](锁文件哈希_pdm/hash_demo/) | 同一份归档哈希经过两版 PDM 读入函数，再导出 requirements / pylock，看它在哪一步丢失或保留 |
 | [backpressure_demo](取消与背压_anyio/backpressure_demo/) | 修复前后两版 AnyIO 各连一条真实的 TCP，看取消之后数据有没有继续堆进队列，连接还能不能接着用 |
 | [cubic_demo](拥塞控制_cubic/cubic_demo/) | 同一次持久拥塞，修复前后的 `ssthresh`，以及之后每个 RTT 的窗口变化 |
 | [variance_demo](方差稳定性_nushell_variance/variance_demo/) | 六种方差算法在同一批输入上的误差，包括反例和数量级扫描 |
