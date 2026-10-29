@@ -1,99 +1,49 @@
-# notes
+# Norna 的笔记
 
-从真实的 bug 出发，读源码、对照论文，再用小程序把问题跑出来。
+这里放我读开源代码时写下的一些东西。最近几篇都和 Rust 项目里的 bug 有关：方差算成负数、定时器不再触发、拥塞窗口多砍了一刀。
 
-这里收录中英文技术笔记、配图和复现代码。博客版同步至掘金、知乎和 CSDN；原稿和后续更正在这里保留。
+补丁往往只有几行，弄明白为什么这样改却要绕不少路。我也把这些绕路记下来：试过的算法、没覆盖的反例，还有后来需要更正的地方。能用小程序跑出来的，就把代码一起放进来。
 
-## 时间轮：那行 `+1`，后来怎么样了？
+## 文章
 
-一个 PostgreSQL 代理运行约 12 天后，周期任务开始不再触发。追到时间轮里，修复看起来只是把扫描起点往后挪一格。
+### CUBIC：同一个窗口，乘了两遍 0.7
 
-但这个 `+1` 不能加在每一层。维护者用 `64ms / 65ms` 和 `4096ms / 4160ms` 两组定时器，找到了初稿没覆盖的级联错误。
+quinn 处理持久拥塞时，把已经削减过的窗口又削了一次，`ssthresh` 从原窗口的 0.7 倍变成了 0.49 倍（未触及最小窗口下限时）。这篇从被删掉的五行代码讲起，看看这条界线为什么会影响窗口恢复，也理一理 `cwnd` 和 `flight_size` 的区别。
 
-|文章|中文|English|
-|---|---|---|
-|首篇 · 时间轮里那行凭空出现的 `+1`|[阅读](时间轮_timing_wheel/时间轮_论文对照_tokio_中文版.md)|[Read](时间轮_timing_wheel/Timing_Wheels_From_SOSP_1987_to_tokio_EN.md)|
-|续篇 · 时间轮的 `+1`，为什么最后只留在顶层|[阅读](时间轮_timing_wheel/时间轮_续篇_只在顶层加一_中文版.md)|[Read](时间轮_timing_wheel/Timing_Wheel_Followup_Top_Level_Only_EN.md)|
+[中文](拥塞控制_cubic/cubic_持久拥塞_ssthresh_二次削减_中文版.md) · [English](拥塞控制_cubic/Cubic_Persistent_Congestion_Second_Cut_EN.md) · [掘金](https://juejin.cn/spost/7701604765432545289) · [知乎](https://zhuanlan.zhihu.com/p/2098906464999969780) · [CSDN](https://blog.csdn.net/MsterNZ/article/details/169368038)
 
-首篇从顶层伪环讲到时间轮的论文谱系；续篇接着讲 review 中发现的两组反例、漏掉的级联写入路径，以及 runtime 与 tokio-util 不同的级联方式。**首篇已补更正，建议连同续篇一起读。**
+修复：[quinn #2903](https://github.com/quinn-rs/quinn/pull/2903)
 
-- 已发布：[首篇博客](https://juejin.cn/post/7690596943454437427)（2026-09-29） / [续篇博客](https://juejin.cn/post/7699791664956932150)（2026-10-24）
-- 对应修复：[tokio #8519](https://github.com/tokio-rs/tokio/pull/8519)（2026-10-11 合并）
-- 复现：[三版本时间轮对照](时间轮_timing_wheel/wheel_demo/)，包含原实现、首篇初稿和最终修复
+### 方差怎么会是 −32？
 
-## 方差：两个相差 1 的数，怎么算出 −32？
+`506250000` 和 `506250001` 的总体方差是 `0.25`，Nushell 的旧实现却算出了 `−32`。换成普通两遍法，这组数对了，另一组又出了问题。沿着这次修复，把六种算法放到相同的输入下试一遍，看看误差从哪里来。
 
-对 `506250000` 和 `506250001` 求总体方差，正确结果是 `0.25`。Nushell 的旧实现却能算出 `−32`。
+[中文](方差稳定性_nushell_variance/nushell_math_variance_中文版.md) · [English](方差稳定性_nushell_variance/Nushell_Math_Variance_EN.md) · [掘金](https://juejin.cn/post/7699685792612679715) · [知乎](https://zhuanlan.zhihu.com/p/2098926232993846374) · [CSDN](https://blog.csdn.net/MsterNZ/article/details/169368433)
 
-普通两遍法修好了这个输入，又在大数常数序列上引入新问题。文章沿着修复过程，比较六种算法，也保留了最终方案仍然存在的数值边界。
+修复：[nushell #19108](https://github.com/nushell/nushell/pull/19108)
 
-- 原稿：[中文版](方差稳定性_nushell_variance/nushell_math_variance_中文版.md) / [English](方差稳定性_nushell_variance/Nushell_Math_Variance_EN.md)
-- 博客：[掘金](https://juejin.cn/post/7699685792612679715) / [知乎](https://zhuanlan.zhihu.com/p/2098926232993846374) / [CSDN](https://blog.csdn.net/MsterNZ/article/details/169368433)
-- 对应修复：[nushell #19108](https://github.com/nushell/nushell/pull/19108)
-- 复现：[六种算法与量级扫描](方差稳定性_nushell_variance/variance_demo/)
+### 时间轮里那行凭空出现的 `+1`
 
-## CUBIC：quinn 的持久拥塞，ssthresh 怎么成了 0.49
+一个 PostgreSQL 代理跑了约 12 天，周期任务开始不再触发。追到 tokio-util 的时间轮里，修复看起来只是把扫描起点往后挪一格。为了理解这一格，回头翻了时间轮的论文，也写了一个不用真等 12 天的复现。
 
-quinn 的 CUBIC 用事件前的 `cwnd` 计算 `ssthresh`，乘一次 0.7，并以最小窗口为下限。修复前的持久拥塞分支把 0.7 乘了第二遍，未触及下限时便成了事件前窗口的 0.49 倍。文章也区分了这里的 `cwnd` 与 RFC 9438 基本公式中的 `flight_size`。
+[中文](时间轮_timing_wheel/时间轮_论文对照_tokio_中文版.md) · [English](时间轮_timing_wheel/Timing_Wheels_From_SOSP_1987_to_tokio_EN.md) · [掘金](https://juejin.cn/post/7690596943454437427)
 
-在固定 RTT、每个 RTT 一次性确认整个窗口的控制器演示中，矮掉的界线把窗口恢复从 2 个 RTT 拖成 12 个。[quinn #2903](https://github.com/quinn-rs/quinn/pull/2903) 删的就是那五行。
+### 后来，`+1` 为什么只留在顶层？
 
-- 原稿：[中文版](拥塞控制_cubic/cubic_持久拥塞_ssthresh_二次削减_中文版.md) / [English](拥塞控制_cubic/Cubic_Persistent_Congestion_Second_Cut_EN.md)
-- 博客：[掘金](https://juejin.cn/spost/7701604765432545289) / [知乎](https://zhuanlan.zhihu.com/p/2098906464999969780) / [CSDN](https://blog.csdn.net/MsterNZ/article/details/169368038)
-- 对应修复：[quinn #2903](https://github.com/quinn-rs/quinn/pull/2903)（2026-09-30 合并）
-- 复现：[持久拥塞两版对照](拥塞控制_cubic/cubic_demo/)
+首篇写完，review 里又出现了两组反例：`64 / 65ms` 和 `4096 / 4160ms`。它们暴露了初稿漏看的级联写入路径，也改变了最终修复。续篇接着讲这件事；首篇文末已补更正，两篇可以连着读。
 
-## 跑一遍
+[中文](时间轮_timing_wheel/时间轮_续篇_只在顶层加一_中文版.md) · [English](时间轮_timing_wheel/Timing_Wheel_Followup_Top_Level_Only_EN.md) · [掘金](https://juejin.cn/post/7699791664956932150)
 
-三个工程都使用 Rust。下面的命令在各自工程目录运行，详细说明见工程内的 README。
+修复：[tokio #8519](https://github.com/tokio-rs/tokio/pull/8519)（首篇与续篇对应同一个 PR）
 
-**时间轮**
+## 复现代码
 
-```sh
-cd 时间轮_timing_wheel/wheel_demo
-cargo test
-cargo test --release
-cargo run --release --example followup
-```
+三个小工程都用 Rust，运行命令和实验设置在各自的 README 里。
 
-`followup` 打印顶层伪环与两组级联反例的三版本对照；不需要等现实中的 12 天过去。debug 模式的断言差异见[工程说明](时间轮_timing_wheel/wheel_demo/README.md)。
+| 工程 | 可以跑什么 |
+| --- | --- |
+| [cubic_demo](拥塞控制_cubic/cubic_demo/) | 同一场持久拥塞事件，比较修复前后的状态与逐 RTT 窗口轨迹 |
+| [variance_demo](方差稳定性_nushell_variance/variance_demo/) | 六种方差算法的对照表、反例和数量级扫描 |
+| [wheel_demo](时间轮_timing_wheel/wheel_demo/) | 原实现、首篇初稿、最终修复的三版本对照，包含两组级联反例 |
 
-**CUBIC**
-
-```sh
-cd 拥塞控制_cubic/cubic_demo
-cargo test
-cargo test --release
-cargo run --example recovery
-```
-
-`recovery` 打印控制器模拟的两组逐 RTT 轨迹：事件前窗口 9600B，修复后 / 修复前分别需 2 / 12 个 RTT 回到事件前大小；4800B 则是 1 / 6。每个 RTT 用一次 ACK 调用确认整个窗口，不跑完整 QUIC 连接；场景设定见[工程说明](拥塞控制_cubic/cubic_demo/README.md)。
-
-**方差**
-
-```sh
-cd 方差稳定性_nushell_variance/variance_demo
-cargo test --release
-cargo run --release
-```
-
-运行后会打印文章里的对照表，并输出 CSV。重画曲线另需 Python 与 Matplotlib，见[工程说明](方差稳定性_nushell_variance/variance_demo/README.md)。
-
-## 目录
-
-```text
-时间轮_timing_wheel/
-├── *.md             中英文首篇与续篇
-├── assets/          配图
-└── wheel_demo/      三版本复现
-
-方差稳定性_nushell_variance/
-├── *.md             中英文笔记
-├── assets/          配图
-└── variance_demo/   算法对照与数据扫描
-
-拥塞控制_cubic/
-├── *.md             中英文笔记
-├── assets/          配图
-└── cubic_demo/      持久拥塞两版对照
-```
+文章有中英文两版，配图和绘图脚本也在对应专题里。博客方便阅读，这里保留原稿、代码和后续更正。
