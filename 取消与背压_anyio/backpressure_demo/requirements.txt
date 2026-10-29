@@ -1,0 +1,4 @@
+# AnyIO itself is imported from the two pinned upstream source trees by run.py.
+# Python 3.12+; unittest, asyncio, urllib, zipfile, etc. are in the stdlib.
+idna==3.20
+typing_extensions==4.16.0
