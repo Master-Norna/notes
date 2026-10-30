@@ -16,6 +16,7 @@ TOPICS = {
     "锁文件哈希_pdm": ("ring", "dot", "missing"),  # 往返一圈，哈希没了
     "导入排序语义_isort": ("stack", "bar", "truncate"),  # 一行的尾巴 noqa 被截掉
     "转义往返_tomlkit": ("fence", "bar", "double"),  # 转义多做了一遍
+    "日期差_nushell_datetime": ("row", "bar", "flip"),  # 日期向前，余天却成了负数
 }
 
 # ---- 记号：point 画在线段中点，line 画整条线段 ----

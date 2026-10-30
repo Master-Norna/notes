@@ -1,0 +1,4 @@
+# Upstream snapshots and LICENSE are byte-hashed in provenance.json.
+# Preserve their original LF bytes even on core.autocrlf=true checkouts.
+upstream/**/*.nu -text
+LICENSE -text

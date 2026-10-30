@@ -16,6 +16,18 @@
 
 <table>
 <tr>
+<td width="88" align="center" valign="top"><a href="日期差_nushell_datetime/nushell_负天数消失以后_中文版.md"><img src="日期差_nushell_datetime/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[负天数消失以后，review 又找到了一个问题](日期差_nushell_datetime/nushell_负天数消失以后_中文版.md)**
+
+1 月 31 日到 3 月 1 日，Nushell 算出「1 个月 −2 天」。我的初稿消掉了负号，review 却发现它把原来正确的「28 天」换成了「1 个月」。我把修复前、送审版和最终版一起留下，看一个补丁如何既修正错误，又不改掉原来的约定。
+
+<sub>2026-10-30 · [English](日期差_nushell_datetime/nushell_负天数消失以后_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
 <td width="88" align="center" valign="top"><a href="转义往返_tomlkit/tomlkit_自己写的TOML读不回_中文版.md"><img src="转义往返_tomlkit/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
@@ -119,6 +131,7 @@ PostgreSQL 代理 pgdog 连续跑了 12 天以后，定时任务全都不再触�
 
 | 工程 | 跑出来的是什么 |
 | --- | --- |
+| [datetime_demo](日期差_nushell_datetime/datetime_demo/) | 三份固定源码交给同一个真实 Nu 执行，对照负天数、初稿的语义变化与最终兼容拆分，并独立检查闰日输入解析 |
 | [hash_demo](锁文件哈希_pdm/hash_demo/) | 同一份归档哈希经过两版 PDM 读入函数，再导出 requirements / pylock，看它在哪一步丢失或保留 |
 | [backpressure_demo](取消与背压_anyio/backpressure_demo/) | 修复前后两版 AnyIO 各连一条真实的 TCP，看取消之后数据有没有继续堆进队列，连接还能不能接着用 |
 | [cubic_demo](拥塞控制_cubic/cubic_demo/) | 同一次持久拥塞，修复前后的 `ssthresh`，以及之后每个 RTT 的窗口变化 |

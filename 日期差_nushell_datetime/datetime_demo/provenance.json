@@ -1,0 +1,64 @@
+{
+  "repository": "https://github.com/nushell/nushell",
+  "pull_request": 19109,
+  "snapshot_policy": "Complete, byte-identical raw upstream mod.nu files; no annotations removed or algorithm adapted.",
+  "files": [
+    {
+      "path": "upstream/before/mod.nu",
+      "revision": "c3b7a5aebea0119d88bba4608bc6a3f81bb54a45",
+      "upstream_path": "crates/nu-std/std/dt/mod.nu",
+      "url": "https://github.com/nushell/nushell/blob/c3b7a5aebea0119d88bba4608bc6a3f81bb54a45/crates/nu-std/std/dt/mod.nu",
+      "raw_url": "https://raw.githubusercontent.com/nushell/nushell/c3b7a5aebea0119d88bba4608bc6a3f81bb54a45/crates/nu-std/std/dt/mod.nu",
+      "git_blob_sha1": "9676d3224e96c0645662d15dba6794638cf40271",
+      "sha256": "ba9a432e8c947c40f1f38861c2b299993e8822a26bbfce96e08a01b45c9c4593",
+      "bytes": 7585
+    },
+    {
+      "path": "upstream/draft/mod.nu",
+      "revision": "ca90358650f1afa85a5bfb05645e87e04f52baaf",
+      "upstream_path": "crates/nu-std/std/dt/mod.nu",
+      "url": "https://github.com/nushell/nushell/blob/ca90358650f1afa85a5bfb05645e87e04f52baaf/crates/nu-std/std/dt/mod.nu",
+      "raw_url": "https://raw.githubusercontent.com/nushell/nushell/ca90358650f1afa85a5bfb05645e87e04f52baaf/crates/nu-std/std/dt/mod.nu",
+      "git_blob_sha1": "a49cf675296ace5e5b8ac2f95119c375eb0f309f",
+      "sha256": "a473904abcdace2e5728b6a139721873b92d37bb9dd68bc47ba20d9b9bb4f89c",
+      "bytes": 10420
+    },
+    {
+      "path": "upstream/after/mod.nu",
+      "revision": "996de1f9a48520c8679e6d791f3260b722d5116e",
+      "upstream_path": "crates/nu-std/std/dt/mod.nu",
+      "url": "https://github.com/nushell/nushell/blob/996de1f9a48520c8679e6d791f3260b722d5116e/crates/nu-std/std/dt/mod.nu",
+      "raw_url": "https://raw.githubusercontent.com/nushell/nushell/996de1f9a48520c8679e6d791f3260b722d5116e/crates/nu-std/std/dt/mod.nu",
+      "git_blob_sha1": "bec322a65a07bdead158f2aee21d493e075a8b92",
+      "sha256": "ec84579781f9ee3028765dc77652e5bff184c023e1e5f4e9aa52e88fbd210981",
+      "bytes": 8258
+    },
+    {
+      "path": "LICENSE",
+      "revision": "c3b7a5aebea0119d88bba4608bc6a3f81bb54a45",
+      "upstream_path": "LICENSE",
+      "url": "https://github.com/nushell/nushell/blob/c3b7a5aebea0119d88bba4608bc6a3f81bb54a45/LICENSE",
+      "git_blob_sha1": "1ecbafd78cadc79bad0e1d4105292830a19612d9",
+      "sha256": "ff5dcaaba6140ec57cafdd4f707cd0d329e727477cf7d5b9ba7a244ec2678b79",
+      "bytes": 1094
+    },
+    {
+      "path": "LICENSE",
+      "revision": "ca90358650f1afa85a5bfb05645e87e04f52baaf",
+      "upstream_path": "LICENSE",
+      "url": "https://github.com/nushell/nushell/blob/ca90358650f1afa85a5bfb05645e87e04f52baaf/LICENSE",
+      "git_blob_sha1": "1ecbafd78cadc79bad0e1d4105292830a19612d9",
+      "sha256": "ff5dcaaba6140ec57cafdd4f707cd0d329e727477cf7d5b9ba7a244ec2678b79",
+      "bytes": 1094
+    },
+    {
+      "path": "LICENSE",
+      "revision": "996de1f9a48520c8679e6d791f3260b722d5116e",
+      "upstream_path": "LICENSE",
+      "url": "https://github.com/nushell/nushell/blob/996de1f9a48520c8679e6d791f3260b722d5116e/LICENSE",
+      "git_blob_sha1": "1ecbafd78cadc79bad0e1d4105292830a19612d9",
+      "sha256": "ff5dcaaba6140ec57cafdd4f707cd0d329e727477cf7d5b9ba7a244ec2678b79",
+      "bytes": 1094
+    }
+  ]
+}
