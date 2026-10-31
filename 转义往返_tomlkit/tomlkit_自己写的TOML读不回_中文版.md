@@ -83,13 +83,46 @@ def __add__(self, other: str) -> String:
 
 ![进源文本的三条路：构造与修后的拼接共用一把转义刷，修前的普通 str 拼接绕开刷子直插源文本](assets/fig1_escape_paths.png)
 
+不过「右边已经按它自己的类型刷过了」这句话，藏着一个前提：两边定界符一样。都是 basic 串、都是字面串，前提成立；一边 basic、一边字面串，就没人问过这一句——`__add__` 只判断 `isinstance(other, String)`，不比较类型。
+
+我拿这个前提试了一组：左边 basic 串，右边字面串，字面串里带一个双引号。
+
+```python
+from tomlkit import string, parse
+
+a = string("foo")                  # _original: foo
+b = string('ba"r', literal=True)   # 字面串不转义，_original 就是 ba"r
+combined = a + b
+combined.as_string()               # '"fooba"r"'
+parse(f"k = {combined.as_string()}")   # UnexpectedCharError
+```
+
+`"fooba"r"` 里的第二个引号提前把字符串收了尾，和开头那三行是同一种坏法：逻辑值 `fooba"r` 是对的，写出来的文本自己读不回。字面串里的裸引号落进 basic 串的定界符，不需要谁手滑。
+
+这也不是「异类型必坏」。两侧都没有特殊字符时，basic 串接字面串读回来好好的：`string("foo") + string("bar", literal=True)` 输出 `"foobar"`，一点问题都没有。坏不坏，取决于右半边恰好有没有那几种字符——这才是「不保证」的意思。
+
+反方向一样坏，只是更安静。字面串接 basic 串，basic 串里的转义序列进了字面串就没人解释：
+
+```python
+l = string("bar", literal=True)
+s = string("it's")     # basic 串不转义单引号，_original 是 it's
+(l + s).as_string()    # "'barit's'" —— 读不回
+
+n = string("a\nb")     # _original 是 a\nb
+(l + n).as_string()    # "'bara\nb'" —— 读得回，值是 bara\nb 这七个可见字符
+```
+
+后一种连异常都没有：解析成功，值却和逻辑值分了家。硬炸至少有人当场发现。
+
+这几组例子，我拿两版快照和 PyPI 上 0.15.2 的轮子各跑了一遍，输出一字不差。要让异类型拼接也守住 round-trip，得在 `__add__` 里比较两侧类型、必要时换定界符或转义，那是另一个设计决定，不是这七行顺手能捎上的。
+
 ## 四、哪条路没被修到
 
-诚实起见，把修复覆盖不到的角落也摆出来：
+这七行管不到的角落，也一并摆出来：
 
 - **字面串追加自己的定界符，两版都坏。** `value("'foo'")` 造出字面串 `'foo'`，追加一个 `'`，输出 `'foo''`，读不回——修前修后一个样。转义帮不上忙，因为字面串压根没有转义机制；要救它只能换一种写法（比如切回 basic 串再转义），但那就不是「保真」而是「改写」了，不属于这七行的范围。
 - **构造路径有校验，追加路径没有。** `from_raw` 造字面串时遇到引号会当场抛 `InvalidStringError`（[items.py L2257-L2259](https://github.com/python-poetry/tomlkit/blob/61941deb3c7155e88d5f038148b33a599c04a530/tomlkit/items.py#L2257-L2259)），而 `__add__` 不做这类检查。如今两条路径共享同一把转义刷子，但校验仍只站在构造那头。
-- 对照里还有两版**完全一致**的部分：`String` 拼 `String`、追加普通文本，修复前后输出一字不差。修复只动了「普通 str 进 basic 串」这一条缝。
+- 对照里还有两版一字不差的部分：追加普通文本，以及前面那组异类型拼接。修复只动了「普通 str 进 basic 串」这一条缝。
 
 ## 五、修前修后，同场对照
 

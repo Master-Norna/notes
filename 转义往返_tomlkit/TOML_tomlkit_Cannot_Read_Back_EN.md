@@ -89,13 +89,46 @@ Mapped as the paths into `_original`, the fix's location is easy to see:
 
 Serialization, for contrast, never moved: `as_string()` wraps `_original` in delimiters and writes it out, byte-identical before and after.
 
+But "the right side was escaped by its own type already" hides a premise: the two sides use the same delimiters. Basic plus basic, literal plus literal — the premise holds. A basic string on one side and a literal on the other, and nobody asked the question: `__add__` only checks `isinstance(other, String)`, never the type.
+
+Nor is the mixed case always broken. With no special characters on either side it is fine — `string("foo") + string("bar", literal=True)` comes out as `"foobar"` and reads back intact. Whether it breaks depends on which characters the right half happens to contain; that is what "not guaranteed" means.
+
+I tried the case where it does break: a basic string on the left, a literal on the right, with a double quote inside.
+
+```python
+from tomlkit import string, parse
+
+a = string("foo")                  # _original: foo
+b = string('ba"r', literal=True)   # literals do not escape; _original is ba"r
+combined = a + b
+combined.as_string()               # '"fooba"r"'
+parse(f"k = {combined.as_string()}")   # UnexpectedCharError
+```
+
+The second quote in `"fooba"r"` closes the string early — the same failure as the three lines at the top: the logical value `fooba"r` is right, and the text written out cannot be read back. A bare quote from a literal lands inside a basic string's delimiters; no slip of the hand required.
+
+The other direction breaks too, only more quietly — a literal followed by a basic string, whose escape sequences nobody interprets inside a literal:
+
+```python
+l = string("bar", literal=True)
+s = string("it's")     # basic strings do not escape single quotes; _original is it's
+(l + s).as_string()    # "'barit's'" — does not read back
+
+n = string("a\nb")     # _original is a\nb
+(l + n).as_string()    # "'bara\nb'" — reads back as the seven visible characters bara\nb
+```
+
+The second one does not even raise: it parses, and the value has forked from the logical one. A hard failure at least gets noticed on the spot.
+
+I ran these cases on both snapshots and on the 0.15.2 wheel from PyPI; the output was identical. Making mixed-type concatenation round-trip-safe would mean comparing the two sides' types inside `__add__`, and possibly switching delimiters or escaping — a separate design decision, not something these seven lines pick up along the way.
+
 ## 4. What the fix does not cover
 
-For honesty's sake, the corners the fix leaves open:
+The corners these seven lines do not reach:
 
 - **A literal string appending its own delimiter breaks in both versions.** `value("'foo'")` builds the literal `'foo'`; append a `'` and the output `'foo''` does not parse — identical before and after. Escaping cannot help, because literals have no escape mechanism at all; the rescue would be a different spelling (switch to a basic string and escape), which would be rewriting, not preserving — out of these seven lines' scope.
 - **Construction validates, appending does not.** `from_raw` raises `InvalidStringError` on the spot when a literal contains a quote ([items.py L2257-L2259](https://github.com/python-poetry/tomlkit/blob/61941deb3c7155e88d5f038148b33a599c04a530/tomlkit/items.py#L2257-L2259)); `__add__` runs no such check. The two paths now share one escape brush, but validation still only stands at the construction end.
-- Two parts of the comparison are **byte-identical across versions**: `String` + `String`, and appending plain text. The fix only closes the "plain str into a basic string" seam.
+- Two parts of the comparison are **byte-identical across versions**: appending plain text, and the mixed-type concatenation above. The fix only closes the "plain str into a basic string" seam.
 
 ## 5. Before and after, side by side
 
