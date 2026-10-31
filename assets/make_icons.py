@@ -18,6 +18,7 @@ TOPICS = {
     "转义往返_tomlkit": ("fence", "bar", "double"),  # 转义多做了一遍
     "日期差_nushell_datetime": ("row", "bar", "flip"),  # 日期向前，余天却成了负数
     "后端参数_pathspec": ("fence", "tick", "missing"),  # 正则跨过引擎边界，编译参数丢了一格
+    "PDF注释_pypdf": ("stack", "tick", "overflow"),  # 跳过注释，调用栈却继续堆叠
 }
 
 # ---- 记号：point 画在线段中点，line 画整条线段 ----

@@ -1,0 +1,1242 @@
+{
+  "schema": 1,
+  "repository": "https://github.com/py-pdf/pypdf",
+  "pull_request": "https://github.com/py-pdf/pypdf/pull/4150",
+  "selection": "Every pypdf/**/*.py and pypdf/py.typed; upstream LICENSE, pyproject.toml, tests/utils.py and tests/test_generic.py. Original bytes, no package changes.",
+  "snapshots": [
+    {
+      "label": "parent",
+      "commit": "a23cc36da7a8e86f2b551b7a6eed1d8798301c73",
+      "archive_url": "https://codeload.github.com/py-pdf/pypdf/tar.gz/a23cc36da7a8e86f2b551b7a6eed1d8798301c73",
+      "archive_sha256": "a21d4c419b2ad19ce7fe90724745a3e71b8743dd4759471ce589618aba536754",
+      "archive_bytes": 10183612,
+      "files": [
+        {
+          "path": "LICENSE",
+          "bytes": 1605,
+          "sha256": "a97ac230e5f33ef10a5367a850eb01f91f1a0b064e34742c7794d2294557f524",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/LICENSE"
+        },
+        {
+          "path": "pypdf/__init__.py",
+          "bytes": 1494,
+          "sha256": "d7786f1b3cb2e52e28b1085f0ea150fa7f029baad252b29af7415c790871f7df",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/__init__.py"
+        },
+        {
+          "path": "pypdf/_cmap.py",
+          "bytes": 21013,
+          "sha256": "d298554fd352442d4384e13395f1f5e768a5f3916baa1deaa599eb017fe1cc60",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_cmap.py"
+        },
+        {
+          "path": "pypdf/_codecs/__init__.py",
+          "bytes": 1510,
+          "sha256": "bd56ce01215af54c771e42b4228dd415aba640fe0970d2f1f63341353351d980",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_codecs/__init__.py"
+        },
+        {
+          "path": "pypdf/_codecs/_codecs.py",
+          "bytes": 10717,
+          "sha256": "f377c8779e1713e6916f798d8bfa75a2526d67375487df07b3159708e193b512",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_codecs/_codecs.py"
+        },
+        {
+          "path": "pypdf/_codecs/adobe_glyphs.py",
+          "bytes": 577665,
+          "sha256": "69ac4e46ea50409ee46cb0c76e35a280b67aa60f06f7fe5ea832a2349c72923e",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_codecs/adobe_glyphs.py"
+        },
+        {
+          "path": "pypdf/_codecs/core_font_metrics.py",
+          "bytes": 114976,
+          "sha256": "dbb26cac9a39511246215ed90ce09427259f066e8b0567aaeefdce5b3a05f21f",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_codecs/core_font_metrics.py"
+        },
+        {
+          "path": "pypdf/_codecs/pdfdoc.py",
+          "bytes": 4269,
+          "sha256": "c5f4af30562cbf1b9a490d14bbdbd90ca681d16bbce61d6e0a20758bdac07145",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_codecs/pdfdoc.py"
+        },
+        {
+          "path": "pypdf/_codecs/std.py",
+          "bytes": 2630,
+          "sha256": "0f240cb84a40184a52f6ecb58d67f87278fe92a4a13ce0228f9b08ed0d580fc1",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_codecs/std.py"
+        },
+        {
+          "path": "pypdf/_codecs/symbol.py",
+          "bytes": 4642,
+          "sha256": "08fe958d172c72b9bcca6007f74c6977155a7a5c22e8c49bd536f5c0d0e1d359",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_codecs/symbol.py"
+        },
+        {
+          "path": "pypdf/_codecs/zapfding.py",
+          "bytes": 4655,
+          "sha256": "e39a9c635d716c1c2da21ebfb7467fef33631bbfaa238d752d14155d828faf65",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_codecs/zapfding.py"
+        },
+        {
+          "path": "pypdf/_configuration.py",
+          "bytes": 11280,
+          "sha256": "dd2b41d34cedc9113c33be3555c662b6692f038d0d8ae29a2ea0ad9fb49823a9",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_configuration.py"
+        },
+        {
+          "path": "pypdf/_crypt_providers/__init__.py",
+          "bytes": 2770,
+          "sha256": "c5441b160310bca31a38e4f7454756ddb4bc7d94a147c3c13b3eab7ac7f05855",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_crypt_providers/__init__.py"
+        },
+        {
+          "path": "pypdf/_crypt_providers/_base.py",
+          "bytes": 1735,
+          "sha256": "34505711d85bae0f64d353d57cd37f93b94401897606481720e8b9a1f53ff91f",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_crypt_providers/_base.py"
+        },
+        {
+          "path": "pypdf/_crypt_providers/_cryptography.py",
+          "bytes": 7313,
+          "sha256": "33183bb4201aa15e950085a97ee874e2af254be0aaeb9ab0de643d7e93100526",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_crypt_providers/_cryptography.py"
+        },
+        {
+          "path": "pypdf/_crypt_providers/_fallback.py",
+          "bytes": 3382,
+          "sha256": "81772ba3f2bbab82180cbe57195471a059978d75cc6ba4e57830f0c56c828f81",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_crypt_providers/_fallback.py"
+        },
+        {
+          "path": "pypdf/_crypt_providers/_pycryptodome.py",
+          "bytes": 4050,
+          "sha256": "bd9102129a13f4ebe9a46ebb74aec456de51e5aa491bd5fce588a3479ed2a6f6",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_crypt_providers/_pycryptodome.py"
+        },
+        {
+          "path": "pypdf/_doc_common.py",
+          "bytes": 63439,
+          "sha256": "acae6573e863afba35c1e451a43b3f7641a7a9238895f71b817323de96a302f4",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_doc_common.py"
+        },
+        {
+          "path": "pypdf/_encryption.py",
+          "bytes": 53681,
+          "sha256": "44f9db6e619c04fd81d37c1c8dc2a65ed0a87e4fd014f9940e03c236cf0c6231",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_encryption.py"
+        },
+        {
+          "path": "pypdf/_page.py",
+          "bytes": 104081,
+          "sha256": "6bd6bc140a9b11b9658f1f3f443c0fb7366cafde2411ad1ccefdf2053a7c6f5c",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_page.py"
+        },
+        {
+          "path": "pypdf/_page_labels.py",
+          "bytes": 11385,
+          "sha256": "55ae47e2e1fcec75ea33d3f97478c1fae1684883414cd8ee04a0a066dec40e06",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_page_labels.py"
+        },
+        {
+          "path": "pypdf/_protocols.py",
+          "bytes": 2397,
+          "sha256": "4e4ea32b83d1f71cc4ec44e7a9a7f6ef5494299913b3a2254672d118f9588ff7",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_protocols.py"
+        },
+        {
+          "path": "pypdf/_reader.py",
+          "bytes": 72487,
+          "sha256": "dedbfa826d5e1660e6d5718d3b10c52de975ad5eefd9a3bb8518487ec8ad4390",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_reader.py"
+        },
+        {
+          "path": "pypdf/_text_extraction/__init__.py",
+          "bytes": 11093,
+          "sha256": "08ee4beeccbae52c021c87c61eed6f9bbfeaef5a9ea1f994170921a2de15e4fb",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_text_extraction/__init__.py"
+        },
+        {
+          "path": "pypdf/_text_extraction/_layout_mode/__init__.py",
+          "bytes": 348,
+          "sha256": "56adb80f37575f9af91995d319579011c9212ed332099acdf207db4a506efecc",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_text_extraction/_layout_mode/__init__.py"
+        },
+        {
+          "path": "pypdf/_text_extraction/_layout_mode/_fixed_width_page.py",
+          "bytes": 18407,
+          "sha256": "146dcd532036ad76afa6a4f0cf188b6449b25da7ca8db63e56a573ed0e1756c0",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_text_extraction/_layout_mode/_fixed_width_page.py"
+        },
+        {
+          "path": "pypdf/_text_extraction/_layout_mode/_text_state_manager.py",
+          "bytes": 7569,
+          "sha256": "b1600d432c5add07cb442b02a0b6daf228b737457c0ea92184f35274c02d68f4",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_text_extraction/_layout_mode/_text_state_manager.py"
+        },
+        {
+          "path": "pypdf/_text_extraction/_layout_mode/_text_state_params.py",
+          "bytes": 6625,
+          "sha256": "a0c4b8cb2f4763835c4ebded2f1272235182e1c759e46cc3ad43f425ac5f5261",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_text_extraction/_layout_mode/_text_state_params.py"
+        },
+        {
+          "path": "pypdf/_text_extraction/_text_extractor.py",
+          "bytes": 15582,
+          "sha256": "8e13a075dc992d1ecdd658f840607107a2a61f63202bf2007e5ad97e82650e12",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_text_extraction/_text_extractor.py"
+        },
+        {
+          "path": "pypdf/_utils.py",
+          "bytes": 23663,
+          "sha256": "1f1e47f3b8ee728f3a05143eef5e370684cd54ddf751fe631ccf1d3eabc14309",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_utils.py"
+        },
+        {
+          "path": "pypdf/_version.py",
+          "bytes": 23,
+          "sha256": "3d176cbc1f25f912bda4dac8a2424cffb162e969c4bf94a837d8289bdb54e0f9",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_version.py"
+        },
+        {
+          "path": "pypdf/_writer.py",
+          "bytes": 140929,
+          "sha256": "598baaa8215415d1d12fbc732eb79b07767101550a86d6e945fffa9bcf1210f4",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/_writer.py"
+        },
+        {
+          "path": "pypdf/actions/__init__.py",
+          "bytes": 391,
+          "sha256": "d8bdd81ef60846bab097640490991e4b63bd6b521eb0356ed696e24854299518",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/actions/__init__.py"
+        },
+        {
+          "path": "pypdf/actions/_actions.py",
+          "bytes": 7648,
+          "sha256": "9ad300bde70c006ba9484e0d78296103c0dcdafa75038248f3bde6a988cd6c4b",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/actions/_actions.py"
+        },
+        {
+          "path": "pypdf/annotations/__init__.py",
+          "bytes": 990,
+          "sha256": "7f693ffa3027dfd082076ecac50fdef771a29e7ce40076d49e749e1899758f21",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/annotations/__init__.py"
+        },
+        {
+          "path": "pypdf/annotations/_base.py",
+          "bytes": 961,
+          "sha256": "608453cd3764aa3f035164939b2d1fae47d3af88e87b91d41b344e5287f8a08a",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/annotations/_base.py"
+        },
+        {
+          "path": "pypdf/annotations/_markup_annotations.py",
+          "bytes": 11858,
+          "sha256": "c210635217f7c5195cae67829cd82a1679ad2767fb07c2289f82b8e88f74a079",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/annotations/_markup_annotations.py"
+        },
+        {
+          "path": "pypdf/annotations/_non_markup_annotations.py",
+          "bytes": 3695,
+          "sha256": "fd2cd3ce864ce01dff1bf57a33ff266c9e7b630d2d024f601db347ea5211ab70",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/annotations/_non_markup_annotations.py"
+        },
+        {
+          "path": "pypdf/constants.py",
+          "bytes": 24233,
+          "sha256": "579bd3b09defab4b63ac63f7effb4713ade10722c8c7799b8566aa80917c3624",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/constants.py"
+        },
+        {
+          "path": "pypdf/errors.py",
+          "bytes": 1947,
+          "sha256": "070d56f61c4eb03830ab053a628436974f89894c93aba979423542afe5b81850",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/errors.py"
+        },
+        {
+          "path": "pypdf/filters.py",
+          "bytes": 38450,
+          "sha256": "7567a0838190cd5e03508d9e945ab11bf4fe1822a80834b5bf958c58efa76aa9",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/filters.py"
+        },
+        {
+          "path": "pypdf/generic/__init__.py",
+          "bytes": 3468,
+          "sha256": "56ba9d61fb5010278f0d4dab5d532012a45a60547ccce57f7ef260a35f71feec",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/generic/__init__.py"
+        },
+        {
+          "path": "pypdf/generic/_appearance_stream.py",
+          "bytes": 43800,
+          "sha256": "4f572ec49a2c290b0389ed7b30758ac21855f1c3b8efc71eeb013e29ebfe22b4",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/generic/_appearance_stream.py"
+        },
+        {
+          "path": "pypdf/generic/_base.py",
+          "bytes": 34314,
+          "sha256": "90c50d931fdc97db44bf57894fa2fe6239ece307e1b831896e54e5c2de6698b7",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/generic/_base.py"
+        },
+        {
+          "path": "pypdf/generic/_color.py",
+          "bytes": 3187,
+          "sha256": "2b10852d96453098d4b9b2f437ad85042a552b37038403c1f6719ba29e3c795c",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/generic/_color.py"
+        },
+        {
+          "path": "pypdf/generic/_data_structures.py",
+          "bytes": 73017,
+          "sha256": "a29bb9c51e8a87872c3196fe74ac9a191cc0361556615d6513928f0f5ab134f2",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/generic/_data_structures.py"
+        },
+        {
+          "path": "pypdf/generic/_files.py",
+          "bytes": 19061,
+          "sha256": "d28b3ece6aa1cec4ed623e83ab52e2cd70fd592118e5855508415352223d9ebd",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/generic/_files.py"
+        },
+        {
+          "path": "pypdf/generic/_fit.py",
+          "bytes": 5550,
+          "sha256": "607a2571a31e1c67d84fdb0d1a3dbfd04b52a09619d9a261b4aa9525c03887f9",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/generic/_fit.py"
+        },
+        {
+          "path": "pypdf/generic/_font.py",
+          "bytes": 43622,
+          "sha256": "ce07922ffa1f27b84fb25c41f2612aa409ba8319fae4c38e0248da8b60c79ef3",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/generic/_font.py"
+        },
+        {
+          "path": "pypdf/generic/_image_inline.py",
+          "bytes": 15158,
+          "sha256": "a708cc06e98c88b0972a6367e6513282b0fd35599c8429c26ff0573a0058f7cc",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/generic/_image_inline.py"
+        },
+        {
+          "path": "pypdf/generic/_image_xobject.py",
+          "bytes": 28136,
+          "sha256": "5c4d6498633962f41592771f24993dfd9742b30d73f783a60c2a0c72ed2f05cd",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/generic/_image_xobject.py"
+        },
+        {
+          "path": "pypdf/generic/_link.py",
+          "bytes": 6207,
+          "sha256": "90835ae593a2a461f163f616fdf231178cf44d134a970c388d161a1822d34116",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/generic/_link.py"
+        },
+        {
+          "path": "pypdf/generic/_outline.py",
+          "bytes": 1094,
+          "sha256": "3c4b924f86fe2a6010203009d05872c4dec036626376c59a4ddc4aa3b862ab78",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/generic/_outline.py"
+        },
+        {
+          "path": "pypdf/generic/_rectangle.py",
+          "bytes": 3969,
+          "sha256": "ec7ac97ce31ab906ad0368245a17074a4cc1ec5e245a671afba90d03a1d5a3a3",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/generic/_rectangle.py"
+        },
+        {
+          "path": "pypdf/generic/_utils.py",
+          "bytes": 7875,
+          "sha256": "0dcef7c1b7cfeb17d2f962d63fa77b98d116c9b0cee7779de94dbb243f5f1df9",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/generic/_utils.py"
+        },
+        {
+          "path": "pypdf/generic/_viewerpref.py",
+          "bytes": 7577,
+          "sha256": "20912ec8cd304ebd6a36004e0bede202e3c1e4f9630ee771f7de14a2c3eb05dc",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/generic/_viewerpref.py"
+        },
+        {
+          "path": "pypdf/pagerange.py",
+          "bytes": 7907,
+          "sha256": "0209c3144e2959cf34d1800cfec3dc1afcb6f747f70f93588abaf6e478753b46",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/pagerange.py"
+        },
+        {
+          "path": "pypdf/papersizes.py",
+          "bytes": 1413,
+          "sha256": "e93cf9b1f34dff724e51aa58f3753e95a928867a57600d2148440d98e54b14bf",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/papersizes.py"
+        },
+        {
+          "path": "pypdf/py.typed",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/py.typed"
+        },
+        {
+          "path": "pypdf/types.py",
+          "bytes": 1915,
+          "sha256": "b09ef01f393b111fc227b90ffacf2ef5ac459e40979c5a6bf27cdc8f50314dab",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/types.py"
+        },
+        {
+          "path": "pypdf/xmp.py",
+          "bytes": 32148,
+          "sha256": "0853e82701b820b96d14ecfdd9f49cf04f1a734ce2314ff0e9b16976e753d494",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pypdf/xmp.py"
+        },
+        {
+          "path": "pyproject.toml",
+          "bytes": 9216,
+          "sha256": "d507b5b776ebd53cc8a7b4e0ee421fc09e5f4689324cdfbe91cbe141a08d640c",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/pyproject.toml"
+        },
+        {
+          "path": "tests/test_generic.py",
+          "bytes": 56479,
+          "sha256": "bc6441cd113b97e75bc70bf21a5f7e8c3e232dab991cc10005f84b50a8d7f546",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/tests/test_generic.py"
+        },
+        {
+          "path": "tests/utils.py",
+          "bytes": 7985,
+          "sha256": "41ebe7ab237907dbe147bb258785bfc9c40d48fbe5dd85fa5582e6cfcf81b330",
+          "url": "https://github.com/py-pdf/pypdf/blob/a23cc36da7a8e86f2b551b7a6eed1d8798301c73/tests/utils.py"
+        }
+      ],
+      "extracted_helpers": [
+        {
+          "name": "ReaderDummy",
+          "path": "tests/utils.py",
+          "first_line": 212,
+          "last_line": 224,
+          "source_segment_utf8_sha256": "1f29df48ee0d5584979680af62bd9775caa1a2dab018644efaf97f59bfdce90a",
+          "method": "ast.get_source_segment, original function/class body; future annotations supplied by harness"
+        },
+        {
+          "name": "count_function_calls",
+          "path": "tests/utils.py",
+          "first_line": 227,
+          "last_line": 247,
+          "source_segment_utf8_sha256": "625099a27efe5ed4a12c977820e077bdcb86b4b2d39412c3369c958dd2ff53a9",
+          "method": "ast.get_source_segment, original function/class body; future annotations supplied by harness"
+        }
+      ]
+    },
+    {
+      "label": "intermediate",
+      "commit": "ad63551501ef8ad03ca91a8d1e5246a79319a048",
+      "archive_url": "https://codeload.github.com/py-pdf/pypdf/tar.gz/ad63551501ef8ad03ca91a8d1e5246a79319a048",
+      "archive_sha256": "d72c971f004ff139c9667046152fbfb7dfba74162c8d1c3b480bb1bbea416fc0",
+      "archive_bytes": 10180808,
+      "files": [
+        {
+          "path": "LICENSE",
+          "bytes": 1605,
+          "sha256": "a97ac230e5f33ef10a5367a850eb01f91f1a0b064e34742c7794d2294557f524",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/LICENSE"
+        },
+        {
+          "path": "pypdf/__init__.py",
+          "bytes": 1494,
+          "sha256": "d7786f1b3cb2e52e28b1085f0ea150fa7f029baad252b29af7415c790871f7df",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/__init__.py"
+        },
+        {
+          "path": "pypdf/_cmap.py",
+          "bytes": 21013,
+          "sha256": "d298554fd352442d4384e13395f1f5e768a5f3916baa1deaa599eb017fe1cc60",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_cmap.py"
+        },
+        {
+          "path": "pypdf/_codecs/__init__.py",
+          "bytes": 1510,
+          "sha256": "bd56ce01215af54c771e42b4228dd415aba640fe0970d2f1f63341353351d980",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_codecs/__init__.py"
+        },
+        {
+          "path": "pypdf/_codecs/_codecs.py",
+          "bytes": 10717,
+          "sha256": "f377c8779e1713e6916f798d8bfa75a2526d67375487df07b3159708e193b512",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_codecs/_codecs.py"
+        },
+        {
+          "path": "pypdf/_codecs/adobe_glyphs.py",
+          "bytes": 577665,
+          "sha256": "69ac4e46ea50409ee46cb0c76e35a280b67aa60f06f7fe5ea832a2349c72923e",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_codecs/adobe_glyphs.py"
+        },
+        {
+          "path": "pypdf/_codecs/core_font_metrics.py",
+          "bytes": 114976,
+          "sha256": "dbb26cac9a39511246215ed90ce09427259f066e8b0567aaeefdce5b3a05f21f",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_codecs/core_font_metrics.py"
+        },
+        {
+          "path": "pypdf/_codecs/pdfdoc.py",
+          "bytes": 4269,
+          "sha256": "c5f4af30562cbf1b9a490d14bbdbd90ca681d16bbce61d6e0a20758bdac07145",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_codecs/pdfdoc.py"
+        },
+        {
+          "path": "pypdf/_codecs/std.py",
+          "bytes": 2630,
+          "sha256": "0f240cb84a40184a52f6ecb58d67f87278fe92a4a13ce0228f9b08ed0d580fc1",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_codecs/std.py"
+        },
+        {
+          "path": "pypdf/_codecs/symbol.py",
+          "bytes": 4642,
+          "sha256": "08fe958d172c72b9bcca6007f74c6977155a7a5c22e8c49bd536f5c0d0e1d359",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_codecs/symbol.py"
+        },
+        {
+          "path": "pypdf/_codecs/zapfding.py",
+          "bytes": 4655,
+          "sha256": "e39a9c635d716c1c2da21ebfb7467fef33631bbfaa238d752d14155d828faf65",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_codecs/zapfding.py"
+        },
+        {
+          "path": "pypdf/_configuration.py",
+          "bytes": 11039,
+          "sha256": "60b0d3b02393ca0063df90a1bde117d79cd09c43c9d1d837393131a396a5e5b9",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_configuration.py"
+        },
+        {
+          "path": "pypdf/_crypt_providers/__init__.py",
+          "bytes": 2770,
+          "sha256": "c5441b160310bca31a38e4f7454756ddb4bc7d94a147c3c13b3eab7ac7f05855",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_crypt_providers/__init__.py"
+        },
+        {
+          "path": "pypdf/_crypt_providers/_base.py",
+          "bytes": 1735,
+          "sha256": "34505711d85bae0f64d353d57cd37f93b94401897606481720e8b9a1f53ff91f",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_crypt_providers/_base.py"
+        },
+        {
+          "path": "pypdf/_crypt_providers/_cryptography.py",
+          "bytes": 7283,
+          "sha256": "d5f8b148d0aa4c63b14f4af96750b8f31cdc9583bdacf2ac0366de3c5678e9f8",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_crypt_providers/_cryptography.py"
+        },
+        {
+          "path": "pypdf/_crypt_providers/_fallback.py",
+          "bytes": 3382,
+          "sha256": "81772ba3f2bbab82180cbe57195471a059978d75cc6ba4e57830f0c56c828f81",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_crypt_providers/_fallback.py"
+        },
+        {
+          "path": "pypdf/_crypt_providers/_pycryptodome.py",
+          "bytes": 4020,
+          "sha256": "c57e05b5af101c7133b44fbf60793ebc9b66054d71295c01f7dff2b10e939ce2",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_crypt_providers/_pycryptodome.py"
+        },
+        {
+          "path": "pypdf/_doc_common.py",
+          "bytes": 63323,
+          "sha256": "3492ff21a5d90f646a4dabcec90efef1c50e5976de908586fd6cb27ff91e9489",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_doc_common.py"
+        },
+        {
+          "path": "pypdf/_encryption.py",
+          "bytes": 53649,
+          "sha256": "c39c927e0c1d9faace5c06f244603027421c50787db847535f780090eb01e0a7",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_encryption.py"
+        },
+        {
+          "path": "pypdf/_page.py",
+          "bytes": 103565,
+          "sha256": "08f0650b5ab1166a9a94751d8fd51e3321e6cbf3cc01218871af5ccf6531fbf8",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_page.py"
+        },
+        {
+          "path": "pypdf/_page_labels.py",
+          "bytes": 11385,
+          "sha256": "55ae47e2e1fcec75ea33d3f97478c1fae1684883414cd8ee04a0a066dec40e06",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_page_labels.py"
+        },
+        {
+          "path": "pypdf/_protocols.py",
+          "bytes": 2397,
+          "sha256": "4e4ea32b83d1f71cc4ec44e7a9a7f6ef5494299913b3a2254672d118f9588ff7",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_protocols.py"
+        },
+        {
+          "path": "pypdf/_reader.py",
+          "bytes": 72057,
+          "sha256": "d2edf485de8e79d0828ef8c3cf8364521bf033a34cc5c2b8f1e571bc0bb89cc7",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_reader.py"
+        },
+        {
+          "path": "pypdf/_text_extraction/__init__.py",
+          "bytes": 11093,
+          "sha256": "08ee4beeccbae52c021c87c61eed6f9bbfeaef5a9ea1f994170921a2de15e4fb",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_text_extraction/__init__.py"
+        },
+        {
+          "path": "pypdf/_text_extraction/_layout_mode/__init__.py",
+          "bytes": 348,
+          "sha256": "56adb80f37575f9af91995d319579011c9212ed332099acdf207db4a506efecc",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_text_extraction/_layout_mode/__init__.py"
+        },
+        {
+          "path": "pypdf/_text_extraction/_layout_mode/_fixed_width_page.py",
+          "bytes": 18090,
+          "sha256": "551dedc23ca1327c56c963c1b4dc9a4484aceb1cb4c4661b81a4f36c5671a8b1",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_text_extraction/_layout_mode/_fixed_width_page.py"
+        },
+        {
+          "path": "pypdf/_text_extraction/_layout_mode/_text_state_manager.py",
+          "bytes": 7569,
+          "sha256": "b1600d432c5add07cb442b02a0b6daf228b737457c0ea92184f35274c02d68f4",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_text_extraction/_layout_mode/_text_state_manager.py"
+        },
+        {
+          "path": "pypdf/_text_extraction/_layout_mode/_text_state_params.py",
+          "bytes": 6625,
+          "sha256": "a0c4b8cb2f4763835c4ebded2f1272235182e1c759e46cc3ad43f425ac5f5261",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_text_extraction/_layout_mode/_text_state_params.py"
+        },
+        {
+          "path": "pypdf/_text_extraction/_text_extractor.py",
+          "bytes": 15202,
+          "sha256": "56268aa3e3468ff88ba8e5d2f57eb55b62c775c36f7f3a6af05c2d505168c8e2",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_text_extraction/_text_extractor.py"
+        },
+        {
+          "path": "pypdf/_utils.py",
+          "bytes": 24866,
+          "sha256": "b4f9356f30633b7d9ad9084d26a09cb19267c3a864ca2d08a02c87d5f51e9c7c",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_utils.py"
+        },
+        {
+          "path": "pypdf/_version.py",
+          "bytes": 23,
+          "sha256": "ee771ce5d48ff28d7c52146b59847f6ecca579b39ae8740bc0dde74ffa6f9f1d",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_version.py"
+        },
+        {
+          "path": "pypdf/_writer.py",
+          "bytes": 140291,
+          "sha256": "67740d099a42b0db3b9dc85c7ea3332ab00253773063c255c66e14ca78310ff9",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/_writer.py"
+        },
+        {
+          "path": "pypdf/actions/__init__.py",
+          "bytes": 391,
+          "sha256": "d8bdd81ef60846bab097640490991e4b63bd6b521eb0356ed696e24854299518",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/actions/__init__.py"
+        },
+        {
+          "path": "pypdf/actions/_actions.py",
+          "bytes": 7648,
+          "sha256": "9ad300bde70c006ba9484e0d78296103c0dcdafa75038248f3bde6a988cd6c4b",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/actions/_actions.py"
+        },
+        {
+          "path": "pypdf/annotations/__init__.py",
+          "bytes": 990,
+          "sha256": "7f693ffa3027dfd082076ecac50fdef771a29e7ce40076d49e749e1899758f21",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/annotations/__init__.py"
+        },
+        {
+          "path": "pypdf/annotations/_base.py",
+          "bytes": 961,
+          "sha256": "608453cd3764aa3f035164939b2d1fae47d3af88e87b91d41b344e5287f8a08a",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/annotations/_base.py"
+        },
+        {
+          "path": "pypdf/annotations/_markup_annotations.py",
+          "bytes": 11858,
+          "sha256": "c210635217f7c5195cae67829cd82a1679ad2767fb07c2289f82b8e88f74a079",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/annotations/_markup_annotations.py"
+        },
+        {
+          "path": "pypdf/annotations/_non_markup_annotations.py",
+          "bytes": 3695,
+          "sha256": "fd2cd3ce864ce01dff1bf57a33ff266c9e7b630d2d024f601db347ea5211ab70",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/annotations/_non_markup_annotations.py"
+        },
+        {
+          "path": "pypdf/constants.py",
+          "bytes": 24233,
+          "sha256": "579bd3b09defab4b63ac63f7effb4713ade10722c8c7799b8566aa80917c3624",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/constants.py"
+        },
+        {
+          "path": "pypdf/errors.py",
+          "bytes": 1947,
+          "sha256": "070d56f61c4eb03830ab053a628436974f89894c93aba979423542afe5b81850",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/errors.py"
+        },
+        {
+          "path": "pypdf/filters.py",
+          "bytes": 37516,
+          "sha256": "b10fd2d48e89d418e4f94f0259423b078baca6be171c18023eee7ac645db9d2d",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/filters.py"
+        },
+        {
+          "path": "pypdf/generic/__init__.py",
+          "bytes": 3468,
+          "sha256": "56ba9d61fb5010278f0d4dab5d532012a45a60547ccce57f7ef260a35f71feec",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/generic/__init__.py"
+        },
+        {
+          "path": "pypdf/generic/_appearance_stream.py",
+          "bytes": 41778,
+          "sha256": "11a5f1648d4392656072549ef920ec8e748ca656e6065c2c75f438b70173aeb8",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/generic/_appearance_stream.py"
+        },
+        {
+          "path": "pypdf/generic/_base.py",
+          "bytes": 34202,
+          "sha256": "e0e8fb5466f5a028f412e7489fcca22c5373472c18e960f25ac7440dc112a632",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/generic/_base.py"
+        },
+        {
+          "path": "pypdf/generic/_color.py",
+          "bytes": 2708,
+          "sha256": "a6274f36e5d52882309a6554c200b62dc6c444acc1c8d244e3580a367815c5c1",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/generic/_color.py"
+        },
+        {
+          "path": "pypdf/generic/_data_structures.py",
+          "bytes": 72760,
+          "sha256": "3ff9883c1742140e8efb9965fc6592ffbeb7c1bdd928c3b784b7b17a4d1f1060",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/generic/_data_structures.py"
+        },
+        {
+          "path": "pypdf/generic/_files.py",
+          "bytes": 19061,
+          "sha256": "d28b3ece6aa1cec4ed623e83ab52e2cd70fd592118e5855508415352223d9ebd",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/generic/_files.py"
+        },
+        {
+          "path": "pypdf/generic/_fit.py",
+          "bytes": 5550,
+          "sha256": "607a2571a31e1c67d84fdb0d1a3dbfd04b52a09619d9a261b4aa9525c03887f9",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/generic/_fit.py"
+        },
+        {
+          "path": "pypdf/generic/_font.py",
+          "bytes": 43606,
+          "sha256": "7de419e6dc1f4ba5752bba2833d433e7e54ab4c9205f7b1ae342710d9fc6c65c",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/generic/_font.py"
+        },
+        {
+          "path": "pypdf/generic/_image_inline.py",
+          "bytes": 15158,
+          "sha256": "a708cc06e98c88b0972a6367e6513282b0fd35599c8429c26ff0573a0058f7cc",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/generic/_image_inline.py"
+        },
+        {
+          "path": "pypdf/generic/_image_xobject.py",
+          "bytes": 28108,
+          "sha256": "3dc359eff22e101aa7cc60ceff0bf921da3042c4efdce450a7e95c0b9982bd3f",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/generic/_image_xobject.py"
+        },
+        {
+          "path": "pypdf/generic/_link.py",
+          "bytes": 6207,
+          "sha256": "90835ae593a2a461f163f616fdf231178cf44d134a970c388d161a1822d34116",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/generic/_link.py"
+        },
+        {
+          "path": "pypdf/generic/_outline.py",
+          "bytes": 1094,
+          "sha256": "3c4b924f86fe2a6010203009d05872c4dec036626376c59a4ddc4aa3b862ab78",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/generic/_outline.py"
+        },
+        {
+          "path": "pypdf/generic/_rectangle.py",
+          "bytes": 3969,
+          "sha256": "ec7ac97ce31ab906ad0368245a17074a4cc1ec5e245a671afba90d03a1d5a3a3",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/generic/_rectangle.py"
+        },
+        {
+          "path": "pypdf/generic/_utils.py",
+          "bytes": 7875,
+          "sha256": "0dcef7c1b7cfeb17d2f962d63fa77b98d116c9b0cee7779de94dbb243f5f1df9",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/generic/_utils.py"
+        },
+        {
+          "path": "pypdf/generic/_viewerpref.py",
+          "bytes": 7577,
+          "sha256": "20912ec8cd304ebd6a36004e0bede202e3c1e4f9630ee771f7de14a2c3eb05dc",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/generic/_viewerpref.py"
+        },
+        {
+          "path": "pypdf/pagerange.py",
+          "bytes": 7907,
+          "sha256": "0209c3144e2959cf34d1800cfec3dc1afcb6f747f70f93588abaf6e478753b46",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/pagerange.py"
+        },
+        {
+          "path": "pypdf/papersizes.py",
+          "bytes": 1413,
+          "sha256": "e93cf9b1f34dff724e51aa58f3753e95a928867a57600d2148440d98e54b14bf",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/papersizes.py"
+        },
+        {
+          "path": "pypdf/py.typed",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/py.typed"
+        },
+        {
+          "path": "pypdf/types.py",
+          "bytes": 1915,
+          "sha256": "b09ef01f393b111fc227b90ffacf2ef5ac459e40979c5a6bf27cdc8f50314dab",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/types.py"
+        },
+        {
+          "path": "pypdf/xmp.py",
+          "bytes": 32129,
+          "sha256": "a59dce58f1dc1ee63e5621844feb45bd12611c6f18014caf673739b059884b3b",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pypdf/xmp.py"
+        },
+        {
+          "path": "pyproject.toml",
+          "bytes": 9350,
+          "sha256": "56a3030be8524eddc71076af4d34f448ac5893c9b33c517b65253e739da1d343",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/pyproject.toml"
+        },
+        {
+          "path": "tests/test_generic.py",
+          "bytes": 59469,
+          "sha256": "800a232fe085bd5e51d680a24c87f22f7a26ecee783ebc709132029b8e1f020c",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/tests/test_generic.py"
+        },
+        {
+          "path": "tests/utils.py",
+          "bytes": 7985,
+          "sha256": "41ebe7ab237907dbe147bb258785bfc9c40d48fbe5dd85fa5582e6cfcf81b330",
+          "url": "https://github.com/py-pdf/pypdf/blob/ad63551501ef8ad03ca91a8d1e5246a79319a048/tests/utils.py"
+        }
+      ],
+      "extracted_helpers": [
+        {
+          "name": "ReaderDummy",
+          "path": "tests/utils.py",
+          "first_line": 212,
+          "last_line": 224,
+          "source_segment_utf8_sha256": "1f29df48ee0d5584979680af62bd9775caa1a2dab018644efaf97f59bfdce90a",
+          "method": "ast.get_source_segment, original function/class body; future annotations supplied by harness"
+        },
+        {
+          "name": "count_function_calls",
+          "path": "tests/utils.py",
+          "first_line": 227,
+          "last_line": 247,
+          "source_segment_utf8_sha256": "625099a27efe5ed4a12c977820e077bdcb86b4b2d39412c3369c958dd2ff53a9",
+          "method": "ast.get_source_segment, original function/class body; future annotations supplied by harness"
+        }
+      ]
+    },
+    {
+      "label": "merge",
+      "commit": "ccd8dc470e13915d384fb8b4c93a351cc1d79ae6",
+      "archive_url": "https://codeload.github.com/py-pdf/pypdf/tar.gz/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6",
+      "archive_sha256": "d245cc038a0a9d27dc4434f9c8bd471b961378f27305a96aa2816e6cd2a37cdc",
+      "archive_bytes": 10185653,
+      "files": [
+        {
+          "path": "LICENSE",
+          "bytes": 1605,
+          "sha256": "a97ac230e5f33ef10a5367a850eb01f91f1a0b064e34742c7794d2294557f524",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/LICENSE"
+        },
+        {
+          "path": "pypdf/__init__.py",
+          "bytes": 1494,
+          "sha256": "d7786f1b3cb2e52e28b1085f0ea150fa7f029baad252b29af7415c790871f7df",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/__init__.py"
+        },
+        {
+          "path": "pypdf/_cmap.py",
+          "bytes": 21013,
+          "sha256": "d298554fd352442d4384e13395f1f5e768a5f3916baa1deaa599eb017fe1cc60",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_cmap.py"
+        },
+        {
+          "path": "pypdf/_codecs/__init__.py",
+          "bytes": 1510,
+          "sha256": "bd56ce01215af54c771e42b4228dd415aba640fe0970d2f1f63341353351d980",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_codecs/__init__.py"
+        },
+        {
+          "path": "pypdf/_codecs/_codecs.py",
+          "bytes": 10717,
+          "sha256": "f377c8779e1713e6916f798d8bfa75a2526d67375487df07b3159708e193b512",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_codecs/_codecs.py"
+        },
+        {
+          "path": "pypdf/_codecs/adobe_glyphs.py",
+          "bytes": 577665,
+          "sha256": "69ac4e46ea50409ee46cb0c76e35a280b67aa60f06f7fe5ea832a2349c72923e",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_codecs/adobe_glyphs.py"
+        },
+        {
+          "path": "pypdf/_codecs/core_font_metrics.py",
+          "bytes": 114976,
+          "sha256": "dbb26cac9a39511246215ed90ce09427259f066e8b0567aaeefdce5b3a05f21f",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_codecs/core_font_metrics.py"
+        },
+        {
+          "path": "pypdf/_codecs/pdfdoc.py",
+          "bytes": 4269,
+          "sha256": "c5f4af30562cbf1b9a490d14bbdbd90ca681d16bbce61d6e0a20758bdac07145",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_codecs/pdfdoc.py"
+        },
+        {
+          "path": "pypdf/_codecs/std.py",
+          "bytes": 2630,
+          "sha256": "0f240cb84a40184a52f6ecb58d67f87278fe92a4a13ce0228f9b08ed0d580fc1",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_codecs/std.py"
+        },
+        {
+          "path": "pypdf/_codecs/symbol.py",
+          "bytes": 4642,
+          "sha256": "08fe958d172c72b9bcca6007f74c6977155a7a5c22e8c49bd536f5c0d0e1d359",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_codecs/symbol.py"
+        },
+        {
+          "path": "pypdf/_codecs/zapfding.py",
+          "bytes": 4655,
+          "sha256": "e39a9c635d716c1c2da21ebfb7467fef33631bbfaa238d752d14155d828faf65",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_codecs/zapfding.py"
+        },
+        {
+          "path": "pypdf/_configuration.py",
+          "bytes": 11280,
+          "sha256": "dd2b41d34cedc9113c33be3555c662b6692f038d0d8ae29a2ea0ad9fb49823a9",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_configuration.py"
+        },
+        {
+          "path": "pypdf/_crypt_providers/__init__.py",
+          "bytes": 2770,
+          "sha256": "c5441b160310bca31a38e4f7454756ddb4bc7d94a147c3c13b3eab7ac7f05855",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_crypt_providers/__init__.py"
+        },
+        {
+          "path": "pypdf/_crypt_providers/_base.py",
+          "bytes": 1735,
+          "sha256": "34505711d85bae0f64d353d57cd37f93b94401897606481720e8b9a1f53ff91f",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_crypt_providers/_base.py"
+        },
+        {
+          "path": "pypdf/_crypt_providers/_cryptography.py",
+          "bytes": 7313,
+          "sha256": "33183bb4201aa15e950085a97ee874e2af254be0aaeb9ab0de643d7e93100526",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_crypt_providers/_cryptography.py"
+        },
+        {
+          "path": "pypdf/_crypt_providers/_fallback.py",
+          "bytes": 3382,
+          "sha256": "81772ba3f2bbab82180cbe57195471a059978d75cc6ba4e57830f0c56c828f81",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_crypt_providers/_fallback.py"
+        },
+        {
+          "path": "pypdf/_crypt_providers/_pycryptodome.py",
+          "bytes": 4050,
+          "sha256": "bd9102129a13f4ebe9a46ebb74aec456de51e5aa491bd5fce588a3479ed2a6f6",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_crypt_providers/_pycryptodome.py"
+        },
+        {
+          "path": "pypdf/_doc_common.py",
+          "bytes": 63439,
+          "sha256": "acae6573e863afba35c1e451a43b3f7641a7a9238895f71b817323de96a302f4",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_doc_common.py"
+        },
+        {
+          "path": "pypdf/_encryption.py",
+          "bytes": 53681,
+          "sha256": "44f9db6e619c04fd81d37c1c8dc2a65ed0a87e4fd014f9940e03c236cf0c6231",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_encryption.py"
+        },
+        {
+          "path": "pypdf/_page.py",
+          "bytes": 104081,
+          "sha256": "6bd6bc140a9b11b9658f1f3f443c0fb7366cafde2411ad1ccefdf2053a7c6f5c",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_page.py"
+        },
+        {
+          "path": "pypdf/_page_labels.py",
+          "bytes": 11385,
+          "sha256": "55ae47e2e1fcec75ea33d3f97478c1fae1684883414cd8ee04a0a066dec40e06",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_page_labels.py"
+        },
+        {
+          "path": "pypdf/_protocols.py",
+          "bytes": 2397,
+          "sha256": "4e4ea32b83d1f71cc4ec44e7a9a7f6ef5494299913b3a2254672d118f9588ff7",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_protocols.py"
+        },
+        {
+          "path": "pypdf/_reader.py",
+          "bytes": 72487,
+          "sha256": "dedbfa826d5e1660e6d5718d3b10c52de975ad5eefd9a3bb8518487ec8ad4390",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_reader.py"
+        },
+        {
+          "path": "pypdf/_text_extraction/__init__.py",
+          "bytes": 11093,
+          "sha256": "08ee4beeccbae52c021c87c61eed6f9bbfeaef5a9ea1f994170921a2de15e4fb",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_text_extraction/__init__.py"
+        },
+        {
+          "path": "pypdf/_text_extraction/_layout_mode/__init__.py",
+          "bytes": 348,
+          "sha256": "56adb80f37575f9af91995d319579011c9212ed332099acdf207db4a506efecc",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_text_extraction/_layout_mode/__init__.py"
+        },
+        {
+          "path": "pypdf/_text_extraction/_layout_mode/_fixed_width_page.py",
+          "bytes": 18407,
+          "sha256": "146dcd532036ad76afa6a4f0cf188b6449b25da7ca8db63e56a573ed0e1756c0",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_text_extraction/_layout_mode/_fixed_width_page.py"
+        },
+        {
+          "path": "pypdf/_text_extraction/_layout_mode/_text_state_manager.py",
+          "bytes": 7569,
+          "sha256": "b1600d432c5add07cb442b02a0b6daf228b737457c0ea92184f35274c02d68f4",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_text_extraction/_layout_mode/_text_state_manager.py"
+        },
+        {
+          "path": "pypdf/_text_extraction/_layout_mode/_text_state_params.py",
+          "bytes": 6625,
+          "sha256": "a0c4b8cb2f4763835c4ebded2f1272235182e1c759e46cc3ad43f425ac5f5261",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_text_extraction/_layout_mode/_text_state_params.py"
+        },
+        {
+          "path": "pypdf/_text_extraction/_text_extractor.py",
+          "bytes": 15582,
+          "sha256": "8e13a075dc992d1ecdd658f840607107a2a61f63202bf2007e5ad97e82650e12",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_text_extraction/_text_extractor.py"
+        },
+        {
+          "path": "pypdf/_utils.py",
+          "bytes": 24900,
+          "sha256": "2f84f77ba0de4ea6b31b8a9f480eec88d1bbac29fc1ea9d622eea644fe38d1ca",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_utils.py"
+        },
+        {
+          "path": "pypdf/_version.py",
+          "bytes": 23,
+          "sha256": "3d176cbc1f25f912bda4dac8a2424cffb162e969c4bf94a837d8289bdb54e0f9",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_version.py"
+        },
+        {
+          "path": "pypdf/_writer.py",
+          "bytes": 140929,
+          "sha256": "598baaa8215415d1d12fbc732eb79b07767101550a86d6e945fffa9bcf1210f4",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/_writer.py"
+        },
+        {
+          "path": "pypdf/actions/__init__.py",
+          "bytes": 391,
+          "sha256": "d8bdd81ef60846bab097640490991e4b63bd6b521eb0356ed696e24854299518",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/actions/__init__.py"
+        },
+        {
+          "path": "pypdf/actions/_actions.py",
+          "bytes": 7648,
+          "sha256": "9ad300bde70c006ba9484e0d78296103c0dcdafa75038248f3bde6a988cd6c4b",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/actions/_actions.py"
+        },
+        {
+          "path": "pypdf/annotations/__init__.py",
+          "bytes": 990,
+          "sha256": "7f693ffa3027dfd082076ecac50fdef771a29e7ce40076d49e749e1899758f21",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/annotations/__init__.py"
+        },
+        {
+          "path": "pypdf/annotations/_base.py",
+          "bytes": 961,
+          "sha256": "608453cd3764aa3f035164939b2d1fae47d3af88e87b91d41b344e5287f8a08a",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/annotations/_base.py"
+        },
+        {
+          "path": "pypdf/annotations/_markup_annotations.py",
+          "bytes": 11858,
+          "sha256": "c210635217f7c5195cae67829cd82a1679ad2767fb07c2289f82b8e88f74a079",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/annotations/_markup_annotations.py"
+        },
+        {
+          "path": "pypdf/annotations/_non_markup_annotations.py",
+          "bytes": 3695,
+          "sha256": "fd2cd3ce864ce01dff1bf57a33ff266c9e7b630d2d024f601db347ea5211ab70",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/annotations/_non_markup_annotations.py"
+        },
+        {
+          "path": "pypdf/constants.py",
+          "bytes": 24233,
+          "sha256": "579bd3b09defab4b63ac63f7effb4713ade10722c8c7799b8566aa80917c3624",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/constants.py"
+        },
+        {
+          "path": "pypdf/errors.py",
+          "bytes": 1947,
+          "sha256": "070d56f61c4eb03830ab053a628436974f89894c93aba979423542afe5b81850",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/errors.py"
+        },
+        {
+          "path": "pypdf/filters.py",
+          "bytes": 38450,
+          "sha256": "7567a0838190cd5e03508d9e945ab11bf4fe1822a80834b5bf958c58efa76aa9",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/filters.py"
+        },
+        {
+          "path": "pypdf/generic/__init__.py",
+          "bytes": 3468,
+          "sha256": "56ba9d61fb5010278f0d4dab5d532012a45a60547ccce57f7ef260a35f71feec",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/generic/__init__.py"
+        },
+        {
+          "path": "pypdf/generic/_appearance_stream.py",
+          "bytes": 43800,
+          "sha256": "4f572ec49a2c290b0389ed7b30758ac21855f1c3b8efc71eeb013e29ebfe22b4",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/generic/_appearance_stream.py"
+        },
+        {
+          "path": "pypdf/generic/_base.py",
+          "bytes": 34314,
+          "sha256": "90c50d931fdc97db44bf57894fa2fe6239ece307e1b831896e54e5c2de6698b7",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/generic/_base.py"
+        },
+        {
+          "path": "pypdf/generic/_color.py",
+          "bytes": 3187,
+          "sha256": "2b10852d96453098d4b9b2f437ad85042a552b37038403c1f6719ba29e3c795c",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/generic/_color.py"
+        },
+        {
+          "path": "pypdf/generic/_data_structures.py",
+          "bytes": 73179,
+          "sha256": "c2dbd9c16a12b363667a3b2c08b912e22d65e458f4c9e3c1c631fa55257ed4d4",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/generic/_data_structures.py"
+        },
+        {
+          "path": "pypdf/generic/_files.py",
+          "bytes": 19061,
+          "sha256": "d28b3ece6aa1cec4ed623e83ab52e2cd70fd592118e5855508415352223d9ebd",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/generic/_files.py"
+        },
+        {
+          "path": "pypdf/generic/_fit.py",
+          "bytes": 5550,
+          "sha256": "607a2571a31e1c67d84fdb0d1a3dbfd04b52a09619d9a261b4aa9525c03887f9",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/generic/_fit.py"
+        },
+        {
+          "path": "pypdf/generic/_font.py",
+          "bytes": 43622,
+          "sha256": "ce07922ffa1f27b84fb25c41f2612aa409ba8319fae4c38e0248da8b60c79ef3",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/generic/_font.py"
+        },
+        {
+          "path": "pypdf/generic/_image_inline.py",
+          "bytes": 15158,
+          "sha256": "a708cc06e98c88b0972a6367e6513282b0fd35599c8429c26ff0573a0058f7cc",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/generic/_image_inline.py"
+        },
+        {
+          "path": "pypdf/generic/_image_xobject.py",
+          "bytes": 28136,
+          "sha256": "5c4d6498633962f41592771f24993dfd9742b30d73f783a60c2a0c72ed2f05cd",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/generic/_image_xobject.py"
+        },
+        {
+          "path": "pypdf/generic/_link.py",
+          "bytes": 6207,
+          "sha256": "90835ae593a2a461f163f616fdf231178cf44d134a970c388d161a1822d34116",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/generic/_link.py"
+        },
+        {
+          "path": "pypdf/generic/_outline.py",
+          "bytes": 1094,
+          "sha256": "3c4b924f86fe2a6010203009d05872c4dec036626376c59a4ddc4aa3b862ab78",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/generic/_outline.py"
+        },
+        {
+          "path": "pypdf/generic/_rectangle.py",
+          "bytes": 3969,
+          "sha256": "ec7ac97ce31ab906ad0368245a17074a4cc1ec5e245a671afba90d03a1d5a3a3",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/generic/_rectangle.py"
+        },
+        {
+          "path": "pypdf/generic/_utils.py",
+          "bytes": 7875,
+          "sha256": "0dcef7c1b7cfeb17d2f962d63fa77b98d116c9b0cee7779de94dbb243f5f1df9",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/generic/_utils.py"
+        },
+        {
+          "path": "pypdf/generic/_viewerpref.py",
+          "bytes": 7577,
+          "sha256": "20912ec8cd304ebd6a36004e0bede202e3c1e4f9630ee771f7de14a2c3eb05dc",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/generic/_viewerpref.py"
+        },
+        {
+          "path": "pypdf/pagerange.py",
+          "bytes": 7907,
+          "sha256": "0209c3144e2959cf34d1800cfec3dc1afcb6f747f70f93588abaf6e478753b46",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/pagerange.py"
+        },
+        {
+          "path": "pypdf/papersizes.py",
+          "bytes": 1413,
+          "sha256": "e93cf9b1f34dff724e51aa58f3753e95a928867a57600d2148440d98e54b14bf",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/papersizes.py"
+        },
+        {
+          "path": "pypdf/py.typed",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/py.typed"
+        },
+        {
+          "path": "pypdf/types.py",
+          "bytes": 1915,
+          "sha256": "b09ef01f393b111fc227b90ffacf2ef5ac459e40979c5a6bf27cdc8f50314dab",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/types.py"
+        },
+        {
+          "path": "pypdf/xmp.py",
+          "bytes": 32148,
+          "sha256": "0853e82701b820b96d14ecfdd9f49cf04f1a734ce2314ff0e9b16976e753d494",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pypdf/xmp.py"
+        },
+        {
+          "path": "pyproject.toml",
+          "bytes": 9216,
+          "sha256": "d507b5b776ebd53cc8a7b4e0ee421fc09e5f4689324cdfbe91cbe141a08d640c",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/pyproject.toml"
+        },
+        {
+          "path": "tests/test_generic.py",
+          "bytes": 59755,
+          "sha256": "b520600c5c3c276bb8356956b8d032b66032701720f1a037b57b0128da95b357",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/tests/test_generic.py"
+        },
+        {
+          "path": "tests/utils.py",
+          "bytes": 7985,
+          "sha256": "41ebe7ab237907dbe147bb258785bfc9c40d48fbe5dd85fa5582e6cfcf81b330",
+          "url": "https://github.com/py-pdf/pypdf/blob/ccd8dc470e13915d384fb8b4c93a351cc1d79ae6/tests/utils.py"
+        }
+      ],
+      "extracted_helpers": [
+        {
+          "name": "ReaderDummy",
+          "path": "tests/utils.py",
+          "first_line": 212,
+          "last_line": 224,
+          "source_segment_utf8_sha256": "1f29df48ee0d5584979680af62bd9775caa1a2dab018644efaf97f59bfdce90a",
+          "method": "ast.get_source_segment, original function/class body; future annotations supplied by harness"
+        },
+        {
+          "name": "count_function_calls",
+          "path": "tests/utils.py",
+          "first_line": 227,
+          "last_line": 247,
+          "source_segment_utf8_sha256": "625099a27efe5ed4a12c977820e077bdcb86b4b2d39412c3369c958dd2ff53a9",
+          "method": "ast.get_source_segment, original function/class body; future annotations supplied by harness"
+        }
+      ]
+    }
+  ],
+  "top_level_license_sha256": "a97ac230e5f33ef10a5367a850eb01f91f1a0b064e34742c7794d2294557f524"
+}

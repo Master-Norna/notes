@@ -16,6 +16,18 @@
 
 <table>
 <tr>
+<td width="88" align="center" valign="top"><a href="PDF注释_pypdf/pypdf_注释不再压垮栈_中文版.md"><img src="PDF注释_pypdf/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[注释不再压垮栈，为什么普通对象又多绕了一次？](PDF注释_pypdf/pypdf_注释不再压垮栈_中文版.md)**
+
+前面多放一些注释，pypdf 连后面的 42 都读不到。我的初稿用循环修好了递归，按 review 抽出公共工具后，却碰到了另一份优化留下的调用预算。我把三版放在一起，追到函数入口和流指针，看两份改动怎样把各自的理由都留在代码里。
+
+<sub>2026-10-31 · [English](PDF注释_pypdf/pypdf_注释不再压垮栈_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
 <td width="88" align="center" valign="top"><a href="后端参数_pathspec/pathspec_装了加速库规则却不认了_中文版.md"><img src="后端参数_pathspec/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
@@ -143,6 +155,7 @@ PostgreSQL 代理 pgdog 连续跑了 12 天以后，定时任务全都不再触�
 
 | 工程 | 跑出来的是什么 |
 | --- | --- |
+| [comments_demo](PDF注释_pypdf/comments_demo/) | 真实三版 pypdf 解析同一组对象字节，对照连续注释边界、流位置和无注释数组的函数调用预算 |
 | [flags_demo](后端参数_pathspec/flags_demo/) | 三份固定源码交给真实 RE2 / Hyperscan，对照编译参数丢失、初稿回退和最终映射，同时检查匹配结果与实际后端 |
 | [datetime_demo](日期差_nushell_datetime/datetime_demo/) | 三份固定源码交给同一个真实 Nu 执行，对照负天数、初稿的语义变化与最终兼容拆分，并独立检查闰日输入解析 |
 | [hash_demo](锁文件哈希_pdm/hash_demo/) | 同一份归档哈希经过两版 PDM 读入函数，再导出 requirements / pylock，看它在哪一步丢失或保留 |
