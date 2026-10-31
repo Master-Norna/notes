@@ -1,0 +1,3 @@
+# Source hashes in provenance.json refer to the original tarball bytes.
+vendor/** -text
+LICENSE.pdm -text

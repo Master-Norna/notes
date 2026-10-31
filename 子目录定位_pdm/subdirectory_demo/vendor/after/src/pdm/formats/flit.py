@@ -1,0 +1,177 @@
+from __future__ import annotations
+
+import ast
+import os
+from collections.abc import Mapping
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, cast
+
+from pdm.compat import tomllib
+from pdm.formats.base import (
+    MetaConverter,
+    Unset,
+    array_of_inline_tables,
+    convert_from,
+    make_array,
+    make_inline_table,
+)
+from pdm.utils import cd
+
+if TYPE_CHECKING:
+    from argparse import Namespace
+    from os import PathLike
+
+    from pdm.project import Project
+
+
+def check_fingerprint(project: Project | None, filename: PathLike) -> bool:
+    with open(filename, "rb") as fp:
+        try:
+            data = tomllib.load(fp)
+        except tomllib.TOMLDecodeError:
+            return False
+
+    return "tool" in data and "flit" in data["tool"]
+
+
+def _get_author(metadata: dict[str, Any], type_: str = "author") -> list[str]:
+    author = {"name": metadata.pop(type_)}
+    email = metadata.pop(f"{type_}-email", None)
+    if email is not None:
+        author["email"] = email
+    return cast(list[str], array_of_inline_tables([author]))
+
+
+def get_docstring_and_version_via_ast(
+    target: Path,
+) -> tuple[str | None, str | None]:
+    """
+    This function is borrowed from flit's implementation, but does not attempt to import
+    that file. If docstring or version can't be retrieved by this function,
+    they are just left empty.
+    """
+    # read as bytes to enable custom encodings
+    if not target.exists():
+        return None, None
+    try:
+        node = ast.parse(target.read_bytes())
+    except (SyntaxError, ValueError):
+        # The module isn't parseable by the running interpreter, so there is
+        # nothing to read out of it. The caller already warns about the fields
+        # that stayed empty, which beats aborting the whole import.
+        return None, None
+    for child in node.body:
+        if not isinstance(child, (ast.Assign, ast.AnnAssign)):
+            continue
+        targets = child.targets if isinstance(child, ast.Assign) else [child.target]
+        # Only use the version from the given module if it's a simple
+        # string assignment to __version__
+        if (
+            len(targets) == 1
+            and isinstance(targets[0], ast.Name)
+            and targets[0].id == "__version__"
+            and isinstance(child.value, ast.Constant)
+            and isinstance(child.value.value, str)
+        ):
+            version: str | None = child.value.value
+            break
+    else:
+        version = None
+    return ast.get_docstring(node), version
+
+
+class FlitMetaConverter(MetaConverter):
+    def warn_against_dynamic_version_or_docstring(self, source: Path, version: str, description: str) -> None:
+        if not self._ui:
+            return
+        dynamic_fields = []
+        if not version:
+            dynamic_fields.append("version")
+        if not description:
+            dynamic_fields.append("description")
+        if not dynamic_fields:
+            return
+        fields = " and ".join(dynamic_fields)
+        message = (
+            f"Can't retrieve {fields} from pyproject.toml or parsing {source}. "
+            "They are probably imported from other files which is not supported by PDM."
+            " You may need to supply their values in pyproject.toml manually."
+        )
+        self._ui.warn(message)
+
+    @convert_from("metadata")
+    def name(self, metadata: dict[str, Any]) -> str:
+        # name
+        module = metadata.pop("module")
+        self._data["name"] = metadata.pop("dist-name", module)
+        # version and description
+        for prefix in (Path(), Path("src")):
+            source = prefix / module / "__init__.py"
+            if source.exists():
+                break
+            source = prefix / f"{module}.py"
+            if source.exists():
+                break
+
+        version = self._data.get("version")
+        description = self._data.get("description")
+        description_in_ast, version_in_ast = get_docstring_and_version_via_ast(source)
+        self._data["version"] = version or version_in_ast or ""
+        self._data["description"] = description or description_in_ast or ""
+        self.warn_against_dynamic_version_or_docstring(source, self._data["version"], self._data["description"])
+        # author and maintainer
+        if "author" in metadata:
+            self._data["authors"] = _get_author(metadata)
+        if "maintainer" in metadata:
+            self._data["maintainers"] = _get_author(metadata, "maintainer")
+        if "license" in metadata:
+            self._data["license"] = make_inline_table({"text": metadata.pop("license")})
+            self._data["dynamic"] = ["classifiers"]
+        if "urls" in metadata:
+            self._data["urls"] = metadata.pop("urls")
+        if "home-page" in metadata:
+            self._data.setdefault("urls", {})["homepage"] = metadata.pop("home-page")
+        if "description-file" in metadata:
+            self._data["readme"] = metadata.pop("description-file")
+        if "requires-python" in metadata:
+            self._data["requires-python"] = metadata.pop("requires-python")
+            self._data["dynamic"] = ["classifiers"]
+        if "keywords" in metadata:
+            # Flit takes a comma-separated string, PEP 621 expects an array.
+            keywords = metadata.pop("keywords")
+            if isinstance(keywords, str):
+                keywords = [word.strip() for word in keywords.split(",") if word.strip()]
+            self._data["keywords"] = make_array(keywords)
+        # requirements
+        self._data["dependencies"] = make_array(metadata.pop("requires", []), True)
+        self._data["optional-dependencies"] = metadata.pop("requires-extra", {})
+        if "dev-requires" in metadata:
+            # Flit turns the obsolete dev-requires into the "dev" extra.
+            dev_requires = metadata.pop("dev-requires")
+            self._data["optional-dependencies"].setdefault("dev", dev_requires)
+        # Add remaining metadata as the same key
+        self._data.update(metadata)
+        return self._data["name"]
+
+    @convert_from("entrypoints", name="entry-points")
+    def entry_points(self, value: dict[str, dict[str, str]]) -> dict[str, dict[str, str]]:
+        return value
+
+    @convert_from("sdist")
+    def includes(self, value: dict[str, list[str]]) -> None:
+        build = self.settings.setdefault("build", {})
+        if "exclude" in value:
+            build["excludes"] = value["exclude"]
+        if "include" in value:
+            build["includes"] = value["include"]
+        raise Unset()
+
+
+def convert(project: Project | None, filename: PathLike, options: Namespace | None) -> tuple[Mapping, Mapping]:
+    with open(filename, "rb") as fp, cd(os.path.dirname(os.path.abspath(filename))):
+        converter = FlitMetaConverter(tomllib.load(fp)["tool"]["flit"], project.core.ui if project else None)
+        return converter.convert()
+
+
+def export(project: Project, candidates: list, options: Namespace | None) -> None:
+    raise NotImplementedError()

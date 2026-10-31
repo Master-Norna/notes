@@ -16,6 +16,18 @@
 
 <table>
 <tr>
+<td width="88" align="center" valign="top"><a href="子目录定位_pdm/pdm_锁文件叫child打开却是parent_中文版.md"><img src="子目录定位_pdm/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[锁文件里叫 child，打开却是 parent](子目录定位_pdm/pdm_锁文件叫child打开却是parent_中文版.md)**
+
+锁文件里的名字还是 `child`，归档哈希也没变；把它重新读进来，元数据却来自同一个 ZIP 根目录的 `parent`。十月最后一周，这条导出路线上补了三处——入口、读入端的哈希、写出端的目录。我按它们发生的顺序把真实 PDM 跑了一遍，看那两行补丁接回的是哪一段。
+
+<sub>2026-10-31 · [English](子目录定位_pdm/PDM_Lockfile_Subdirectory_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
 <td width="88" align="center" valign="top"><a href="PDF注释_pypdf/pypdf_注释不再压垮栈_中文版.md"><img src="PDF注释_pypdf/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
@@ -155,6 +167,7 @@ PostgreSQL 代理 pgdog 连续跑了 12 天以后，定时任务全都不再触�
 
 | 工程 | 跑出来的是什么 |
 | --- | --- |
+| [subdirectory_demo](子目录定位_pdm/subdirectory_demo/) | 同一份含三个项目的 ZIP 交给两版 PDM 走完导入、导出、重新读入，看子目录在哪一版没写进 archive 表，新 candidate 的元数据来自哪个目录 |
 | [comments_demo](PDF注释_pypdf/comments_demo/) | 真实三版 pypdf 解析同一组对象字节，对照连续注释边界、流位置和无注释数组的函数调用预算 |
 | [flags_demo](后端参数_pathspec/flags_demo/) | 三份固定源码交给真实 RE2 / Hyperscan，对照编译参数丢失、初稿回退和最终映射，同时检查匹配结果与实际后端 |
 | [datetime_demo](日期差_nushell_datetime/datetime_demo/) | 三份固定源码交给同一个真实 Nu 执行，对照负天数、初稿的语义变化与最终兼容拆分，并独立检查闰日输入解析 |
