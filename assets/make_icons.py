@@ -21,6 +21,7 @@ TOPICS = {
     "PDF注释_pypdf": ("stack", "tick", "overflow"),  # 跳过注释，调用栈却继续堆叠
     "子目录定位_pdm": ("grid", "dot", "outlier"),  # 记录里没写选哪个目录，回来时落在了别处
     "字节删除_nushell_bytes": ("row", "bar", "missing"),  # 未命中的模式，前缀字节少了一截
+    "对数定义域_nushell_math_log": ("fence", "tick", "overflow"),  # 刻度轴右端之外，还有一个值被放行
 }
 
 # ---- 记号：point 画在线段中点，line 画整条线段 ----

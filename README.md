@@ -16,6 +16,18 @@
 
 <table>
 <tr>
+<td width="88" align="center" valign="top"><a href="对数定义域_nushell_math_log/nushell_math_log_中文版.md"><img src="对数定义域_nushell_math_log/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[拦住了 1 和 NaN，却漏掉 ∞](对数定义域_nushell_math_log/nushell_math_log_中文版.md)**
+
+`2 | math log 1` 返回 `inf`，`2 | math log inf` 返回 `0.0`，两条都不报错。我的首稿补上了 1 和 NaN，review 却指出同一个判据还漏着正无穷；输入那一侧的 NaN 漏法相同，只是守卫的方向反了。我把三版提取出来跑完 144 对。
+
+<sub>2026-10-31 · [English](对数定义域_nushell_math_log/Nushell_Math_Log_Domain_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
 <td width="88" align="center" valign="top"><a href="字节删除_nushell_bytes/nushell_bytes_remove_中文版.md"><img src="字节删除_nushell_bytes/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
@@ -179,6 +191,7 @@ PostgreSQL 代理 pgdog 连续跑了 12 天以后，定时任务全都不再触�
 
 | 工程 | 跑出来的是什么 |
 | --- | --- |
+| [math_log_demo](对数定义域_nushell_math_log/math_log_demo/) | 从三个固定提交里提取 `math log` 的底数检查与输入判断，看 1、NaN 与 ∞ 各在哪一版被拦下，域内算术是否逐位不变 |
 | [bytes_demo](字节删除_nushell_bytes/bytes_demo/) | 从五个固定提交里提取 `remove_impl`，看未命中时丢了哪几个字节、panic 在哪一版消失，以及首稿与最终版在 882 组输入上是否逐字相同 |
 | [subdirectory_demo](子目录定位_pdm/subdirectory_demo/) | 同一份含三个项目的 ZIP 交给两版 PDM 走完导入、导出、重新读入，看子目录在哪一版没写进 archive 表，新 candidate 的元数据来自哪个目录 |
 | [comments_demo](PDF注释_pypdf/comments_demo/) | 真实三版 pypdf 解析同一组对象字节，对照连续注释边界、流位置和无注释数组的函数调用预算 |
