@@ -1,0 +1,3 @@
+# CPython 3.12 / Windows x86-64; exact binary hashes from PyPI release JSON.
+google-re2==1.1.20251105 --hash=sha256:062313c309f93dfeb6966372f4c446580e98879133ec155522eea8aaf568a5cd
+hyperscan==0.9.1 --hash=sha256:13241b1d3338818d45c37ffc18620326d5a88eab71ec32d01639ad0aa84469a0

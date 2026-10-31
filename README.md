@@ -16,6 +16,18 @@
 
 <table>
 <tr>
+<td width="88" align="center" valign="top"><a href="后端参数_pathspec/pathspec_装了加速库规则却不认了_中文版.md"><img src="后端参数_pathspec/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[装了加速库，同一条规则却不认了](后端参数_pathspec/pathspec_装了加速库规则却不认了_中文版.md)**
+
+同一条忽略大小写的正则，装上原生加速库后，匹配反而从 True 变成 False。我的初稿靠退回 Python 修好了答案，维护者却要求让能表达的参数继续走原生后端；改版期间，另一份补丁又先合入了重叠的加固。我把三版放在一起，不只看答案，也看它究竟选了哪个引擎。
+
+<sub>2026-10-31 · [English](后端参数_pathspec/pathspec_装了加速库规则却不认了_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
 <td width="88" align="center" valign="top"><a href="日期差_nushell_datetime/nushell_负天数消失以后_中文版.md"><img src="日期差_nushell_datetime/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
@@ -131,6 +143,7 @@ PostgreSQL 代理 pgdog 连续跑了 12 天以后，定时任务全都不再触�
 
 | 工程 | 跑出来的是什么 |
 | --- | --- |
+| [flags_demo](后端参数_pathspec/flags_demo/) | 三份固定源码交给真实 RE2 / Hyperscan，对照编译参数丢失、初稿回退和最终映射，同时检查匹配结果与实际后端 |
 | [datetime_demo](日期差_nushell_datetime/datetime_demo/) | 三份固定源码交给同一个真实 Nu 执行，对照负天数、初稿的语义变化与最终兼容拆分，并独立检查闰日输入解析 |
 | [hash_demo](锁文件哈希_pdm/hash_demo/) | 同一份归档哈希经过两版 PDM 读入函数，再导出 requirements / pylock，看它在哪一步丢失或保留 |
 | [backpressure_demo](取消与背压_anyio/backpressure_demo/) | 修复前后两版 AnyIO 各连一条真实的 TCP，看取消之后数据有没有继续堆进队列，连接还能不能接着用 |

@@ -1,0 +1,19 @@
+{
+  "target": "CPython 3.12 / Windows x86-64",
+  "wheels": [
+    {
+      "distribution": "google-re2",
+      "version": "1.1.20251105",
+      "filename": "google_re2-1.1.20251105-1-cp312-cp312-win_amd64.whl",
+      "sha256": "062313c309f93dfeb6966372f4c446580e98879133ec155522eea8aaf568a5cd",
+      "url": "https://files.pythonhosted.org/packages/31/e9/5dd951c35acaabfe87c67228b9af2cdcd7779d9167edbe6b9094b8a8e529/google_re2-1.1.20251105-1-cp312-cp312-win_amd64.whl"
+    },
+    {
+      "distribution": "hyperscan",
+      "version": "0.9.1",
+      "filename": "hyperscan-0.9.1-cp312-cp312-win_amd64.whl",
+      "sha256": "13241b1d3338818d45c37ffc18620326d5a88eab71ec32d01639ad0aa84469a0",
+      "url": "https://files.pythonhosted.org/packages/31/b9/38f4f926f1beb102df476dbac08ad4fe5fab2d6da916fb0259e41d0fbee1/hyperscan-0.9.1-cp312-cp312-win_amd64.whl"
+    }
+  ]
+}
