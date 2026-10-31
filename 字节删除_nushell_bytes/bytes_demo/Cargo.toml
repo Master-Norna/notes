@@ -1,0 +1,14 @@
+[package]
+name = "bytes-demo"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Extracted remove_impl from five fixed Nushell commits; not a Nushell binary"
+
+[lib]
+name = "bytes_demo"
+path = "src/lib.rs"
+
+[[bin]]
+name = "bytes-demo"
+path = "src/main.rs"

@@ -16,6 +16,18 @@
 
 <table>
 <tr>
+<td width="88" align="center" valign="top"><a href="字节删除_nushell_bytes/nushell_bytes_remove_中文版.md"><img src="字节删除_nushell_bytes/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[panic 消失以后，字节却少了](字节删除_nushell_bytes/nushell_bytes_remove_中文版.md)**
+
+`0x[10 11 12 13] | bytes remove --end 0x[AA BB]` 没找到模式，返回的却是 `0x[11 12 13]`：第一个字节没了。两年前那次修复只挡住了 panic，没有把扫描跳过的前缀补回来。我的首稿把结果修对了，review 却要求把那条已经出过两次问题的游标整个换掉。
+
+<sub>2026-10-31 · [English](字节删除_nushell_bytes/Nushell_Bytes_Remove_Prefix_Loss_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
 <td width="88" align="center" valign="top"><a href="子目录定位_pdm/pdm_锁文件叫child打开却是parent_中文版.md"><img src="子目录定位_pdm/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
@@ -167,6 +179,7 @@ PostgreSQL 代理 pgdog 连续跑了 12 天以后，定时任务全都不再触�
 
 | 工程 | 跑出来的是什么 |
 | --- | --- |
+| [bytes_demo](字节删除_nushell_bytes/bytes_demo/) | 从五个固定提交里提取 `remove_impl`，看未命中时丢了哪几个字节、panic 在哪一版消失，以及首稿与最终版在 882 组输入上是否逐字相同 |
 | [subdirectory_demo](子目录定位_pdm/subdirectory_demo/) | 同一份含三个项目的 ZIP 交给两版 PDM 走完导入、导出、重新读入，看子目录在哪一版没写进 archive 表，新 candidate 的元数据来自哪个目录 |
 | [comments_demo](PDF注释_pypdf/comments_demo/) | 真实三版 pypdf 解析同一组对象字节，对照连续注释边界、流位置和无注释数组的函数调用预算 |
 | [flags_demo](后端参数_pathspec/flags_demo/) | 三份固定源码交给真实 RE2 / Hyperscan，对照编译参数丢失、初稿回退和最终映射，同时检查匹配结果与实际后端 |
