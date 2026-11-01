@@ -1,0 +1,7 @@
+# Preserve upstream bytes: the runtime verifies every vendor file by SHA-256.
+/vendor/** -text
+/LICENSE -text
+/run.py text eol=lf
+/README.md text eol=lf
+/provenance.json text eol=lf
+/.gitattributes text eol=lf

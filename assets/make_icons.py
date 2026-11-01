@@ -22,6 +22,9 @@ TOPICS = {
     "子目录定位_pdm": ("grid", "dot", "outlier"),  # 记录里没写选哪个目录，回来时落在了别处
     "字节删除_nushell_bytes": ("row", "bar", "missing"),  # 未命中的模式，前缀字节少了一截
     "对数定义域_nushell_math_log": ("fence", "tick", "overflow"),  # 刻度轴右端之外，还有一个值被放行
+    "负指针_pypdf": ("row", "tick", "outlier"),  # 偏移指针落到文件左边之外
+    "旋转丢元素_pottery": ("ring", "bar", "flip"),  # 旋转方向反了，元素少了一个
+    "本地时间_tomlkit": ("row", "bar", "extra"),  # 本地时间后面多出一段偏移
 }
 
 # ---- 记号：point 画在线段中点，line 画整条线段 ----

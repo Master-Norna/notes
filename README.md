@@ -16,6 +16,42 @@
 
 <table>
 <tr>
+<td width="88" align="center" valign="top"><a href="负指针_pypdf/pypdf_负指针_中文版.md"><img src="负指针_pypdf/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[报错是 −257，文件里写的是 −256](负指针_pypdf/pypdf_负指针_中文版.md)**
+
+把 PDF 末尾的 `startxref` 改成 `-256`，pypdf 报的是 `negative seek value -257`。差的那 1 来自 `seek(startxref - 1)`；我顺着这个值看它流向的三个去处，2025 年那道守卫只装在其中一处，而且只认 0。
+
+<sub>2026-11-01 · [English](负指针_pypdf/pypdf_Negative_Startxref_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
+<td width="88" align="center" valign="top"><a href="旋转丢元素_pottery/pottery_旋转丢元素_中文版.md"><img src="旋转丢元素_pottery/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[转四步，少了一个元素](旋转丢元素_pottery/pottery_旋转丢元素_中文版.md)**
+
+`[1, 2, 3]` 转 −4 步，标准库给 `[2, 3, 1]`，`RedisDeque` 给 `[2, 3]`；转 −6 步直接清空。切片会夹住越界的端点，裁切却按原步数算。我把长度 0–8、步数 −20–20 的 369 格逐格跑完，红格正好落在 `|n| > len`。
+
+<sub>2026-11-01 · [English](旋转丢元素_pottery/Pottery_Rotate_Long_Steps_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
+<td width="88" align="center" valign="top"><a href="本地时间_tomlkit/tomlkit_本地时间没有时区_中文版.md"><img src="本地时间_tomlkit/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[写出去的时间，自己读不回来](本地时间_tomlkit/tomlkit_本地时间没有时区_中文版.md)**
+
+`item(time(7, 32, tzinfo=+02:00))` 写出 `07:32:00+02:00`，交给它自己的 `parse()` 却抛 `InvalidTimeError`。TOML 的 Local Time 没有那六个字符的位置；修复只动了写出端，解析器照旧拒绝偏移。
+
+<sub>2026-11-01 · [English](本地时间_tomlkit/TOML_tomlkit_Local_Time_No_Offset_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
 <td width="88" align="center" valign="top"><a href="对数定义域_nushell_math_log/nushell_math_log_中文版.md"><img src="对数定义域_nushell_math_log/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
@@ -191,6 +227,9 @@ PostgreSQL 代理 pgdog 连续跑了 12 天以后，定时任务全都不再触�
 
 | 工程 | 跑出来的是什么 |
 | --- | --- |
+| [negative_startxref_demo](负指针_pypdf/negative_startxref_demo/) | 两份完整 pypdf 源码读同一份把 `startxref` 改成负数的 PDF，看修前在哪一处 `seek` 抛 `ValueError`、合并版如何归一化后重建 xref |
+| [rotate_demo](旋转丢元素_pottery/rotate_demo/) | 两版 pottery 在 fakeredis 上跑 369 组旋转，对照最终列表和实际发出的 `LPUSH`/`RPUSH`/`LTRIM` 参数 |
+| [local_time_demo](本地时间_tomlkit/local_time_demo/) | 两版 tomlkit 序列化同一个带时区的 `time`，看写出的文本、自己的解析器能否读回，以及不带时区时是否逐字节不变 |
 | [math_log_demo](对数定义域_nushell_math_log/math_log_demo/) | 从三个固定提交里提取 `math log` 的底数检查与输入判断，看 1、NaN 与 ∞ 各在哪一版被拦下，域内算术是否逐位不变 |
 | [bytes_demo](字节删除_nushell_bytes/bytes_demo/) | 从五个固定提交里提取 `remove_impl`，看未命中时丢了哪几个字节、panic 在哪一版消失，以及首稿与最终版在 882 组输入上是否逐字相同 |
 | [subdirectory_demo](子目录定位_pdm/subdirectory_demo/) | 同一份含三个项目的 ZIP 交给两版 PDM 走完导入、导出、重新读入，看子目录在哪一版没写进 archive 表，新 candidate 的元数据来自哪个目录 |

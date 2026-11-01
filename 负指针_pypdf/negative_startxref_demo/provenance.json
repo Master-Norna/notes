@@ -1,0 +1,508 @@
+{
+  "upstream": "py-pdf/pypdf",
+  "license": "BSD-3-Clause",
+  "versions": {
+    "parent": {
+      "commit": "b78c2aa5301ee4fb1ee024b9838923945ab357b6",
+      "role": "first parent of the #4144 merge (pre-fix)",
+      "codeload": "https://codeload.github.com/py-pdf/pypdf/tar.gz/b78c2aa5301ee4fb1ee024b9838923945ab357b6",
+      "archive": "b78c2aa5301ee4fb1ee024b9838923945ab357b6.tar.gz",
+      "archive_bytes": 10165859,
+      "archive_sha256": "7f42a18ddf17abab65d7e449350790d54ddcddd2b330acd1cdf240535a36a146",
+      "package_files": 60,
+      "files": {
+        "vendor/parent/pypdf/__init__.py": {
+          "bytes": 1494,
+          "sha256": "d7786f1b3cb2e52e28b1085f0ea150fa7f029baad252b29af7415c790871f7df"
+        },
+        "vendor/parent/pypdf/_cmap.py": {
+          "bytes": 19756,
+          "sha256": "a0dde07acffceda0fbe45c3e20e4efc091aa4097f6f938e8c4efa19cf981c5fc"
+        },
+        "vendor/parent/pypdf/_codecs/__init__.py": {
+          "bytes": 1510,
+          "sha256": "bd56ce01215af54c771e42b4228dd415aba640fe0970d2f1f63341353351d980"
+        },
+        "vendor/parent/pypdf/_codecs/_codecs.py": {
+          "bytes": 10717,
+          "sha256": "f377c8779e1713e6916f798d8bfa75a2526d67375487df07b3159708e193b512"
+        },
+        "vendor/parent/pypdf/_codecs/adobe_glyphs.py": {
+          "bytes": 577665,
+          "sha256": "69ac4e46ea50409ee46cb0c76e35a280b67aa60f06f7fe5ea832a2349c72923e"
+        },
+        "vendor/parent/pypdf/_codecs/core_font_metrics.py": {
+          "bytes": 114968,
+          "sha256": "14b3d66d3678871790597820d63a397b8a972821642846397bce54d9b2c533a9"
+        },
+        "vendor/parent/pypdf/_codecs/pdfdoc.py": {
+          "bytes": 4269,
+          "sha256": "c5f4af30562cbf1b9a490d14bbdbd90ca681d16bbce61d6e0a20758bdac07145"
+        },
+        "vendor/parent/pypdf/_codecs/std.py": {
+          "bytes": 2630,
+          "sha256": "0f240cb84a40184a52f6ecb58d67f87278fe92a4a13ce0228f9b08ed0d580fc1"
+        },
+        "vendor/parent/pypdf/_codecs/symbol.py": {
+          "bytes": 4642,
+          "sha256": "08fe958d172c72b9bcca6007f74c6977155a7a5c22e8c49bd536f5c0d0e1d359"
+        },
+        "vendor/parent/pypdf/_codecs/zapfding.py": {
+          "bytes": 4655,
+          "sha256": "e39a9c635d716c1c2da21ebfb7467fef33631bbfaa238d752d14155d828faf65"
+        },
+        "vendor/parent/pypdf/_configuration.py": {
+          "bytes": 10832,
+          "sha256": "e1a3388be0acbc086d26a38abc0fbfaf82df592d4ed38d0e5fd3521ff60c72b5"
+        },
+        "vendor/parent/pypdf/_crypt_providers/__init__.py": {
+          "bytes": 2770,
+          "sha256": "c5441b160310bca31a38e4f7454756ddb4bc7d94a147c3c13b3eab7ac7f05855"
+        },
+        "vendor/parent/pypdf/_crypt_providers/_base.py": {
+          "bytes": 1735,
+          "sha256": "34505711d85bae0f64d353d57cd37f93b94401897606481720e8b9a1f53ff91f"
+        },
+        "vendor/parent/pypdf/_crypt_providers/_cryptography.py": {
+          "bytes": 7283,
+          "sha256": "d5f8b148d0aa4c63b14f4af96750b8f31cdc9583bdacf2ac0366de3c5678e9f8"
+        },
+        "vendor/parent/pypdf/_crypt_providers/_fallback.py": {
+          "bytes": 3382,
+          "sha256": "81772ba3f2bbab82180cbe57195471a059978d75cc6ba4e57830f0c56c828f81"
+        },
+        "vendor/parent/pypdf/_crypt_providers/_pycryptodome.py": {
+          "bytes": 4020,
+          "sha256": "c57e05b5af101c7133b44fbf60793ebc9b66054d71295c01f7dff2b10e939ce2"
+        },
+        "vendor/parent/pypdf/_doc_common.py": {
+          "bytes": 63323,
+          "sha256": "3492ff21a5d90f646a4dabcec90efef1c50e5976de908586fd6cb27ff91e9489"
+        },
+        "vendor/parent/pypdf/_encryption.py": {
+          "bytes": 53649,
+          "sha256": "c39c927e0c1d9faace5c06f244603027421c50787db847535f780090eb01e0a7"
+        },
+        "vendor/parent/pypdf/_font.py": {
+          "bytes": 40397,
+          "sha256": "c5f358267ed9f426131a27881b3d0041f628b41575ee18c7d52475ae4d37032c"
+        },
+        "vendor/parent/pypdf/_page.py": {
+          "bytes": 103252,
+          "sha256": "fc37df0f0f295cf53a0fde7faace419925415ce782501a63c19ff4b3c3666664"
+        },
+        "vendor/parent/pypdf/_page_labels.py": {
+          "bytes": 11385,
+          "sha256": "55ae47e2e1fcec75ea33d3f97478c1fae1684883414cd8ee04a0a066dec40e06"
+        },
+        "vendor/parent/pypdf/_protocols.py": {
+          "bytes": 2387,
+          "sha256": "def9d9b5c9fac01c0c44391dc5df100784260968290fe7cbe7a9dadfe0c75db0"
+        },
+        "vendor/parent/pypdf/_reader.py": {
+          "bytes": 70318,
+          "sha256": "34b83c83e5084e914cfa039e2607da6616ff6beef6247e78d3b876be0951a6d3"
+        },
+        "vendor/parent/pypdf/_text_extraction/__init__.py": {
+          "bytes": 9646,
+          "sha256": "48b2fb644632129e4e2435a367fad9805c4e49e609035b3b6ef5bdb754bee7d7"
+        },
+        "vendor/parent/pypdf/_text_extraction/_layout_mode/__init__.py": {
+          "bytes": 340,
+          "sha256": "454408c22530ce778db5c9639d533a8e445a7a6ea980fee6383dbe3019ada6fc"
+        },
+        "vendor/parent/pypdf/_text_extraction/_layout_mode/_fixed_width_page.py": {
+          "bytes": 17321,
+          "sha256": "9258d72e179bb39262f803c5a7d56946fda53734cdbf3fc3f7edc2437b944a70"
+        },
+        "vendor/parent/pypdf/_text_extraction/_layout_mode/_text_state_manager.py": {
+          "bytes": 7561,
+          "sha256": "cd8e095dedc819fe0671483189d6aace8725ede0fb353ea3ebde198a6e39deeb"
+        },
+        "vendor/parent/pypdf/_text_extraction/_layout_mode/_text_state_params.py": {
+          "bytes": 6617,
+          "sha256": "d3a69b6dd6981ecbd52b864b1decebe6f636c4d4711f106b3c4daafd5af6c5b3"
+        },
+        "vendor/parent/pypdf/_text_extraction/_text_extractor.py": {
+          "bytes": 14916,
+          "sha256": "399a2067c68c1bfd836d4a1cf08f826586c08372c467439334fc83ec43a4eea9"
+        },
+        "vendor/parent/pypdf/_utils.py": {
+          "bytes": 23663,
+          "sha256": "1f1e47f3b8ee728f3a05143eef5e370684cd54ddf751fe631ccf1d3eabc14309"
+        },
+        "vendor/parent/pypdf/_version.py": {
+          "bytes": 23,
+          "sha256": "ee771ce5d48ff28d7c52146b59847f6ecca579b39ae8740bc0dde74ffa6f9f1d"
+        },
+        "vendor/parent/pypdf/_writer.py": {
+          "bytes": 140291,
+          "sha256": "67740d099a42b0db3b9dc85c7ea3332ab00253773063c255c66e14ca78310ff9"
+        },
+        "vendor/parent/pypdf/actions/__init__.py": {
+          "bytes": 391,
+          "sha256": "d8bdd81ef60846bab097640490991e4b63bd6b521eb0356ed696e24854299518"
+        },
+        "vendor/parent/pypdf/actions/_actions.py": {
+          "bytes": 7648,
+          "sha256": "9ad300bde70c006ba9484e0d78296103c0dcdafa75038248f3bde6a988cd6c4b"
+        },
+        "vendor/parent/pypdf/annotations/__init__.py": {
+          "bytes": 990,
+          "sha256": "7f693ffa3027dfd082076ecac50fdef771a29e7ce40076d49e749e1899758f21"
+        },
+        "vendor/parent/pypdf/annotations/_base.py": {
+          "bytes": 961,
+          "sha256": "608453cd3764aa3f035164939b2d1fae47d3af88e87b91d41b344e5287f8a08a"
+        },
+        "vendor/parent/pypdf/annotations/_markup_annotations.py": {
+          "bytes": 11858,
+          "sha256": "c210635217f7c5195cae67829cd82a1679ad2767fb07c2289f82b8e88f74a079"
+        },
+        "vendor/parent/pypdf/annotations/_non_markup_annotations.py": {
+          "bytes": 3695,
+          "sha256": "fd2cd3ce864ce01dff1bf57a33ff266c9e7b630d2d024f601db347ea5211ab70"
+        },
+        "vendor/parent/pypdf/constants.py": {
+          "bytes": 24168,
+          "sha256": "1a2a9392718a0e4cc435cd9a23542a4fefb77764e394098ea656a65b884090b8"
+        },
+        "vendor/parent/pypdf/errors.py": {
+          "bytes": 1947,
+          "sha256": "070d56f61c4eb03830ab053a628436974f89894c93aba979423542afe5b81850"
+        },
+        "vendor/parent/pypdf/filters.py": {
+          "bytes": 34856,
+          "sha256": "8b6d7bbdf6c3cab618a87f86652196269c95b3116f8802938ca3fe53cfef0d3f"
+        },
+        "vendor/parent/pypdf/generic/__init__.py": {
+          "bytes": 3468,
+          "sha256": "56ba9d61fb5010278f0d4dab5d532012a45a60547ccce57f7ef260a35f71feec"
+        },
+        "vendor/parent/pypdf/generic/_appearance_stream.py": {
+          "bytes": 41779,
+          "sha256": "d0ab599f7fb299e0af02f2f80b71dfcc1e45ec208c3fe07b7919f44f79f9b987"
+        },
+        "vendor/parent/pypdf/generic/_base.py": {
+          "bytes": 33935,
+          "sha256": "c428b305b94fa409ed11e56784504fc601740e122b41c10b34da6a532bd2ba30"
+        },
+        "vendor/parent/pypdf/generic/_color.py": {
+          "bytes": 2708,
+          "sha256": "a6274f36e5d52882309a6554c200b62dc6c444acc1c8d244e3580a367815c5c1"
+        },
+        "vendor/parent/pypdf/generic/_data_structures.py": {
+          "bytes": 70508,
+          "sha256": "bad73c6fa6c421bb3a7cb42d7f4a299ef640fb0a8c680e9e0f139d66d33b77e7"
+        },
+        "vendor/parent/pypdf/generic/_files.py": {
+          "bytes": 19061,
+          "sha256": "d28b3ece6aa1cec4ed623e83ab52e2cd70fd592118e5855508415352223d9ebd"
+        },
+        "vendor/parent/pypdf/generic/_fit.py": {
+          "bytes": 5550,
+          "sha256": "607a2571a31e1c67d84fdb0d1a3dbfd04b52a09619d9a261b4aa9525c03887f9"
+        },
+        "vendor/parent/pypdf/generic/_image_inline.py": {
+          "bytes": 15148,
+          "sha256": "bd651e8394a2d573ac07771c487a32d74c505d87c283efbfbd56a9ef5b1e7955"
+        },
+        "vendor/parent/pypdf/generic/_image_xobject.py": {
+          "bytes": 28108,
+          "sha256": "3dc359eff22e101aa7cc60ceff0bf921da3042c4efdce450a7e95c0b9982bd3f"
+        },
+        "vendor/parent/pypdf/generic/_link.py": {
+          "bytes": 6207,
+          "sha256": "90835ae593a2a461f163f616fdf231178cf44d134a970c388d161a1822d34116"
+        },
+        "vendor/parent/pypdf/generic/_outline.py": {
+          "bytes": 1094,
+          "sha256": "3c4b924f86fe2a6010203009d05872c4dec036626376c59a4ddc4aa3b862ab78"
+        },
+        "vendor/parent/pypdf/generic/_rectangle.py": {
+          "bytes": 3969,
+          "sha256": "ec7ac97ce31ab906ad0368245a17074a4cc1ec5e245a671afba90d03a1d5a3a3"
+        },
+        "vendor/parent/pypdf/generic/_utils.py": {
+          "bytes": 7875,
+          "sha256": "0dcef7c1b7cfeb17d2f962d63fa77b98d116c9b0cee7779de94dbb243f5f1df9"
+        },
+        "vendor/parent/pypdf/generic/_viewerpref.py": {
+          "bytes": 7577,
+          "sha256": "20912ec8cd304ebd6a36004e0bede202e3c1e4f9630ee771f7de14a2c3eb05dc"
+        },
+        "vendor/parent/pypdf/pagerange.py": {
+          "bytes": 7907,
+          "sha256": "0209c3144e2959cf34d1800cfec3dc1afcb6f747f70f93588abaf6e478753b46"
+        },
+        "vendor/parent/pypdf/papersizes.py": {
+          "bytes": 1413,
+          "sha256": "e93cf9b1f34dff724e51aa58f3753e95a928867a57600d2148440d98e54b14bf"
+        },
+        "vendor/parent/pypdf/py.typed": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "vendor/parent/pypdf/types.py": {
+          "bytes": 1915,
+          "sha256": "b09ef01f393b111fc227b90ffacf2ef5ac459e40979c5a6bf27cdc8f50314dab"
+        },
+        "vendor/parent/pypdf/xmp.py": {
+          "bytes": 32200,
+          "sha256": "255613532cd0dbef17f5adc91e932a84ec1c1a145bc3355a40326486e86710b3"
+        }
+      }
+    },
+    "merge": {
+      "commit": "91a73b5e8e9701efdad26b865964c2a53cb110b3",
+      "role": "#4144 merge",
+      "codeload": "https://codeload.github.com/py-pdf/pypdf/tar.gz/91a73b5e8e9701efdad26b865964c2a53cb110b3",
+      "archive": "91a73b5e8e9701efdad26b865964c2a53cb110b3.tar.gz",
+      "archive_bytes": 10168144,
+      "archive_sha256": "10dc7eb62a0ee74f7521fccf5271379c442361d8cd109b0ee7912e9dffa78dbb",
+      "package_files": 60,
+      "files": {
+        "vendor/merge/pypdf/__init__.py": {
+          "bytes": 1494,
+          "sha256": "d7786f1b3cb2e52e28b1085f0ea150fa7f029baad252b29af7415c790871f7df"
+        },
+        "vendor/merge/pypdf/_cmap.py": {
+          "bytes": 19756,
+          "sha256": "a0dde07acffceda0fbe45c3e20e4efc091aa4097f6f938e8c4efa19cf981c5fc"
+        },
+        "vendor/merge/pypdf/_codecs/__init__.py": {
+          "bytes": 1510,
+          "sha256": "bd56ce01215af54c771e42b4228dd415aba640fe0970d2f1f63341353351d980"
+        },
+        "vendor/merge/pypdf/_codecs/_codecs.py": {
+          "bytes": 10717,
+          "sha256": "f377c8779e1713e6916f798d8bfa75a2526d67375487df07b3159708e193b512"
+        },
+        "vendor/merge/pypdf/_codecs/adobe_glyphs.py": {
+          "bytes": 577665,
+          "sha256": "69ac4e46ea50409ee46cb0c76e35a280b67aa60f06f7fe5ea832a2349c72923e"
+        },
+        "vendor/merge/pypdf/_codecs/core_font_metrics.py": {
+          "bytes": 114968,
+          "sha256": "14b3d66d3678871790597820d63a397b8a972821642846397bce54d9b2c533a9"
+        },
+        "vendor/merge/pypdf/_codecs/pdfdoc.py": {
+          "bytes": 4269,
+          "sha256": "c5f4af30562cbf1b9a490d14bbdbd90ca681d16bbce61d6e0a20758bdac07145"
+        },
+        "vendor/merge/pypdf/_codecs/std.py": {
+          "bytes": 2630,
+          "sha256": "0f240cb84a40184a52f6ecb58d67f87278fe92a4a13ce0228f9b08ed0d580fc1"
+        },
+        "vendor/merge/pypdf/_codecs/symbol.py": {
+          "bytes": 4642,
+          "sha256": "08fe958d172c72b9bcca6007f74c6977155a7a5c22e8c49bd536f5c0d0e1d359"
+        },
+        "vendor/merge/pypdf/_codecs/zapfding.py": {
+          "bytes": 4655,
+          "sha256": "e39a9c635d716c1c2da21ebfb7467fef33631bbfaa238d752d14155d828faf65"
+        },
+        "vendor/merge/pypdf/_configuration.py": {
+          "bytes": 10832,
+          "sha256": "e1a3388be0acbc086d26a38abc0fbfaf82df592d4ed38d0e5fd3521ff60c72b5"
+        },
+        "vendor/merge/pypdf/_crypt_providers/__init__.py": {
+          "bytes": 2770,
+          "sha256": "c5441b160310bca31a38e4f7454756ddb4bc7d94a147c3c13b3eab7ac7f05855"
+        },
+        "vendor/merge/pypdf/_crypt_providers/_base.py": {
+          "bytes": 1735,
+          "sha256": "34505711d85bae0f64d353d57cd37f93b94401897606481720e8b9a1f53ff91f"
+        },
+        "vendor/merge/pypdf/_crypt_providers/_cryptography.py": {
+          "bytes": 7283,
+          "sha256": "d5f8b148d0aa4c63b14f4af96750b8f31cdc9583bdacf2ac0366de3c5678e9f8"
+        },
+        "vendor/merge/pypdf/_crypt_providers/_fallback.py": {
+          "bytes": 3382,
+          "sha256": "81772ba3f2bbab82180cbe57195471a059978d75cc6ba4e57830f0c56c828f81"
+        },
+        "vendor/merge/pypdf/_crypt_providers/_pycryptodome.py": {
+          "bytes": 4020,
+          "sha256": "c57e05b5af101c7133b44fbf60793ebc9b66054d71295c01f7dff2b10e939ce2"
+        },
+        "vendor/merge/pypdf/_doc_common.py": {
+          "bytes": 63323,
+          "sha256": "3492ff21a5d90f646a4dabcec90efef1c50e5976de908586fd6cb27ff91e9489"
+        },
+        "vendor/merge/pypdf/_encryption.py": {
+          "bytes": 53649,
+          "sha256": "c39c927e0c1d9faace5c06f244603027421c50787db847535f780090eb01e0a7"
+        },
+        "vendor/merge/pypdf/_font.py": {
+          "bytes": 40397,
+          "sha256": "c5f358267ed9f426131a27881b3d0041f628b41575ee18c7d52475ae4d37032c"
+        },
+        "vendor/merge/pypdf/_page.py": {
+          "bytes": 103252,
+          "sha256": "fc37df0f0f295cf53a0fde7faace419925415ce782501a63c19ff4b3c3666664"
+        },
+        "vendor/merge/pypdf/_page_labels.py": {
+          "bytes": 11385,
+          "sha256": "55ae47e2e1fcec75ea33d3f97478c1fae1684883414cd8ee04a0a066dec40e06"
+        },
+        "vendor/merge/pypdf/_protocols.py": {
+          "bytes": 2387,
+          "sha256": "def9d9b5c9fac01c0c44391dc5df100784260968290fe7cbe7a9dadfe0c75db0"
+        },
+        "vendor/merge/pypdf/_reader.py": {
+          "bytes": 70774,
+          "sha256": "9cc730dc665de4a1b79d6a61ce8b96ec8e849598b3bc86a57df53a5d0a7f6711"
+        },
+        "vendor/merge/pypdf/_text_extraction/__init__.py": {
+          "bytes": 9646,
+          "sha256": "48b2fb644632129e4e2435a367fad9805c4e49e609035b3b6ef5bdb754bee7d7"
+        },
+        "vendor/merge/pypdf/_text_extraction/_layout_mode/__init__.py": {
+          "bytes": 340,
+          "sha256": "454408c22530ce778db5c9639d533a8e445a7a6ea980fee6383dbe3019ada6fc"
+        },
+        "vendor/merge/pypdf/_text_extraction/_layout_mode/_fixed_width_page.py": {
+          "bytes": 17321,
+          "sha256": "9258d72e179bb39262f803c5a7d56946fda53734cdbf3fc3f7edc2437b944a70"
+        },
+        "vendor/merge/pypdf/_text_extraction/_layout_mode/_text_state_manager.py": {
+          "bytes": 7561,
+          "sha256": "cd8e095dedc819fe0671483189d6aace8725ede0fb353ea3ebde198a6e39deeb"
+        },
+        "vendor/merge/pypdf/_text_extraction/_layout_mode/_text_state_params.py": {
+          "bytes": 6617,
+          "sha256": "d3a69b6dd6981ecbd52b864b1decebe6f636c4d4711f106b3c4daafd5af6c5b3"
+        },
+        "vendor/merge/pypdf/_text_extraction/_text_extractor.py": {
+          "bytes": 14916,
+          "sha256": "399a2067c68c1bfd836d4a1cf08f826586c08372c467439334fc83ec43a4eea9"
+        },
+        "vendor/merge/pypdf/_utils.py": {
+          "bytes": 23663,
+          "sha256": "1f1e47f3b8ee728f3a05143eef5e370684cd54ddf751fe631ccf1d3eabc14309"
+        },
+        "vendor/merge/pypdf/_version.py": {
+          "bytes": 23,
+          "sha256": "ee771ce5d48ff28d7c52146b59847f6ecca579b39ae8740bc0dde74ffa6f9f1d"
+        },
+        "vendor/merge/pypdf/_writer.py": {
+          "bytes": 140291,
+          "sha256": "67740d099a42b0db3b9dc85c7ea3332ab00253773063c255c66e14ca78310ff9"
+        },
+        "vendor/merge/pypdf/actions/__init__.py": {
+          "bytes": 391,
+          "sha256": "d8bdd81ef60846bab097640490991e4b63bd6b521eb0356ed696e24854299518"
+        },
+        "vendor/merge/pypdf/actions/_actions.py": {
+          "bytes": 7648,
+          "sha256": "9ad300bde70c006ba9484e0d78296103c0dcdafa75038248f3bde6a988cd6c4b"
+        },
+        "vendor/merge/pypdf/annotations/__init__.py": {
+          "bytes": 990,
+          "sha256": "7f693ffa3027dfd082076ecac50fdef771a29e7ce40076d49e749e1899758f21"
+        },
+        "vendor/merge/pypdf/annotations/_base.py": {
+          "bytes": 961,
+          "sha256": "608453cd3764aa3f035164939b2d1fae47d3af88e87b91d41b344e5287f8a08a"
+        },
+        "vendor/merge/pypdf/annotations/_markup_annotations.py": {
+          "bytes": 11858,
+          "sha256": "c210635217f7c5195cae67829cd82a1679ad2767fb07c2289f82b8e88f74a079"
+        },
+        "vendor/merge/pypdf/annotations/_non_markup_annotations.py": {
+          "bytes": 3695,
+          "sha256": "fd2cd3ce864ce01dff1bf57a33ff266c9e7b630d2d024f601db347ea5211ab70"
+        },
+        "vendor/merge/pypdf/constants.py": {
+          "bytes": 24168,
+          "sha256": "1a2a9392718a0e4cc435cd9a23542a4fefb77764e394098ea656a65b884090b8"
+        },
+        "vendor/merge/pypdf/errors.py": {
+          "bytes": 1947,
+          "sha256": "070d56f61c4eb03830ab053a628436974f89894c93aba979423542afe5b81850"
+        },
+        "vendor/merge/pypdf/filters.py": {
+          "bytes": 34856,
+          "sha256": "8b6d7bbdf6c3cab618a87f86652196269c95b3116f8802938ca3fe53cfef0d3f"
+        },
+        "vendor/merge/pypdf/generic/__init__.py": {
+          "bytes": 3468,
+          "sha256": "56ba9d61fb5010278f0d4dab5d532012a45a60547ccce57f7ef260a35f71feec"
+        },
+        "vendor/merge/pypdf/generic/_appearance_stream.py": {
+          "bytes": 41779,
+          "sha256": "d0ab599f7fb299e0af02f2f80b71dfcc1e45ec208c3fe07b7919f44f79f9b987"
+        },
+        "vendor/merge/pypdf/generic/_base.py": {
+          "bytes": 33935,
+          "sha256": "c428b305b94fa409ed11e56784504fc601740e122b41c10b34da6a532bd2ba30"
+        },
+        "vendor/merge/pypdf/generic/_color.py": {
+          "bytes": 2708,
+          "sha256": "a6274f36e5d52882309a6554c200b62dc6c444acc1c8d244e3580a367815c5c1"
+        },
+        "vendor/merge/pypdf/generic/_data_structures.py": {
+          "bytes": 70508,
+          "sha256": "bad73c6fa6c421bb3a7cb42d7f4a299ef640fb0a8c680e9e0f139d66d33b77e7"
+        },
+        "vendor/merge/pypdf/generic/_files.py": {
+          "bytes": 19061,
+          "sha256": "d28b3ece6aa1cec4ed623e83ab52e2cd70fd592118e5855508415352223d9ebd"
+        },
+        "vendor/merge/pypdf/generic/_fit.py": {
+          "bytes": 5550,
+          "sha256": "607a2571a31e1c67d84fdb0d1a3dbfd04b52a09619d9a261b4aa9525c03887f9"
+        },
+        "vendor/merge/pypdf/generic/_image_inline.py": {
+          "bytes": 15148,
+          "sha256": "bd651e8394a2d573ac07771c487a32d74c505d87c283efbfbd56a9ef5b1e7955"
+        },
+        "vendor/merge/pypdf/generic/_image_xobject.py": {
+          "bytes": 28108,
+          "sha256": "3dc359eff22e101aa7cc60ceff0bf921da3042c4efdce450a7e95c0b9982bd3f"
+        },
+        "vendor/merge/pypdf/generic/_link.py": {
+          "bytes": 6207,
+          "sha256": "90835ae593a2a461f163f616fdf231178cf44d134a970c388d161a1822d34116"
+        },
+        "vendor/merge/pypdf/generic/_outline.py": {
+          "bytes": 1094,
+          "sha256": "3c4b924f86fe2a6010203009d05872c4dec036626376c59a4ddc4aa3b862ab78"
+        },
+        "vendor/merge/pypdf/generic/_rectangle.py": {
+          "bytes": 3969,
+          "sha256": "ec7ac97ce31ab906ad0368245a17074a4cc1ec5e245a671afba90d03a1d5a3a3"
+        },
+        "vendor/merge/pypdf/generic/_utils.py": {
+          "bytes": 7875,
+          "sha256": "0dcef7c1b7cfeb17d2f962d63fa77b98d116c9b0cee7779de94dbb243f5f1df9"
+        },
+        "vendor/merge/pypdf/generic/_viewerpref.py": {
+          "bytes": 7577,
+          "sha256": "20912ec8cd304ebd6a36004e0bede202e3c1e4f9630ee771f7de14a2c3eb05dc"
+        },
+        "vendor/merge/pypdf/pagerange.py": {
+          "bytes": 7907,
+          "sha256": "0209c3144e2959cf34d1800cfec3dc1afcb6f747f70f93588abaf6e478753b46"
+        },
+        "vendor/merge/pypdf/papersizes.py": {
+          "bytes": 1413,
+          "sha256": "e93cf9b1f34dff724e51aa58f3753e95a928867a57600d2148440d98e54b14bf"
+        },
+        "vendor/merge/pypdf/py.typed": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "vendor/merge/pypdf/types.py": {
+          "bytes": 1915,
+          "sha256": "b09ef01f393b111fc227b90ffacf2ef5ac459e40979c5a6bf27cdc8f50314dab"
+        },
+        "vendor/merge/pypdf/xmp.py": {
+          "bytes": 32200,
+          "sha256": "255613532cd0dbef17f5adc91e932a84ec1c1a145bc3355a40326486e86710b3"
+        }
+      }
+    }
+  }
+}
