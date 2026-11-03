@@ -1,0 +1,31 @@
+{
+  "repository": "https://github.com/dateutil/dateutil",
+  "revisions": {
+    "parent": {
+      "commit": "5391455e7c7839e300b63649041806fb5219432e",
+      "files": {
+        "_common.py": {
+          "sha256": "35239cd3809e4e4038c43b1f323da012ebe90b66d75761163988eb6160344c04",
+          "bytes": 859
+        },
+        "relativedelta.py": {
+          "sha256": "f668cc14a557fa0e100ac4d105bbd8a9f5bfaa1240b78920bbeb13efac3fbc47",
+          "bytes": 24678
+        }
+      }
+    },
+    "merged": {
+      "commit": "d23ff760f8448b51579016d96f39590018445724",
+      "files": {
+        "_common.py": {
+          "sha256": "35239cd3809e4e4038c43b1f323da012ebe90b66d75761163988eb6160344c04",
+          "bytes": 859
+        },
+        "relativedelta.py": {
+          "sha256": "73dc3c523083fb4a1b8300fb428a6196b4948caaaa0800789230c7fa360bf992",
+          "bytes": 24962
+        }
+      }
+    }
+  }
+}

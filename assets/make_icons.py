@@ -25,6 +25,7 @@ TOPICS = {
     "负指针_pypdf": ("row", "tick", "outlier"),  # 偏移指针落到文件左边之外
     "旋转丢元素_pottery": ("ring", "bar", "flip"),  # 旋转方向反了，元素少了一个
     "本地时间_tomlkit": ("row", "bar", "extra"),  # 本地时间后面多出一段偏移
+    "第366天_dateutil": ("row", "tick", "double"),  # 第 366 天先被 clamp 压回月末，又被 leapdays 减了一天
 }
 
 # ---- 记号：point 画在线段中点，line 画整条线段 ----

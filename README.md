@@ -16,6 +16,18 @@
 
 <table>
 <tr>
+<td width="88" align="center" valign="top"><a href="第366天_dateutil/dateutil_第366天_中文版.md"><img src="第366天_dateutil/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[第 366 天，落回了 12 月 30 日](第366天_dateutil/dateutil_第366天_中文版.md)**
+
+从 2000 年 1 月 1 日取第 366 天，dateutil 返回的还是 12 月 30 日，和第 365 天同一个日期。`yearday` 先被换算成 12 月 32 日，clamp 把它压回月末，闰年的补偿又减了一天；2000–2399 逐日枚举，97 个闰年全错在这一天。
+
+<sub>2026-11-03 · [English](第366天_dateutil/dateutil_Day_366_Lands_on_Dec_30_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
 <td width="88" align="center" valign="top"><a href="负指针_pypdf/pypdf_负指针_中文版.md"><img src="负指针_pypdf/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
@@ -227,6 +239,7 @@ PostgreSQL 代理 pgdog 连续跑了 12 天以后，定时任务全都不再触�
 
 | 工程 | 跑出来的是什么 |
 | --- | --- |
+| [yearday_demo](第366天_dateutil/yearday_demo/) | 两份固定源码快照对照 `yearday=366` 的返回日期与 `relativedelta` 字段，并逐日枚举 2000–2399 的 146,097 个日期 |
 | [negative_startxref_demo](负指针_pypdf/negative_startxref_demo/) | 两份完整 pypdf 源码读同一份把 `startxref` 改成负数的 PDF，看修前在哪一处 `seek` 抛 `ValueError`、合并版如何归一化后重建 xref |
 | [rotate_demo](旋转丢元素_pottery/rotate_demo/) | 两版 pottery 在 fakeredis 上跑 369 组旋转，对照最终列表和实际发出的 `LPUSH`/`RPUSH`/`LTRIM` 参数 |
 | [local_time_demo](本地时间_tomlkit/local_time_demo/) | 两版 tomlkit 序列化同一个带时区的 `time`，看写出的文本、自己的解析器能否读回，以及不带时区时是否逐字节不变 |
