@@ -103,6 +103,24 @@ def with_pointer(value):
 negative = with_pointer(-offset)
 zero = with_pointer(0)
 
+# Boundary probe: the *other* pointer.  A trailer may carry /Prev, which is
+# also a byte offset from the start of the file; #4144 only normalizes the
+# trailing startxref, so a negative /Prev should still reach seek() as-is.
+trailer_at = healthy.find(b"trailer")
+dict_at = healthy.find(b"<<", trailer_at)
+prev_negative = healthy[:dict_at + 2] + b" /Prev -1" + healthy[dict_at + 2:]
+
+# Optional: write the four files to disk so scan_startxref.py (or any other
+# tool) can be pointed at them.  Only the merge snapshot is asked to emit.
+if len(sys.argv) > 2:
+    from pathlib import Path
+    out = Path(sys.argv[2])
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "healthy.pdf").write_bytes(healthy)
+    (out / "zero.pdf").write_bytes(zero)
+    (out / "negative.pdf").write_bytes(negative)
+    (out / "prev-negative.pdf").write_bytes(prev_negative)
+
 print(json.dumps({
     "version": pypdf.__version__,
     "offset": offset,
@@ -111,14 +129,18 @@ print(json.dumps({
     "zero": probe("zero", zero),
     "negative_strict": probe("negative_strict", negative, True),
     "zero_strict": probe("zero_strict", zero, True),
+    "prev_negative": probe("prev_negative", prev_negative),
 }))
 """
 
 
-def run_child(label: str) -> dict:
+def run_child(label: str, emit: Path | None = None) -> dict:
     package = ROOT / "vendor" / label
+    command = [sys.executable, "-I", "-B", "-S", "-c", CHILD, str(package)]
+    if emit is not None:
+        command.append(str(emit))
     proc = subprocess.run(
-        [sys.executable, "-I", "-B", "-S", "-c", CHILD, str(package)],
+        command,
         capture_output=True,
         text=True,
         encoding="utf-8",
@@ -143,6 +165,12 @@ def main() -> int:
     parser.add_argument("--test", action="store_true", help="run all assertions")
     parser.add_argument("--json", action="store_true", help="print JSON only")
     parser.add_argument("--output", type=Path, help="also write the JSON report here")
+    parser.add_argument(
+        "--emit",
+        type=Path,
+        metavar="DIR",
+        help="also write healthy.pdf / zero.pdf / negative.pdf / prev-negative.pdf into DIR",
+    )
     args = parser.parse_args()
 
     if not (sys.flags.isolated and sys.flags.dont_write_bytecode and sys.flags.no_site):
@@ -158,7 +186,8 @@ def main() -> int:
 
     results = {}
     for label in ("parent", "merge"):
-        results[label] = run_child(label)
+        emit = args.emit if label == "merge" else None
+        results[label] = run_child(label, emit)
         results[label]["source_sha"] = VERSIONS[label]["sha"]
         results[label]["source_role"] = VERSIONS[label]["role"]
         results[label]["source_files"] = sum(
@@ -241,6 +270,17 @@ def main() -> int:
     )
     check(merge["zero_strict"]["warnings"] == [], "merge: strict zero should not warn")
 
+    # Boundary: a negative /Prev in the trailer is a different offset, and the
+    # fix deliberately does not touch it.  Both versions must still leak here.
+    for label, data in results.items():
+        prev = data["prev_negative"]
+        check(
+            not prev["ok"]
+            and prev["type"] == "ValueError"
+            and prev["message"] == "negative seek value -1",
+            f"{label}: negative /Prev should still raise ValueError(-1), got {compact(prev)}",
+        )
+
     report = {
         "demo": "pypdf-negative-startxref",
         "python": sys.version.split()[0],
@@ -256,7 +296,14 @@ def main() -> int:
         "cases": {
             label: {
                 key: data[key]
-                for key in ("healthy", "zero", "negative", "negative_strict", "zero_strict")
+                for key in (
+                    "healthy",
+                    "zero",
+                    "negative",
+                    "negative_strict",
+                    "zero_strict",
+                    "prev_negative",
+                )
             }
             for label, data in results.items()
         },
@@ -278,7 +325,14 @@ def main() -> int:
         print(f"Python {report['python']}  (two complete pypdf snapshots, no install)")
         print(f"{'case':22} {'parent b78c2aa':32} {'merge 91a73b5':32}")
         print("-" * 90)
-        for key in ("healthy", "zero", "negative", "negative_strict", "zero_strict"):
+        for key in (
+            "healthy",
+            "zero",
+            "negative",
+            "negative_strict",
+            "zero_strict",
+            "prev_negative",
+        ):
             print(f"{key:22} {compact(parent[key]):32} {compact(merge[key]):32}")
         if failures:
             print("\nFAIL")
@@ -289,6 +343,8 @@ def main() -> int:
                 "\nPASS: parent leaks ValueError(-257); merge warns, recovers one page, "
                 "and raises PdfReadError in strict mode."
             )
+        if args.emit:
+            print(f"\nemitted: {args.emit}\\healthy.pdf, zero.pdf, negative.pdf, prev-negative.pdf")
 
     return 0 if not failures else 1
 

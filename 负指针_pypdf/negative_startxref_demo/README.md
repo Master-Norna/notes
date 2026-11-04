@@ -12,12 +12,15 @@
 python -B -S 负指针_pypdf/negative_startxref_demo/run.py --test
 python -B -S 负指针_pypdf/negative_startxref_demo/run.py --test --json
 python -B -S 负指针_pypdf/negative_startxref_demo/run.py --test --output negative-startxref.json
+python -B -S 负指针_pypdf/negative_startxref_demo/run.py --test --emit $env:TEMP\ptr-emit
+python -B -S 负指针_pypdf/negative_startxref_demo/scan_startxref.py $env:TEMP\ptr-emit\*.pdf
 ```
 
 也可以把整个 `negative_startxref_demo/` 单独复制出去，在任意工作目录用其 `run.py` 的绝对路径执行。不依赖仓库其他文件、`.yan/`、Git、网络或安装步骤。
 
 - `--test` 明确请求全部断言；不传也执行同样的校验。
 - `--json` 让 stdout 只含完整 JSON；`--output PATH` 同时保存相同格式的报告，父目录按需创建。失败时 stderr 输出原因，退出码非零。
+- `--emit DIR` 把 `healthy.pdf`、`zero.pdf`、`negative.pdf`、`prev-negative.pdf` 四份样例写到磁盘，供 `scan_startxref.py` 或别的工具检查；字节与子进程内存里读的完全一致。
 - 入口会确认 `-I -B -S`，缺少时自动启动相同解释器的隔离子进程，再为两版分别启动 `-I -B -S` 子进程。`-I` 忽略 `PYTHONPATH` 与用户 site，`-S` 不加载 site-packages，`-B` 不写 `.pyc`。
 - 子进程安装 Python audit hook，拒绝所有 `socket.*` 事件；这是离线运行约束，不是对恶意 Python 代码的操作系统级安全沙箱。
 
@@ -32,8 +35,18 @@ zero                   ok pages=1 warnings=2            ok pages=1 warnings=2
 negative               ValueError: negative seek value -257 ok pages=1 warnings=3
 negative_strict        ValueError: negative seek value -257 PdfReadError: Broken xref table
 zero_strict            PdfReadError: Broken xref table  PdfReadError: Broken xref table
+prev_negative          ValueError: negative seek value -1 ValueError: negative seek value -1
 
 PASS: parent leaks ValueError(-257); merge warns, recovers one page, and raises PdfReadError in strict mode.
+```
+
+`scan_startxref.py` 只读最后 1 KiB，报告末尾指针与 `/Prev` 指向何处：
+
+```text
+healthy.pdf          startxref 256: inside file, starts 'xref 0 5 000'
+negative.pdf         startxref -256: negative, 256 bytes before the file starts
+prev-negative.pdf    startxref 256: inside file, starts 'xref 0 5 000'; /Prev -1: negative, 1 byte before the file starts
+zero.pdf             startxref 0: zero, points at byte 0
 ```
 
 ## 输入是怎么造的
@@ -69,9 +82,10 @@ negative = healthy[:marker] + b"startxref\n-256\n%%EOF" + tail
 | `negative` | 修前抛 `ValueError: negative seek value -257`；合并版一页，按顺序警告 `Negative startxref pointer (-256), treating it as zero.`、`incorrect startxref pointer(4)`、`parsing for Object Streams` |
 | `negative_strict` | 修前仍抛 `ValueError`；合并版抛 pypdf 的 `PdfReadError: Broken xref table`，只先记一条负数警告 |
 | `zero_strict` | 两版都抛 `PdfReadError: Broken xref table`，不记警告 |
+| `prev_negative` | 边界：trailer 里的 `/Prev -1` 不是末尾指针，两版都仍抛 `ValueError: negative seek value -1` |
 
 `-257` 不是笔误：代码先执行 `seek(startxref - 1)`，`-256 - 1` 就是 `-257`。这个数字直接来自本轮输出，也解释了为什么修前的异常看起来像 Python 的 `open()` 错误，而不是 pypdf 的格式错误。
 
 ## 范围
 
-这是一个一页、无压缩、无加密 PDF 的窄复现；只覆盖 `read()` 入口的 `startxref` 归一化，以及 `strict=False/True` 两条路径。没有覆盖所有畸形 PDF、其他负偏移位置、xref 流、增量更新、加密文件或完整上游测试套件。固定提交合并事实不等于首次发行版本或受影响版本范围。
+这是一个一页、无压缩、无加密 PDF 的窄复现；只覆盖 `read()` 入口的 `startxref` 归一化，以及 `strict=False/True` 两条路径。`prev_negative` 用例专门标出边界：trailer 里的 `/Prev` 是另一个偏移，两版都还在抛 `ValueError`，这条补丁没有碰它。没有覆盖所有畸形 PDF、其他负偏移位置、xref 流、增量更新、加密文件或完整上游测试套件。固定提交合并事实不等于首次发行版本或受影响版本范围。

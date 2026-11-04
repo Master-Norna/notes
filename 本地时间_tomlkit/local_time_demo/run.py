@@ -39,7 +39,7 @@ def sha256(path: Path) -> str:
 
 CHILD = r"""
 import json, sys
-from datetime import time, timedelta, timezone
+from datetime import datetime, time, timedelta, timezone
 
 def deny_socket(event, args):
     if event.startswith("socket."):
@@ -96,7 +96,47 @@ except Exception as exc:
         "error_type": type(exc).__name__,
         "error": str(exc),
     }
+result["boundary"] = {
+    "time_utc": render(time(7, 32, tzinfo=timezone.utc))["as_string"],
+    "micro_100000": render(time(7, 32, 0, 100000, tzinfo=TZ))["as_string"],
+    "micro_one": render(time(7, 32, 0, 1, tzinfo=TZ))["as_string"],
+    "micro_naive": render(time(7, 32, 0, 123450))["as_string"],
+    "fold_one": render(time(7, 32, fold=1))["as_string"],
+    "datetime_aware": item(datetime(2026, 11, 4, 7, 32, tzinfo=TZ)).as_string(),
+    "datetime_utc": item(datetime(2026, 11, 4, 7, 32, tzinfo=timezone.utc)).as_string(),
+    "datetime_replace": item(
+        datetime(2026, 11, 4, 7, 32, tzinfo=timezone.utc)
+    ).replace(hour=13).as_string(),
+    "array": dumps({"a": [item(aware)]}).strip(),
+    "parsed_text": dumps(parse("t = 07:32:00.123450")).strip(),
+    "parsed_replace": dumps(
+        {"t": parse("t = 07:32:00.123450")["t"].replace(minute=33)}
+    ).strip(),
+}
 print(json.dumps(result, ensure_ascii=False))
+"""
+
+
+EMIT = r"""
+import sys
+from datetime import datetime, time, timedelta, timezone
+sys.path.insert(0, sys.argv[1])
+from tomlkit import dumps, item
+
+folder, label = sys.argv[2], sys.argv[3]
+zone = timezone(timedelta(hours=2))
+with open(f"{folder}/{label}.toml", "w", encoding="utf-8", newline="\n") as handle:
+    handle.write(dumps({"schedule": {"start": item(time(7, 32, tzinfo=zone))}}))
+
+if label == "merge":
+    legal = dumps(
+        {
+            "note": item("07:32:00+02:00"),
+            "stamp": item(datetime(1979, 5, 27, 7, 32, tzinfo=zone)),
+        }
+    )
+    with open(f"{folder}/legal.toml", "w", encoding="utf-8", newline="\n") as handle:
+        handle.write(legal)
 """
 
 
@@ -122,6 +162,12 @@ def main() -> int:
     parser.add_argument("--test", action="store_true", help="run all assertions")
     parser.add_argument("--json", action="store_true", help="print JSON only")
     parser.add_argument("--output", type=Path, help="also write the JSON report here")
+    parser.add_argument(
+        "--emit",
+        type=Path,
+        metavar="DIR",
+        help="write DIR/parent.toml and DIR/merge.toml as each snapshot dumps them",
+    )
     args = parser.parse_args()
 
     if not (sys.flags.isolated and sys.flags.dont_write_bytecode and sys.flags.no_site):
@@ -134,6 +180,30 @@ def main() -> int:
             *sys.argv[1:],
         ]
         raise SystemExit(subprocess.call(command))
+
+    if args.emit:
+        args.emit.mkdir(parents=True, exist_ok=True)
+        for label in ("parent", "merge"):
+            proc = subprocess.run(
+                [
+                    sys.executable,
+                    "-I",
+                    "-B",
+                    "-S",
+                    "-c",
+                    EMIT,
+                    str(ROOT / "vendor" / label),
+                    str(args.emit),
+                    label,
+                ],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                env={**os.environ, "PYTHONPATH": ""},
+            )
+            if proc.returncode != 0:
+                raise SystemExit(f"emit {label} failed: {proc.stderr}")
+            print(f"wrote {args.emit / (label + '.toml')}")
 
     results = {}
     for label in ("parent", "merge"):
@@ -209,6 +279,55 @@ def main() -> int:
         "merge: naive output must be byte-for-byte unchanged",
     )
 
+    # Boundary cases: what the #613 rendering does and does not touch.
+    boundary = {label: data["boundary"] for label, data in results.items()}
+    for label, data in boundary.items():
+        check(
+            data["datetime_aware"] == "2026-11-04T07:32:00+02:00",
+            f"{label}: aware datetime {data['datetime_aware']}",
+        )
+        check(
+            data["datetime_utc"] == "2026-11-04T07:32:00Z",
+            f"{label}: utc datetime {data['datetime_utc']}",
+        )
+        check(
+            data["datetime_replace"] == "2026-11-04T13:32:00+00:00",
+            f"{label}: datetime replace {data['datetime_replace']}",
+        )
+        check(
+            data["parsed_text"] == "t = 07:32:00.123450",
+            f"{label}: parsed text must survive a round trip: {data['parsed_text']}",
+        )
+        check(data["fold_one"] == "07:32:00", f"{label}: fold {data['fold_one']}")
+
+    check(boundary["parent"]["time_utc"] == "07:32:00+00:00", "parent: utc offset")
+    check(
+        boundary["parent"]["micro_100000"] == "07:32:00.100000+02:00",
+        "parent: micro 100000",
+    )
+    check(
+        boundary["parent"]["micro_naive"] == "07:32:00.123450",
+        "parent: naive microseconds keep their trailing zero",
+    )
+    check(
+        boundary["parent"]["parsed_replace"] == "t = 07:33:00.123450",
+        "parent: replace on a parsed value",
+    )
+    check(boundary["parent"]["array"] == "a = [07:32:00+02:00]", "parent: array element")
+
+    check(boundary["merge"]["time_utc"] == "07:32:00", "merge: utc offset dropped")
+    check(boundary["merge"]["micro_100000"] == "07:32:00.1", "merge: micro 100000")
+    check(boundary["merge"]["micro_one"] == "07:32:00.000001", "merge: micro 1")
+    check(
+        boundary["merge"]["micro_naive"] == "07:32:00.12345",
+        "merge: naive microseconds also lose the trailing zero",
+    )
+    check(
+        boundary["merge"]["parsed_replace"] == "t = 07:33:00.12345",
+        "merge: replace on a parsed value",
+    )
+    check(boundary["merge"]["array"] == "a = [07:32:00]", "merge: array element")
+
     report = {
         "demo": "tomlkit-local-time",
         "python": sys.version.split()[0],
@@ -235,6 +354,7 @@ def main() -> int:
             }
             for label, data in results.items()
         },
+        "boundary": boundary,
         "assertions": {"passed": not failures, "failures": failures},
     }
 
@@ -272,6 +392,27 @@ def main() -> int:
         ]
         for name, before, after in rows:
             print(f"{name:28} {before:32} {after:32}")
+
+        print()
+        print("boundary cases")
+        print(f"{'case':28} {'parent 763bd66':32} {'merge ce8f8ee':32}")
+        print("-" * 94)
+        boundary_rows = [
+            ("time(tzinfo=utc)", "time_utc"),
+            ("micro 100000 (aware)", "micro_100000"),
+            ("micro 1 (aware)", "micro_one"),
+            ("micro 123450 (naive)", "micro_naive"),
+            ("fold=1 (naive)", "fold_one"),
+            ("datetime (aware)", "datetime_aware"),
+            ("datetime (utc)", "datetime_utc"),
+            ("datetime.replace(hour=13)", "datetime_replace"),
+            ("dumps(array)", "array"),
+            ("parse().dumps()", "parsed_text"),
+            ("parse().replace(minute=33)", "parsed_replace"),
+        ]
+        for name, key in boundary_rows:
+            print(f"{name:28} {boundary['parent'][key]:32} {boundary['merge'][key]:32}")
+
         if failures:
             print("\nFAIL")
             for failure in failures:
@@ -279,7 +420,8 @@ def main() -> int:
         else:
             print(
                 "\nPASS: parent writes 07:32:00+02:00 and cannot parse its own output; "
-                "merge writes 07:32:00, parses it back, and leaves naive times unchanged."
+                "merge writes 07:32:00, parses it back, leaves whole-second naive times "
+                "unchanged, and touches neither datetime nor parsed text."
             )
 
     return 0 if not failures else 1
