@@ -1,6 +1,10 @@
 # Rust 构建产物
 **/target/
 
+# 单文件 rustc 构建的复现产物
+百分号解码_epub_start/percent_decode_demo/*.exe
+百分号解码_epub_start/percent_decode_demo/*.pdb
+
 # Python
 __pycache__/
 *.pyc

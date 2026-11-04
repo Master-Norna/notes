@@ -26,6 +26,8 @@ TOPICS = {
     "旋转丢元素_pottery": ("ring", "bar", "flip"),  # 旋转方向反了，元素少了一个
     "本地时间_tomlkit": ("row", "bar", "extra"),  # 本地时间后面多出一段偏移
     "第366天_dateutil": ("row", "tick", "double"),  # 第 366 天先被 clamp 压回月末，又被 leapdays 减了一天
+    "百分号解码_epub_start": ("row", "bar", "grow"),  # 同一个条目名编码后变长，按字面查找就没命中
+    "零阈值_scrapling": ("stack", "bar", "gap"),  # 分母为零，这一段比值根本没算下去
 }
 
 # ---- 记号：point 画在线段中点，line 画整条线段 ----

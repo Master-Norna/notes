@@ -16,6 +16,30 @@
 
 <table>
 <tr>
+<td width="88" align="center" valign="top"><a href="百分号解码_epub_start/epub_中文封面404_中文版.md"><img src="百分号解码_epub_start/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[中文封面为什么 404](百分号解码_epub_start/epub_中文封面404_中文版.md)**
+
+`OEBPS/图片/封面.png` 在 ZIP 里是 23 个字节，浏览器发来的请求路径是 47 个 ASCII 字符；处理器拿这串字符去按字面找，找不到。解码要放在入口、要走在路径校验前面，而且只能做一次——`save_book_image` 那一层收到的，已经是解好的名字。
+
+<sub>2026-11-03 · [English](百分号解码_epub_start/epub_Why_the_Chinese_Cover_404s_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
+<td width="88" align="center" valign="top"><a href="零阈值_scrapling/scrapling_零阈值仍过滤_中文版.md"><img src="零阈值_scrapling/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[阈值写 0，过滤为什么没关](零阈值_scrapling/scrapling_零阈值仍过滤_中文版.md)**
+
+参考链接没有属性、候选多一个 `class`，`checks` 停在 0；旧代码把「没有可比的属性」当成「不相似」，直接返回。修复只把 `return False` 换成了 `0 >= similarity_threshold`，14 行对照里只有两行变了。
+
+<sub>2026-11-03 · [English](零阈值_scrapling/scrapling_Zero_Threshold_Still_Filters_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
 <td width="88" align="center" valign="top"><a href="第366天_dateutil/dateutil_第366天_中文版.md"><img src="第366天_dateutil/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
@@ -239,6 +263,8 @@ PostgreSQL 代理 pgdog 连续跑了 12 天以后，定时任务全都不再触�
 
 | 工程 | 跑出来的是什么 |
 | --- | --- |
+| [percent_decode_demo](百分号解码_epub_start/percent_decode_demo/) | 两版协议处理器读同一份含中文、空格、`#`、`?`、`%` 条目名的 EPUB，9 个请求在哪一版是 404，解码与路径校验的先后如何把一次穿越从 404 变成 403 |
+| [threshold_demo](零阈值_scrapling/threshold_demo/) | 两版 `parser.py` 跑 7 个页面 × 2 个阈值，看 0 阈值下「参考无属性、候选有属性」那一格修前修后差在哪里 |
 | [yearday_demo](第366天_dateutil/yearday_demo/) | 两份固定源码快照对照 `yearday=366` 的返回日期与 `relativedelta` 字段，并逐日枚举 2000–2399 的 146,097 个日期 |
 | [negative_startxref_demo](负指针_pypdf/negative_startxref_demo/) | 两份完整 pypdf 源码读同一份把 `startxref` 改成负数的 PDF，看修前在哪一处 `seek` 抛 `ValueError`、合并版如何归一化后重建 xref |
 | [rotate_demo](旋转丢元素_pottery/rotate_demo/) | 两版 pottery 在 fakeredis 上跑 369 组旋转，对照最终列表和实际发出的 `LPUSH`/`RPUSH`/`LTRIM` 参数 |
