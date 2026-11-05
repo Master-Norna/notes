@@ -28,6 +28,7 @@ TOPICS = {
     "第366天_dateutil": ("row", "tick", "double"),  # 第 366 天先被 clamp 压回月末，又被 leapdays 减了一天
     "百分号解码_epub_start": ("row", "bar", "grow"),  # 同一个条目名编码后变长，按字面查找就没命中
     "零阈值_scrapling": ("stack", "bar", "gap"),  # 分母为零，这一段比值根本没算下去
+    "覆盖输入_skylos": ("grid", "dot", "missing"),  # 守卫的名单比收集器少了 13 个输入名，那一格是空的
 }
 
 # ---- 记号：point 画在线段中点，line 画整条线段 ----

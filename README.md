@@ -16,6 +16,18 @@
 
 <table>
 <tr>
+<td width="88" align="center" valign="top"><a href="覆盖输入_skylos/skylos_退出码0锁文件没了_中文版.md"><img src="覆盖输入_skylos/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[退出码 0，Cargo.lock 没了](覆盖输入_skylos/skylos_退出码0锁文件没了_中文版.md)**
+
+`skylos sbom . -o Cargo.lock` 退出 0，把 7 个包的锁文件写成了一份 CycloneDX JSON。守卫认识 11 个依赖文件名，收集器认识 24 个；差的 13 个里有 6 个是手写清单，丢了没有命令能重建。
+
+<sub>2026-11-05 · [English](覆盖输入_skylos/skylos_Exit_Code_0_Lockfile_Gone_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
 <td width="88" align="center" valign="top"><a href="百分号解码_epub_start/epub_中文封面404_中文版.md"><img src="百分号解码_epub_start/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
@@ -263,6 +275,7 @@ PostgreSQL 代理 pgdog 连续跑了 12 天以后，定时任务全都不再触�
 
 | 工程 | 跑出来的是什么 |
 | --- | --- |
+| [overwrite_demo](覆盖输入_skylos/overwrite_demo/) | 两版输出守卫对 24 个依赖输入名逐个跑一遍，看修前哪 13 个被安静覆盖、修后是否全部拒绝，另比对大小写、子目录、`.csproj` 与 `pins.txt` 的字节 |
 | [percent_decode_demo](百分号解码_epub_start/percent_decode_demo/) | 两版协议处理器读同一份含中文、空格、`#`、`?`、`%` 条目名的 EPUB，9 个请求在哪一版是 404，解码与路径校验的先后如何把一次穿越从 404 变成 403 |
 | [threshold_demo](零阈值_scrapling/threshold_demo/) | 两版 `parser.py` 跑 7 个页面 × 2 个阈值，看 0 阈值下「参考无属性、候选有属性」那一格修前修后差在哪里 |
 | [yearday_demo](第366天_dateutil/yearday_demo/) | 两份固定源码快照对照 `yearday=366` 的返回日期与 `relativedelta` 字段，并逐日枚举 2000–2399 的 146,097 个日期 |
