@@ -91,11 +91,11 @@
 <td width="88" align="center" valign="top"><a href="本地时间_tomlkit/tomlkit_本地时间没有时区_中文版.md"><img src="本地时间_tomlkit/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
-**[写出去的时间，自己读不回来](本地时间_tomlkit/tomlkit_本地时间没有时区_中文版.md)**
+**[tomlkit 写出的 07:32:00+02:00，为什么自己读不回来](本地时间_tomlkit/tomlkit_本地时间没有时区_中文版.md)**
 
 `item(time(7, 32, tzinfo=+02:00))` 写出 `07:32:00+02:00`，交给它自己的 `parse()` 却抛 `InvalidTimeError`。TOML 的 Local Time 没有那六个字符的位置；修复只动了写出端，解析器照旧拒绝偏移。
 
-<sub>2026-11-01 · 2026-11-04 扩写 · [English](本地时间_tomlkit/TOML_tomlkit_Local_Time_No_Offset_EN.md)</sub>
+<sub>2026-11-01 · 2026-11-04 扩写 · 2026-11-05 改写 · [English](本地时间_tomlkit/TOML_tomlkit_Local_Time_No_Offset_EN.md)</sub>
 
 </td>
 </tr>
