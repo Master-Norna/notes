@@ -1,0 +1,252 @@
+from __future__ import annotations
+
+from collections.abc import (
+    ItemsView,
+    Iterator,
+    KeysView,
+    Mapping,
+    MutableMapping,
+    Reversible,
+    ValuesView,
+)
+from typing import Any, cast
+
+from typing_extensions import Self, TypeVar
+
+from benedict.core.clone import clone as _clone
+
+_K = TypeVar("_K", default=str)
+_V = TypeVar("_V", default=Any)
+
+
+class BaseDict(dict[_K, _V]):
+    _dict: dict[_K, _V] | None
+    _frozen: bool
+
+    # ids of mappings being unwrapped anywhere on the call stack, to detect
+    # self-referential structures instead of recursing forever
+    _unwrapping_ids: set[int] = set()
+
+    @classmethod
+    def _get_dict_or_value(cls, value: Any) -> Any:
+        value = value.dict() if isinstance(value, cls) else value
+        if isinstance(value, MutableMapping):
+            value_id = id(value)
+            if value_id in cls._unwrapping_ids:
+                # it contains itself; unwind here before reaching code with no cycle
+                # protection of its own
+                raise ValueError(
+                    "Cannot assign a dict that contains itself "
+                    "(directly or indirectly): self-referential "
+                    "(cyclic) structures are not supported."
+                )
+            cls._unwrapping_ids.add(value_id)
+            try:
+                for key in value.keys():
+                    key_val = value[key]
+                    if isinstance(key_val, cls):
+                        key_val = cls._get_dict_or_value(value[key])
+                        value[key] = key_val
+            finally:
+                cls._unwrapping_ids.discard(value_id)
+        return value
+
+    def __new__(cls, *args: Any, **kwargs: Any) -> Self:
+        obj = super().__new__(cls)
+        # bypass subclass __setattr__ (e.g. KeyattrDict) which may access _dict before it exists
+        object.__setattr__(obj, "_dict", None)
+        object.__setattr__(obj, "_frozen", False)
+        return obj
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        if len(args) == 1 and isinstance(args[0], Mapping):
+            # bypass subclass __setattr__ (e.g. KeyattrDict) which may treat _dict as a key
+            d = self._get_dict_or_value(args[0])
+            object.__setattr__(self, "_dict", d)
+            super().__init__(d)
+            return
+        super().__init__(*args, **kwargs)
+
+    def __bool__(self) -> bool:
+        if self._dict is not None:
+            return bool(self._dict)
+        return len(self.keys()) > 0
+
+    def __contains__(self, o: object) -> bool:
+        if self._dict is not None:
+            return o in self._dict
+        return super().__contains__(o)
+
+    def __deepcopy__(self, memo: dict[int, Any]) -> Self:
+        obj = self.__class__()
+        for key, value in self.items():
+            obj[key] = _clone(value, memo=memo)
+        if self._frozen:
+            obj.freeze()
+        return obj
+
+    def __delitem__(self, key: _K) -> None:
+        self._check_frozen()
+        if self._dict is not None:
+            del self._dict[key]
+            return
+        super().__delitem__(key)
+
+    def __eq__(self, other: object) -> bool:
+        if self._dict is not None:
+            return self._dict == other
+        return super().__eq__(other)
+
+    def __getitem__(self, key: _K) -> _V:
+        if self._dict is not None:
+            return self._dict[key]
+        return super().__getitem__(key)
+
+    def __ior__(self, other: Any) -> Self:  # type: ignore[misc,override]
+        self._check_frozen()
+        if self._dict is not None:
+            self._dict.__ior__(other)
+            return self
+        return super().__ior__(other)
+
+    def __iter__(self) -> Iterator[_K]:
+        if self._dict is not None:
+            return iter(self._dict)
+        return super().__iter__()
+
+    def __len__(self) -> int:
+        if self._dict is not None:
+            return len(self._dict)
+        return super().__len__()
+
+    def __ne__(self, other: object) -> bool:
+        if self._dict is not None:
+            return self._dict != other
+        return super().__ne__(other)
+
+    def __or__(self, other: dict[_K, _V]) -> Self:  # type: ignore[override]
+        if self._dict is not None:
+            return cast("Self", self._dict.__or__(other))
+        return cast("Self", super().__or__(other))
+
+    def __repr__(self) -> str:
+        if self._dict is not None:
+            return repr(self._dict)
+        return super().__repr__()
+
+    def __reversed__(self) -> Iterator[_K]:
+        if isinstance(self._dict, Reversible):
+            return reversed(self._dict)
+        return super().__reversed__()
+
+    def __setitem__(self, key: _K, value: _V) -> None:
+        self._check_frozen()
+        value = self._get_dict_or_value(value)
+        if self._dict is not None:
+            is_dict_item = key in self._dict and isinstance(self._dict[key], dict)
+            is_dict_value = isinstance(value, dict)
+            if is_dict_item and is_dict_value:
+                if self._dict[key] is value:
+                    # prevent clearing dict instance when assigning value to itself. fix #294
+                    return
+                self._dict[key].clear()  # type: ignore[attr-defined]
+                self._dict[key].update(value)  # type: ignore[attr-defined]
+                return
+            self._dict[key] = value
+            return
+        super().__setitem__(key, value)
+
+    def __setstate__(self, state: Mapping[str, Any]) -> None:
+        object.__setattr__(self, "_dict", state.get("_dict", None))
+        object.__setattr__(self, "_frozen", state.get("_frozen", False))
+
+    def __str__(self) -> str:
+        if self._dict is not None:
+            return str(self._dict)
+        return super().__str__()
+
+    def _check_frozen(self) -> None:
+        if self._frozen:
+            raise TypeError(
+                f"{self.__class__.__name__!r} object is frozen and cannot be modified."
+            )
+
+    @property
+    def frozen(self) -> bool:
+        return self._frozen
+
+    def freeze(self) -> Self:
+        object.__setattr__(self, "_frozen", True)
+        return self
+
+    def unfreeze(self) -> Self:
+        object.__setattr__(self, "_frozen", False)
+        return self
+
+    def clear(self) -> None:
+        self._check_frozen()
+        if self._dict is not None:
+            self._dict.clear()
+            return
+        super().clear()
+
+    def copy(self) -> Self:
+        obj = self.__class__()
+        for key, value in self.items():
+            obj[key] = value
+        if self._frozen:
+            obj.freeze()
+        return obj
+
+    def dict(self) -> Self:
+        if self._dict is not None:
+            return cast("Self", self._dict)
+        return self
+
+    def get(self, key: _K, default: _V | None = None) -> _V | None:  # type: ignore[override]
+        if self._dict is not None:
+            return self._dict.get(key, default)
+        return super().get(key, default)
+
+    def items(self) -> ItemsView[_K, _V]:  # type: ignore[override]
+        if self._dict is not None:
+            return self._dict.items()
+        return super().items()
+
+    def keys(self) -> KeysView[_K]:  # type: ignore[override]
+        if self._dict is not None:
+            return self._dict.keys()
+        return super().keys()
+
+    def pop(self, key: _K, *args: Any) -> _V:
+        self._check_frozen()
+        if self._dict is not None:
+            return self._dict.pop(key, *args)  # type: ignore[no-any-return]
+        return super().pop(key, *args)  # type: ignore[no-any-return]
+
+    def popitem(self) -> tuple[_K, _V]:
+        self._check_frozen()
+        if self._dict is not None:
+            return self._dict.popitem()
+        return super().popitem()
+
+    def setdefault(self, key: _K, default: _V | None = None) -> _V:
+        self._check_frozen()
+        default = self._get_dict_or_value(default)
+        assert default is not None
+        if self._dict is not None:
+            return self._dict.setdefault(key, default)
+        return super().setdefault(key, default)
+
+    def update(self, other: Any) -> None:
+        self._check_frozen()
+        other = self._get_dict_or_value(other)
+        if self._dict is not None:
+            self._dict.update(other)
+            return
+        super().update(other)
+
+    def values(self) -> ValuesView[_V]:  # type: ignore[override]
+        if self._dict is not None:
+            return self._dict.values()
+        return super().values()

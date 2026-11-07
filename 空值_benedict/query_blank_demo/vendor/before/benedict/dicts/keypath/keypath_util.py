@@ -1,0 +1,83 @@
+from __future__ import annotations
+
+import re
+from typing import Any, TypeAlias
+
+from benedict.core.traverse import traverse
+from benedict.utils import type_util
+
+KEY_INDEX_RE = r"(?:\[[\'\"]*(\-?[\d]+)[\'\"]*\]){1}$"
+KeyType: TypeAlias = list[str | int] | tuple[str | int, ...] | int | str | None
+
+
+def check_keys(d: Any, separator: str | None) -> None:
+    """
+    Check if dict keys contain keypath separator.
+    """
+    if not type_util.is_dict(d) or not separator:
+        return
+
+    def check_key(parent: Any, key: KeyType, value: Any) -> None:
+        if key and type_util.is_string(key) and separator in key:
+            raise ValueError(
+                f"Key should not contain keypath separator {separator!r}, found: {key!r}."
+            )
+
+    traverse(d, check_key)
+
+
+def parse_keys(keypath: KeyType, separator: str | None) -> list[str | int]:
+    """
+    Parse keys from keylist or keypath using the given separator.
+    """
+    if type_util.is_list(keypath):
+        keys = []
+        for key in keypath:
+            keys += parse_keys(key, separator)
+        return keys
+    return _split_keys_and_indexes(keypath, separator)
+
+
+def _split_key_indexes(key: str) -> list[str | int]:
+    """
+    Splits key indexes:
+    eg. 'item[0][1]' -> ['item', 0, 1].
+    """
+    if "[" in key and key.endswith("]"):
+        keys: list[str | int] = []
+        while True:
+            matches = re.findall(KEY_INDEX_RE, key)
+            if matches:
+                key = re.sub(KEY_INDEX_RE, "", key)
+                index = int(matches[0])
+                keys.insert(0, index)
+                # keys.insert(0, { keylist_util.INDEX_KEY:index })
+                continue
+            keys.insert(0, key)
+            break
+        return keys
+    return [key]
+
+
+def _split_keys(keypath: str, separator: str | None) -> list[str]:
+    """
+    Splits keys using the given separator:
+    eg. 'item.subitem[1]' -> ['item', 'subitem[1]'].
+    """
+    if separator:
+        return keypath.split(separator)
+    return [keypath]
+
+
+def _split_keys_and_indexes(keypath: Any, separator: str | None) -> list[Any]:
+    """
+    Splits keys and indexes using the given separator:
+    eg. 'item[0].subitem[1]' -> ['item', 0, 'subitem', 1].
+    """
+    if type_util.is_string(keypath):
+        keys1 = _split_keys(keypath, separator)
+        keys2: list[Any] = []
+        for key in keys1:
+            keys2 += _split_key_indexes(key)
+        return keys2
+    return [keypath]
