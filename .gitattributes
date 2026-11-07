@@ -1,0 +1,4 @@
+# 上游源码快照按字节入库：各工程的 provenance 记的是这些文件的 SHA-256，
+# 检出时不做换行转换，否则 Windows 上（core.autocrlf=true）克隆出来的哈希对不上。
+**/vendor/** -text
+**/fixtures/** -text
