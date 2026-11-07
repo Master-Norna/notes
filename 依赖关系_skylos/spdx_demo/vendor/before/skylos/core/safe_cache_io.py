@@ -1,0 +1,824 @@
+from __future__ import annotations
+
+import codecs
+import json
+import math
+import os
+import shutil
+import stat
+import time
+from collections.abc import Iterator
+from contextlib import contextmanager
+from pathlib import Path
+from typing import Any
+from uuid import uuid4
+
+DEFAULT_MAX_JSON_CACHE_BYTES = 2_000_000
+PROJECT_CACHE_LOCK_TIMEOUT_SECONDS = 1.0
+PROJECT_CACHE_LOCK_POLL_SECONDS = 0.01
+PROJECT_CACHE_LOCK_STALE_SECONDS = 3600.0
+
+
+UTF8_BOM = "\ufeff"
+
+
+def strip_utf8_bom(text: str) -> str:
+    """Drop one leading U+FEFF. In a UTF-8 file it is the byte-order mark, a
+    file signature rather than content: CPython, Node's module loader, npm
+    and pip all skip it, and Windows editors write it."""
+    return text[1:] if text.startswith(UTF8_BOM) else text
+
+
+def read_text_no_symlink(
+    path: str | Path,
+    *,
+    max_bytes: int,
+    encoding: str = "utf-8",
+    errors: str | None = None,
+    newline: str | None = None,
+    prefix: bool = False,
+) -> str | None:
+    if max_bytes < 0:
+        return None
+    try:
+        if Path(path).is_symlink():
+            return None
+    except OSError:
+        return None
+
+    flags = os.O_RDONLY
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    if hasattr(os, "O_NONBLOCK"):
+        flags |= os.O_NONBLOCK
+    if hasattr(os, "O_CLOEXEC"):
+        flags |= os.O_CLOEXEC
+
+    fd: int | None = None
+    try:
+        fd = os.open(  # skylos: ignore[SKY-D215] caller supplies guarded source/cache path
+            path, flags
+        )
+        stat_result = os.fstat(fd)
+        if not stat.S_ISREG(stat_result.st_mode):
+            return None
+        if not prefix and stat_result.st_size > max_bytes:
+            return None
+        if prefix:
+            return _decode_text_prefix(
+                os.read(fd, max_bytes),
+                encoding=encoding,
+                errors=errors,
+                newline=newline,
+            )
+        with os.fdopen(
+            fd,
+            "r",
+            encoding=encoding,
+            errors=errors,
+            newline=newline,
+        ) as handle:
+            fd = None
+            text = handle.read(max_bytes + 1)
+    except (OSError, UnicodeError):
+        return None
+    finally:
+        if fd is not None:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+
+    encoded_errors = errors or "strict"
+    encoded = text.encode(encoding, encoded_errors)
+    if len(encoded) > max_bytes:
+        return None
+    return text
+
+
+def read_project_text_no_symlink(
+    project_root: str | Path,
+    path: str | Path,
+    *,
+    max_bytes: int,
+    encoding: str = "utf-8",
+    errors: str | None = None,
+    newline: str | None = None,
+    prefix: bool = False,
+) -> str | None:
+    """Read a scoped regular file, optionally only a bounded text prefix.
+
+    Prefix mode keeps the no-follow checks and decodes at most ``max_bytes``
+    raw bytes without requiring the whole source file to fit that limit.
+    """
+    if max_bytes < 0:
+        return None
+    project_path = _project_relative_path(project_root, path)
+    if project_path is None:
+        return None
+    root, relative = project_path
+    if os.open not in os.supports_dir_fd:
+        return _read_project_text_fallback(
+            root,
+            relative,
+            max_bytes=max_bytes,
+            encoding=encoding,
+            errors=errors,
+            newline=newline,
+            prefix=prefix,
+        )
+
+    directory_fd: int | None = None
+    file_fd: int | None = None
+    try:
+        directory_fd = os.open(root, _directory_open_flags(follow_symlinks=True))
+        for part in relative.parts[:-1]:
+            next_fd = os.open(part, _directory_open_flags(), dir_fd=directory_fd)
+            os.close(directory_fd)
+            directory_fd = next_fd
+        flags = os.O_RDONLY
+        if hasattr(os, "O_NOFOLLOW"):
+            flags |= os.O_NOFOLLOW
+        if hasattr(os, "O_NONBLOCK"):
+            flags |= os.O_NONBLOCK
+        if hasattr(os, "O_CLOEXEC"):
+            flags |= os.O_CLOEXEC
+        file_fd = os.open(relative.parts[-1], flags, dir_fd=directory_fd)
+        file_stat = os.fstat(file_fd)
+        if not stat.S_ISREG(file_stat.st_mode) or (
+            not prefix and file_stat.st_size > max_bytes
+        ):
+            return None
+        if prefix:
+            return _decode_text_prefix(
+                os.read(file_fd, max_bytes),
+                encoding=encoding,
+                errors=errors,
+                newline=newline,
+            )
+        with os.fdopen(
+            file_fd,
+            "r",
+            encoding=encoding,
+            errors=errors,
+            newline=newline,
+        ) as handle:
+            file_fd = None
+            text = handle.read(max_bytes + 1)
+    except (OSError, UnicodeError):
+        return None
+    finally:
+        _close_file_descriptor(file_fd)
+        _close_file_descriptor(directory_fd)
+
+    encoded_errors = errors or "strict"
+    encoded = text.encode(encoding, encoded_errors)
+    if len(encoded) > max_bytes:
+        return None
+    return text
+
+
+def _decode_text_prefix(
+    data: bytes, *, encoding: str, errors: str | None, newline: str | None
+) -> str:
+    # A prefix may end in the middle of a code point. Incremental decoding
+    # leaves that incomplete suffix buffered, but still rejects malformed
+    # interior bytes with strict errors. Never read more bytes to complete it.
+    decoder = codecs.getincrementaldecoder(encoding)(errors=errors or "strict")
+    text = decoder.decode(data, final=False)
+    if newline is None:
+        return text.replace("\r\n", "\n").replace("\r", "\n")
+    if newline not in {"", "\n", "\r", "\r\n"}:
+        raise ValueError(f"illegal newline value: {newline}")
+    return text
+
+
+def _project_relative_path(
+    project_root: str | Path,
+    path: str | Path,
+) -> tuple[Path, Path] | None:
+    try:
+        root = _expand_user(Path(project_root)).resolve(strict=True)
+    except OSError:
+        return None
+    # A path inside the project is literal: Git never expands "~", so
+    # "~notes/todo.py" or "~/x.py" name folders in the repository, not a
+    # home directory (expanding them crashed on unknown users and read
+    # outside the project for known ones).
+    candidate = Path(path)
+    if not candidate.is_absolute():
+        candidate = root / candidate
+    try:
+        relative = candidate.relative_to(root)
+    except ValueError:
+        return None
+    if not relative.parts or any(part in {"", ".", ".."} for part in relative.parts):
+        return None
+    return root, relative
+
+
+def _expand_user(path: Path) -> Path:
+    """``path.expanduser()``, or ``path`` itself when "~name" names no user
+    (or there is no home directory): then it is a literal folder name."""
+    try:
+        return path.expanduser()
+    except (RuntimeError, KeyError):
+        return path
+
+
+def _read_project_text_fallback(
+    root: Path,
+    relative: Path,
+    *,
+    max_bytes: int,
+    encoding: str,
+    errors: str | None,
+    newline: str | None,
+    prefix: bool = False,
+) -> str | None:
+    current = root
+    try:
+        for part in relative.parts[:-1]:
+            current = current / part
+            if current.is_symlink() or not current.is_dir():
+                return None
+        candidate = current / relative.parts[-1]
+        candidate.resolve(strict=True).relative_to(root)
+    except (OSError, ValueError):
+        return None
+    return read_text_no_symlink(
+        candidate,
+        max_bytes=max_bytes,
+        encoding=encoding,
+        errors=errors,
+        newline=newline,
+        prefix=prefix,
+    )
+
+
+def _directory_open_flags(*, follow_symlinks: bool = False) -> int:
+    flags = os.O_RDONLY
+    if hasattr(os, "O_DIRECTORY"):
+        flags |= os.O_DIRECTORY
+    if not follow_symlinks and hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    return flags
+
+
+def _close_file_descriptor(file_descriptor: int | None) -> None:
+    if file_descriptor is None:
+        return
+    try:
+        os.close(file_descriptor)
+    except OSError:
+        pass
+
+
+def write_existing_text_no_symlink(
+    path: str | Path,
+    text: str,
+    *,
+    encoding: str = "utf-8",
+) -> bool:
+    try:
+        if Path(path).is_symlink():
+            return False
+    except OSError:
+        return False
+
+    flags = os.O_WRONLY | os.O_TRUNC
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+
+    fd: int | None = None
+    try:
+        fd = os.open(  # skylos: ignore[SKY-D215] caller supplies guarded existing file path
+            path, flags
+        )
+        stat_result = os.fstat(fd)
+        if not stat.S_ISREG(stat_result.st_mode):
+            return False
+        with os.fdopen(fd, "w", encoding=encoding) as handle:
+            fd = None
+            handle.write(text)
+            handle.flush()
+            os.fsync(handle.fileno())
+        return True
+    except (OSError, UnicodeError):
+        return False
+    finally:
+        if fd is not None:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+
+
+def _output_open_flags() -> int:
+    flags = os.O_WRONLY | os.O_CREAT
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    if hasattr(os, "O_NONBLOCK"):
+        flags |= os.O_NONBLOCK
+    if hasattr(os, "O_CLOEXEC"):
+        flags |= os.O_CLOEXEC
+    return flags
+
+
+def _open_output_parent(output_path: Path) -> int | None:
+    directory_fd: int | None = None
+    try:
+        directory_fd = os.open(
+            output_path.anchor or os.sep,
+            _directory_open_flags(follow_symlinks=True),
+        )
+        for component in output_path.parent.parts[1:]:
+            next_fd = os.open(
+                component,
+                _directory_open_flags(),
+                dir_fd=directory_fd,
+            )
+            os.close(directory_fd)
+            directory_fd = next_fd
+        return directory_fd
+    except OSError:
+        _close_file_descriptor(directory_fd)
+        return None
+
+
+def _fallback_output_parent_is_safe(output_path: Path) -> bool:
+    current = Path(output_path.anchor)
+    try:
+        for component in output_path.parent.parts[1:]:
+            current /= component
+            if current.is_symlink() or not current.is_dir():
+                return False
+        return not output_path.is_symlink()
+    except OSError:
+        return False
+
+
+def _open_output_file(output_path: Path) -> int | None:
+    flags = _output_open_flags()
+    if (
+        os.open in os.supports_dir_fd
+        and os.name != "nt"
+        and hasattr(os, "O_DIRECTORY")
+        and hasattr(os, "O_NOFOLLOW")
+    ):
+        directory_fd = _open_output_parent(output_path)
+        if directory_fd is None:
+            return None
+        try:
+            return os.open(  # skylos: ignore[SKY-D215] verified no-follow parent dir_fd and explicit output basename
+                output_path.name,
+                flags,
+                0o600,
+                dir_fd=directory_fd,
+            )
+        except OSError:
+            return None
+        finally:
+            _close_file_descriptor(directory_fd)
+
+    if not _fallback_output_parent_is_safe(output_path):
+        return None
+    try:
+        return os.open(  # skylos: ignore[SKY-D215] fallback rejects symlink parents and validates the opened file
+            output_path,
+            flags,
+            0o600,
+        )
+    except OSError:
+        return None
+
+
+def write_text_no_symlink(
+    path: str | Path,
+    text: str,
+    *,
+    encoding: str = "utf-8",
+    newline: str | None = None,
+) -> bool:
+    """Create or replace a regular file without following path symlinks."""
+
+    try:
+        output_path = Path(os.path.abspath(Path(path).expanduser()))
+    except (OSError, RuntimeError, ValueError):
+        return False
+    if not output_path.name:
+        return False
+
+    fd = _open_output_file(output_path)
+    if fd is None:
+        return False
+    try:
+        stat_result = os.fstat(fd)
+        if not stat.S_ISREG(stat_result.st_mode) or stat_result.st_nlink != 1:
+            return False
+        os.ftruncate(fd, 0)
+        with os.fdopen(fd, "w", encoding=encoding, newline=newline) as handle:
+            fd = None
+            handle.write(text)
+            handle.flush()
+            os.fsync(handle.fileno())
+        return True
+    except (OSError, UnicodeError):
+        return False
+    finally:
+        _close_file_descriptor(fd)
+
+
+def remove_project_tree_no_symlink(
+    project_root: str | Path,
+    tree_path: str | Path,
+) -> bool:
+    """Remove an in-project directory without following symlink components."""
+
+    if not shutil.rmtree.avoids_symlink_attacks:
+        return False
+    if os.open not in os.supports_dir_fd or os.stat not in os.supports_dir_fd:
+        return False
+    if os.stat not in os.supports_follow_symlinks:
+        return False
+
+    resolved = _resolve_project_cache_path(project_root, tree_path)
+    if resolved is None:
+        return False
+    root, path = resolved
+    try:
+        relative = path.relative_to(root)
+    except ValueError:
+        return False
+    if not relative.parts:
+        return False
+
+    directory_fd: int | None = None
+    try:
+        directory_fd = os.open(root, _directory_open_flags())
+        for component in relative.parts[:-1]:
+            component_name = Path(component).name
+            if component_name != component or component_name in {"", ".", ".."}:
+                return False
+            next_fd = os.open(
+                component_name,
+                _directory_open_flags(),
+                dir_fd=directory_fd,
+            )
+            os.close(directory_fd)
+            directory_fd = next_fd
+
+        tree_name = relative.name
+        if tree_name in {"", ".", ".."}:
+            return False
+        tree_stat = os.stat(tree_name, dir_fd=directory_fd, follow_symlinks=False)
+        if not stat.S_ISDIR(tree_stat.st_mode):
+            return False
+        shutil.rmtree(tree_name, dir_fd=directory_fd)
+        return True
+    except (FileNotFoundError, NotADirectoryError, OSError):
+        return False
+    finally:
+        _close_file_descriptor(directory_fd)
+
+
+def _project_cache_path(
+    project_root: str | Path,
+    cache_path: str | Path,
+    *,
+    create: bool,
+) -> Path | None:
+    resolved = _resolve_project_cache_path(project_root, cache_path)
+    if resolved is None:
+        return None
+    root, path = resolved
+    if not _ensure_cache_parent(root, path, create=create):
+        return None
+    if not _is_regular_cache_file(path):
+        return None
+    return path
+
+
+# (project dir, cache dir) pairs: while active, project caches for anything
+# at or under the project dir are stored in the cache dir instead. Agent hooks
+# use it so a user-level install never writes ``.skylos/`` into a directory
+# that is not a Git repo.
+_CACHE_ROOT_REDIRECTS: list[tuple[Path, Path]] = []
+
+
+@contextmanager
+def redirect_project_caches(project_dir: str | Path, cache_dir: str | Path):
+    try:
+        source = Path(project_dir).resolve(strict=True)
+        target = Path(cache_dir).resolve(strict=True)
+    except OSError:
+        yield
+        return
+    if source == target:
+        yield
+        return
+    pair = (source, target)
+    _CACHE_ROOT_REDIRECTS.append(pair)
+    try:
+        yield
+    finally:
+        _CACHE_ROOT_REDIRECTS.remove(pair)
+
+
+def _redirected_root(root: Path) -> Path:
+    for source, target in reversed(_CACHE_ROOT_REDIRECTS):
+        if root == source or source in root.parents:
+            return target
+    return root
+
+
+def _resolve_project_cache_path(
+    project_root: str | Path,
+    cache_path: str | Path,
+) -> tuple[Path, Path] | None:
+    try:
+        root = Path(project_root).resolve(strict=True)
+    except OSError:
+        return None
+
+    path = Path(cache_path)
+    redirected = _redirected_root(root) if _CACHE_ROOT_REDIRECTS else root
+    if redirected != root:
+        if path.is_absolute():
+            try:
+                path = path.relative_to(root)
+            except ValueError:
+                return None
+        root = redirected
+    if not path.is_absolute():
+        path = root / path
+
+    try:
+        relative = path.relative_to(root)
+    except ValueError:
+        return None
+    if any(part == ".." for part in relative.parts):
+        return None
+
+    return root, path
+
+
+# Generated state under .skylos/ that never belongs in a commit. Each of these
+# directories ignores itself, which leaves the repository's .gitignore and the
+# files people do commit in .skylos/ (config, baseline, contracts) alone.
+_GENERATED_SKYLOS_DIRS = frozenset({"cache", "contribution", "index", "receipts"})
+
+
+def _ensure_cache_parent(root: Path, path: Path, *, create: bool) -> bool:
+    try:
+        relative_parent = path.parent.relative_to(root)
+    except ValueError:
+        return False
+
+    current = root
+    for part in relative_parent.parts:
+        current = current / part
+        if not _ensure_cache_dir(root, current, create=create):
+            return False
+    parts = relative_parent.parts
+    if (
+        create
+        and len(parts) >= 2
+        and parts[0] == ".skylos"
+        and parts[1] in _GENERATED_SKYLOS_DIRS
+    ):
+        _ignore_generated_dir(root / ".skylos" / parts[1])
+    return True
+
+
+def _ignore_generated_dir(directory: Path) -> None:
+    ignore = directory / ".gitignore"
+    if ignore.exists() or ignore.is_symlink():
+        return
+    write_text_no_symlink(ignore, "*\n")
+
+
+def _ensure_cache_dir(root: Path, current: Path, *, create: bool) -> bool:
+    try:
+        if current.is_symlink():
+            return False
+        if current.exists():
+            current.resolve(strict=True).relative_to(root)
+            return current.is_dir()
+        if not create:
+            return False
+        try:
+            current.mkdir(  # skylos: ignore[SKY-D215] bounded project-local cache directory
+                mode=0o700
+            )
+        except FileExistsError:
+            if current.is_symlink():
+                return False
+            current.resolve(strict=True).relative_to(root)
+            return current.is_dir()
+        return True
+    except (OSError, ValueError):
+        return False
+
+
+def _is_regular_cache_file(path: Path) -> bool:
+    try:
+        if path.is_symlink():
+            return False
+        if path.exists():
+            path.resolve(strict=True).relative_to(path.parent.resolve(strict=True))
+            return path.is_file()
+    except (OSError, ValueError):
+        return False
+    return True
+
+
+def _project_cache_lock_path(
+    project_root: str | Path,
+    lock_path: str | Path,
+) -> Path | None:
+    resolved = _resolve_project_cache_path(project_root, lock_path)
+    if resolved is None:
+        return None
+    root, path = resolved
+    if not _ensure_cache_parent(root, path, create=True):
+        return None
+    return path
+
+
+def _remove_stale_project_cache_lock(
+    path: Path,
+    existing: os.stat_result,
+) -> bool:
+    if time.time() - existing.st_mtime < PROJECT_CACHE_LOCK_STALE_SECONDS:
+        return False
+    try:
+        current = os.lstat(path)
+        if (
+            stat.S_ISLNK(current.st_mode)
+            or not stat.S_ISDIR(current.st_mode)
+            or current.st_dev != existing.st_dev
+            or current.st_ino != existing.st_ino
+        ):
+            return False
+        os.rmdir(  # skylos: ignore[SKY-D215] inode-verified empty project cache lock directory
+            path
+        )
+        return True
+    except (FileNotFoundError, OSError):
+        return False
+
+
+def _acquire_project_cache_lock(
+    path: Path,
+    *,
+    deadline: float,
+) -> os.stat_result | None:
+    while True:
+        try:
+            os.mkdir(  # skylos: ignore[SKY-D215] fixed project-local cache lock path with validated parents
+                path,
+                mode=0o700,
+            )
+        except FileExistsError:
+            try:
+                existing = os.lstat(path)
+            except FileNotFoundError:
+                continue
+            except OSError:
+                return None
+            if stat.S_ISLNK(existing.st_mode) or not stat.S_ISDIR(existing.st_mode):
+                return None
+            if _remove_stale_project_cache_lock(path, existing):
+                continue
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                return None
+            time.sleep(min(PROJECT_CACHE_LOCK_POLL_SECONDS, remaining))
+            continue
+        except OSError:
+            return None
+
+        try:
+            created = os.lstat(path)
+        except OSError:
+            return None
+        if stat.S_ISLNK(created.st_mode) or not stat.S_ISDIR(created.st_mode):
+            return None
+        return created
+
+
+def _release_project_cache_lock(path: Path, owned: os.stat_result) -> None:
+    try:
+        current = os.lstat(path)
+        if (
+            stat.S_ISLNK(current.st_mode)
+            or not stat.S_ISDIR(current.st_mode)
+            or current.st_dev != owned.st_dev
+            or current.st_ino != owned.st_ino
+        ):
+            return
+        os.rmdir(  # skylos: ignore[SKY-D215] inode-verified empty project cache lock directory
+            path
+        )
+    except (FileNotFoundError, OSError):
+        pass
+
+
+@contextmanager
+def project_cache_lock(
+    project_root: str | Path,
+    lock_path: str | Path,
+    *,
+    timeout_seconds: float = PROJECT_CACHE_LOCK_TIMEOUT_SECONDS,
+) -> Iterator[bool]:
+    """Bound a project-local cache transaction with an atomic directory lock."""
+
+    if not math.isfinite(timeout_seconds) or timeout_seconds < 0:
+        raise ValueError("Project cache lock timeout must be finite and non-negative")
+
+    path = _project_cache_lock_path(project_root, lock_path)
+    if path is None:
+        yield False
+        return
+
+    deadline = time.monotonic() + timeout_seconds
+    owned = _acquire_project_cache_lock(path, deadline=deadline)
+    if owned is None:
+        yield False
+        return
+
+    try:
+        yield True
+    finally:
+        _release_project_cache_lock(path, owned)
+
+
+def load_project_json_cache(
+    project_root: str | Path,
+    cache_path: str | Path,
+    *,
+    max_bytes: int = DEFAULT_MAX_JSON_CACHE_BYTES,
+) -> dict[str, Any]:
+    path = _project_cache_path(project_root, cache_path, create=False)
+    if path is None:
+        return {}
+
+    text = read_text_no_symlink(path, max_bytes=max_bytes, encoding="utf-8")
+    if text is None:
+        return {}
+
+    try:
+        data = json.loads(text)
+    except (json.JSONDecodeError, TypeError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def save_project_json_cache(
+    project_root: str | Path,
+    cache_path: str | Path,
+    payload: dict[str, Any],
+    *,
+    indent: int | None = 2,
+) -> bool:
+    path = _project_cache_path(project_root, cache_path, create=True)
+    if path is None:
+        return False
+
+    temp_path = path.with_name(f".{path.name}.{os.getpid()}.{uuid4().hex}.tmp")
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+
+    fd: int | None = None
+    try:
+        fd = os.open(  # skylos: ignore[SKY-D215] guarded project-local cache temp path
+            temp_path, flags, 0o600
+        )
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            fd = None
+            if indent is None:
+                json.dump(payload, handle, separators=(",", ":"))
+            else:
+                json.dump(payload, handle, indent=indent)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        if path.is_symlink():
+            return False
+        os.replace(temp_path, path)
+        return True
+    except (OSError, TypeError, ValueError):
+        return False
+    finally:
+        if fd is not None:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+        try:
+            if temp_path.exists() and not temp_path.is_symlink():
+                temp_path.unlink()
+        except OSError:
+            pass

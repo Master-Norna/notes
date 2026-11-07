@@ -1,0 +1,15 @@
+{
+ "before": {
+  "commit": "4481fea70b5a7ccab9e4b362a42c2ebb4f3608ea",
+  "spdx.py": "1cc012e5ba4dc7bc38f509b861718c2b8ec44ab3c5294559ec95d105bf5ae559",
+  "sbom.py": "9c88515bb9a64d1bfdd757ca26e29e751bce4feba7b87230f797a33db73767b3",
+  "tarball_sha256": "3dc12324cfd327f16e10f38b21dd8ed413a0131c0f7ea04d8e1f6a595b849ffa"
+ },
+ "after": {
+  "commit": "bf6215f02f27d58c9c07ac57731505e65f76f8ad",
+  "spdx.py": "3125585924108276dc85d0b6407d3a2f58e4bbe9d64b4fb99203b476f406a18f",
+  "sbom.py": "9c88515bb9a64d1bfdd757ca26e29e751bce4feba7b87230f797a33db73767b3",
+  "tarball_sha256": "4c82641dc1b3c0b1fc31959ca6325f1482b10873ea918f7cd2e9a221f4d62955"
+ },
+ "pr": "https://github.com/duriantaco/skylos/pull/1179"
+}
