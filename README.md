@@ -16,6 +16,42 @@
 
 <table>
 <tr>
+<td width="88" align="center" valign="top"><a href="pylock本地工件_pdm/pdm_pylock本地工件_中文版.md"><img src="pylock本地工件_pdm/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[pylock 里写了本地文件，PDM 为什么还去网上找](pylock本地工件_pdm/pdm_pylock本地工件_中文版.md)**
+
+`pylock.toml` 把位置、文件名、哈希都写全了，修前的 PDM 还是去查 DNS——`path` 在读取函数里根本没人读。补上位置之后又冒出第二层：unearth 只认链接的最后一段，物理名是内容摘要时，包名和版本都推不出来。两版源码各跑一遍，四组输入摆在一起看。
+
+<sub>2026-11-06 · [English](pylock本地工件_pdm/PDM_Pylock_Local_Artifact_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
+<td width="88" align="center" valign="top"><a href="空值_benedict/benedict_空值丢键_中文版.md"><img src="空值_benedict/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[`a=` 和没有 `a`，差的是一个空字符串](空值_benedict/benedict_空值丢键_中文版.md)**
+
+`benedict({"a": ""}).to_query_string()` 写出 `a=`，`from_query_string("a=")` 读回来却是 `{}`。正则那一侧允许 `=` 后面为空，`parse_qs` 那一侧按默认值把空值丢了；修复只给后者加了 `keep_blank_values=True`。八组输入里最意外的是同一个键出现两次：`a=&a=1` 修前得 `{'a': '1'}`，修后得 `{'a': ''}`。
+
+<sub>2026-11-06 · [English](空值_benedict/benedict_Empty_Query_Value_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
+<td width="88" align="center" valign="top"><a href="依赖关系_skylos/skylos_SPDX多出一条依赖边_中文版.md"><img src="依赖关系_skylos/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[SPDX 说 app 依赖 child，其实只是「够得着」](依赖关系_skylos/skylos_SPDX多出一条依赖边_中文版.md)**
+
+Yarn 工作区导出 SPDX 2.3，根包多出一条指向 `child` 的 `DEPENDS_ON`——`child` 只是 `parent` 的可选依赖，工作区从没声明过它。删掉 `_is_direct` 里 `bool(dependency_roots)` 那一项就够了：`roots` 记的是「从哪个 workspace 够得着」，`kind` 记的才是「谁声明的」。
+
+<sub>2026-11-06 · [English](依赖关系_skylos/skylos_SPDX_Extra_Dependency_Edge_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
 <td width="88" align="center" valign="top"><a href="覆盖输入_skylos/skylos_退出码0锁文件没了_中文版.md"><img src="覆盖输入_skylos/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
@@ -275,6 +311,9 @@ PostgreSQL 代理 pgdog 连续跑了 12 天以后，定时任务全都不再触�
 
 | 工程 | 跑出来的是什么 |
 | --- | --- |
+| [pylock_artifact_demo](pylock本地工件_pdm/pylock_artifact_demo/) | 两版 PDM 读同一份 pylock，看 `path` 与 `name` 各在哪一步被丢掉、按逻辑名复制之后候选认不认得出 wheel，另留一组物理名叫 `wrong.tar.bz2` 的 sdist |
+| [query_blank_demo](空值_benedict/query_blank_demo/) | 两版 benedict 解码八组查询串，看空值怎么在正则和 `parse_qs` 之间被丢掉，嵌套键、重复键与尾部 `&` 各剩什么 |
+| [spdx_demo](依赖关系_skylos/spdx_demo/) | 两版 skylos 对同一份 Yarn 工作区导出 SPDX，看根包多出的那条 `DEPENDS_ON`、真声明时的对照，以及图不完整时它换成哪条关系 |
 | [overwrite_demo](覆盖输入_skylos/overwrite_demo/) | 两版输出守卫对 24 个依赖输入名逐个跑一遍，看修前哪 13 个被安静覆盖、修后是否全部拒绝，另比对大小写、子目录、`.csproj` 与 `pins.txt` 的字节 |
 | [percent_decode_demo](百分号解码_epub_start/percent_decode_demo/) | 两版协议处理器读同一份含中文、空格、`#`、`?`、`%` 条目名的 EPUB，9 个请求在哪一版是 404，解码与路径校验的先后如何把一次穿越从 404 变成 403 |
 | [threshold_demo](零阈值_scrapling/threshold_demo/) | 两版 `parser.py` 跑 7 个页面 × 2 个阈值，看 0 阈值下「参考无属性、候选有属性」那一格修前修后差在哪里 |

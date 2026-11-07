@@ -29,6 +29,9 @@ TOPICS = {
     "百分号解码_epub_start": ("row", "bar", "grow"),  # 同一个条目名编码后变长，按字面查找就没命中
     "零阈值_scrapling": ("stack", "bar", "gap"),  # 分母为零，这一段比值根本没算下去
     "覆盖输入_skylos": ("grid", "dot", "missing"),  # 守卫的名单比收集器少了 13 个输入名，那一格是空的
+    "pylock本地工件_pdm": ("fence", "bar", "shift"),  # 位置读到了，名字却从 URL 尾段取，这一列到此错开半格
+    "空值_benedict": ("tri", "dot", "missing"),  # 正则放行的 a=，解析时那一格没了
+    "依赖关系_skylos": ("stack", "bar", "extra"),  # 根包的依赖表里多出一条 DEPENDS_ON
 }
 
 # ---- 记号：point 画在线段中点，line 画整条线段 ----
