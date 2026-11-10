@@ -16,6 +16,42 @@
 
 <table>
 <tr>
+<td width="88" align="center" valign="top"><a href="Git路径_skylos/skylos_Git路径_中文版.md"><img src="Git路径_skylos/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[Git 给路径加了引号，这个文件就从 review 里消失了](Git路径_skylos/skylos_Git路径_中文版.md)**
+
+一个删掉 `@login_required` 的改动能从 skylos 的 PR 审查里整条走过去：文件在改动列表里，安全回归那一栏是空的。同一个 `git diff`，`get_changed_line_ranges` 走的是认引号、TAB 和 `/dev/null` 的解析器，`_get_per_file_diffs` 直接 `line[6:]`；引号、空格、hunk 里的假文件头、源码里的裸 CR、非 UTF-8 字节，五种形状各让后一个读错一次。
+
+<sub>2026-11-10 · [English](Git路径_skylos/skylos_Quoted_Diff_Path_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
+<td width="88" align="center" valign="top"><a href="跨进程结果_skylos/skylos_跨进程结果_中文版.md"><img src="跨进程结果_skylos/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[20 个文件，17 个在父进程里又算了一遍](跨进程结果_skylos/skylos_跨进程结果_中文版.md)**
+
+并行静态扫描的日志里每个文件都跟着一条 `Can't get local object '_CallableIndex.flow.<locals>.outer'`，退出码却是 0。worker 的结果里带着 `Definition` 的 `parent` 指针，一路把挂过索引的 module 拖进 pickle，而索引的 flow 缓存里有个闭包。兜底把结果救回来了，代价是每个文件两遍。
+
+<sub>2026-11-10 · [English](跨进程结果_skylos/skylos_Pickle_Worker_Result_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
+<td width="88" align="center" valign="top"><a href="直播双发_ralphex/ralphex_直播双发_中文版.md"><img src="直播双发_ralphex/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[同一行日志，dashboard 收到了两次](直播双发_ralphex/ralphex_直播双发_中文版.md)**
+
+`--serve` 带 watch 目录时，每行进度从 `BroadcastLogger` 和 `progress-*.txt` 各来一次；run 结束以后整个文件还会重放。修复先给 session 打个 live 标记，再让它在收尾的同一锁区里标成 loaded——`lastOffset` 故意留在 0，因为同一秒重跑会截断重写这个文件。
+
+<sub>2026-11-10 · [English](直播双发_ralphex/ralphex_Duplicate_Live_Output_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
 <td width="88" align="center" valign="top"><a href="pylock本地工件_pdm/pdm_pylock本地工件_中文版.md"><img src="pylock本地工件_pdm/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
@@ -311,6 +347,9 @@ PostgreSQL 代理 pgdog 连续跑了 12 天以后，定时任务全都不再触�
 
 | 工程 | 跑出来的是什么 |
 | --- | --- |
+| [git_diff_paths_demo](Git路径_skylos/git_diff_paths_demo/) | 两版 `review.py` 的四个函数在真实 Git 仓库里跑五种 diff 形状，看路径在哪一版被认错、`-@login_required` 有没有送进安全回归那一栏 |
+| [danger_pickle_demo](跨进程结果_skylos/danger_pickle_demo/) | 两版 `callable_bindings.py` 各 pickle 同一个索引对象，看父版卡在哪条引用链、合并版反序列化后重建出几个 flow，另跑 2 文件与 20 文件的真进程池对照重试次数 |
+| [live_double_tail_demo](直播双发_ralphex/live_double_tail_demo/) | 两版 ralphex 的判定顺序抽成小模型，看一行 live 输出到达 SSE 几次、run 结束后重放几行 |
 | [pylock_artifact_demo](pylock本地工件_pdm/pylock_artifact_demo/) | 两版 PDM 读同一份 pylock，看 `path` 与 `name` 各在哪一步被丢掉、按逻辑名复制之后候选认不认得出 wheel，另留一组物理名叫 `wrong.tar.bz2` 的 sdist |
 | [query_blank_demo](空值_benedict/query_blank_demo/) | 两版 benedict 解码八组查询串，看空值怎么在正则和 `parse_qs` 之间被丢掉，嵌套键、重复键与尾部 `&` 各剩什么 |
 | [spdx_demo](依赖关系_skylos/spdx_demo/) | 两版 skylos 对同一份 Yarn 工作区导出 SPDX，看根包多出的那条 `DEPENDS_ON`、真声明时的对照，以及图不完整时它换成哪条关系 |

@@ -32,6 +32,9 @@ TOPICS = {
     "pylock本地工件_pdm": ("fence", "bar", "shift"),  # 位置读到了，名字却从 URL 尾段取，这一列到此错开半格
     "空值_benedict": ("tri", "dot", "missing"),  # 正则放行的 a=，解析时那一格没了
     "依赖关系_skylos": ("stack", "bar", "extra"),  # 根包的依赖表里多出一条 DEPENDS_ON
+    "Git路径_skylos": ("hatch", "tick", "missing"),  # 引号包住的路径没认出来，这个文件的位置空着
+    "跨进程结果_skylos": ("fence", "bar", "gap"),  # 结果送不过进程边界，这一格断开
+    "直播双发_ralphex": ("ring", "bar", "double"),  # 同一行从两条路各来一次，这一格劈成两份
 }
 
 # ---- 记号：point 画在线段中点，line 画整条线段 ----
