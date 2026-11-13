@@ -16,6 +16,42 @@
 
 <table>
 <tr>
+<td width="88" align="center" valign="top"><a href="空裁剪框_pypdf/pypdf_空裁剪框_中文版.md"><img src="空裁剪框_pypdf/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[裁剪框写着 null，为什么另外三个框也读不出来](空裁剪框_pypdf/pypdf_空裁剪框_中文版.md)**
+
+一个只写了 `/CropBox null` 的页面，读 `/TrimBox` 会抛 `got NullObject`；先读一次 `page.cropbox`，这一句又过去了。空值让回退链停在 `/CropBox` 这一格，而读取会把结果写回页面字典——绕过不是修好了，是 null 被数组盖住了。我把八个用例各开一个进程，让每一行都从「文件里写着 null」开始。
+
+<sub>2026-11-13 · [English](空裁剪框_pypdf/pypdf_Null_CropBox_Fallback_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
+<td width="88" align="center" valign="top"><a href="缓存没落盘_skylos/skylos_缓存没落盘_中文版.md"><img src="缓存没落盘_skylos/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[缓存文件从没写出来：一个 `.json` 被当成目录用了](缓存没落盘_skylos/skylos_缓存没落盘_中文版.md)**
+
+同一个依赖连跑两次扫描，`cache_hits` 一直是 0，盘上也找不到缓存文件。数据文件名被交给了按目录处理的锁，锁把它 `mkdir` 成目录；保存函数看见同名路径是个目录，返回 `False`，调用方没看。复现用记账的假传输层连跑两遍，看请求数在哪一版才降下来。
+
+<sub>2026-11-13 · [English](缓存没落盘_skylos/skylos_Npm_Cache_Never_Saved_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
+<td width="88" align="center" valign="top"><a href="替换失败_pixeltable/pixeltable_替换失败_中文版.md"><img src="替换失败_pixeltable/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[替换失败之后，旧表和新表都没了](替换失败_pixeltable/pixeltable_替换失败_中文版.md)**
+
+`if_exists='replace'` 交换失败时，`finally` 把唯一一份完整导出也删掉，写进去的三行一行读不回来。修复只加了两个布尔量：临时表是不是这次建的、还需不需要留作恢复。五个注入场景两版各跑一遍，父版有三个以命名空间为空收尾。
+
+<sub>2026-11-13 · [English](替换失败_pixeltable/pixeltable_Failed_Replace_Loses_Both_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
 <td width="88" align="center" valign="top"><a href="Git路径_skylos/skylos_Git路径_中文版.md"><img src="Git路径_skylos/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
@@ -347,6 +383,9 @@ PostgreSQL 代理 pgdog 连续跑了 12 天以后，定时任务全都不再触�
 
 | 工程 | 跑出来的是什么 |
 | --- | --- |
+| [null_box_demo](空裁剪框_pypdf/null_box_demo/) | 两版 pypdf 原样 vendor，8 个用例各在隔离子进程里读同一份 `/CropBox null` 的页面，看回退停在哪一格、写回把哪个键换成了数组、`scale_by(0.5)` 先撞上哪个框 |
+| [npm_cache_demo](缓存没落盘_skylos/npm_cache_demo/) | 两版缓存写入对同一个依赖连跑两次 `verify_npm_mirrors()`，看请求数与命中数、锁收到的参数，以及跑完之后缓存路径上是文件、是目录、还是什么都没有 |
+| [iceberg_swap_demo](替换失败_pixeltable/iceberg_swap_demo/) | 两版 `iceberg.py` 在本机 SQLite catalog 上跑五个注入场景，看交换失败之后目标名与临时名各剩下什么、错误信息点名了谁 |
 | [git_diff_paths_demo](Git路径_skylos/git_diff_paths_demo/) | 两版 `review.py` 的四个函数在真实 Git 仓库里跑五种 diff 形状，看路径在哪一版被认错、`-@login_required` 有没有送进安全回归那一栏 |
 | [danger_pickle_demo](跨进程结果_skylos/danger_pickle_demo/) | 两版 `callable_bindings.py` 各 pickle 同一个索引对象，看父版卡在哪条引用链、合并版反序列化后重建出几个 flow，另跑 2 文件与 20 文件的真进程池对照重试次数 |
 | [live_double_tail_demo](直播双发_ralphex/live_double_tail_demo/) | 两版 ralphex 的判定顺序抽成小模型，看一行 live 输出到达 SSE 几次、run 结束后重放几行 |

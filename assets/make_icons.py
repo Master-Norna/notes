@@ -35,6 +35,9 @@ TOPICS = {
     "Git路径_skylos": ("hatch", "tick", "missing"),  # 引号包住的路径没认出来，这个文件的位置空着
     "跨进程结果_skylos": ("fence", "bar", "gap"),  # 结果送不过进程边界，这一格断开
     "直播双发_ralphex": ("ring", "bar", "double"),  # 同一行从两条路各来一次，这一格劈成两份
+    "空裁剪框_pypdf": ("steps", "bar", "gap"),  # 空值断了回退链，后面那一格永远没轮到
+    "缓存没落盘_skylos": ("row", "bar", "truncate"),  # 该落盘的那一条只走到半截，尾巴只剩虚线
+    "替换失败_pixeltable": ("fence", "bar", "outlier"),  # 唯一一份落到临时名下，目标名已经空了
 }
 
 # ---- 记号：point 画在线段中点，line 画整条线段 ----
