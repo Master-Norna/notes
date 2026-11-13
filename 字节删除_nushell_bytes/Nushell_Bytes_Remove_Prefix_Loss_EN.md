@@ -176,9 +176,7 @@ Every number above comes from this 882-pair run. The PR discussion contains comp
 
 **Empty patterns are still rejected by `run()`.** `windows(0)` panics, but the normal command path never delivers an empty pattern. The final code records the premise in a comment, and the reproduction only tests non-empty patterns.
 
-**Metadata is still cleared.** Before returning, `run()` unconditionally sets `content_type` to `None`. So "returned unchanged" holds at the byte level; it does not promise that `image/png` and friends survive the pipeline. The PR description attributes this behaviour to #16500; I checked only the unconditional clearing in the final code and did not trace the commit that introduced it.
-
-**A merge is not a release.** #19107 has merged. This article does not infer which release contains it; the `v0.89.0` in the PR description is a description, not release evidence I verified.
+**Metadata is still cleared.** Before returning, `run()` unconditionally sets `content_type` to `None`. So "returned unchanged" holds at the byte level; it does not promise that `image/png` and friends survive the pipeline. The PR description attributes this behaviour to #16500.
 
 ## 7. A test that passed by accident
 
