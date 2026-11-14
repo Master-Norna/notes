@@ -52,7 +52,7 @@ That fix saved the left half: the left side's escapes survive concatenation, pin
 
 The same append feeds `"` into the logical value while the source text never sees it — the two representations fork on the spot. From the PR:
 
-> String.__add__ spliced the appended text into the raw literal without escaping it, so appending a quote or backslash to a basic string produced a literal that is not valid TOML - including to this library's own parser.
+> `String.__add__` spliced the appended text into the raw literal without escaping it, so appending a quote or backslash to a basic string produced a literal that is not valid TOML - including to this library's own parser.
 > —— [#612 description](https://github.com/python-poetry/tomlkit/pull/612)
 
 ## 3. Seven lines at the concatenation

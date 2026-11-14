@@ -52,7 +52,7 @@ def __add__(self, other: str) -> String:
 
 同一份追加，逻辑值吃进了 `"`、源文本没有，两份表示当场分家。PR 里我把这层意思写成一句：
 
-> String.__add__ spliced the appended text into the raw literal without escaping it, so appending a quote or backslash to a basic string produced a literal that is not valid TOML - including to this library's own parser.
+> `String.__add__` spliced the appended text into the raw literal without escaping it, so appending a quote or backslash to a basic string produced a literal that is not valid TOML - including to this library's own parser.
 > —— [#612 描述](https://github.com/python-poetry/tomlkit/pull/612)
 
 ## 三、七行补在拼接处
