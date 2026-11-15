@@ -38,6 +38,7 @@ TOPICS = {
     "空裁剪框_pypdf": ("steps", "bar", "gap"),  # 空值断了回退链，后面那一格永远没轮到
     "缓存没落盘_skylos": ("row", "bar", "truncate"),  # 该落盘的那一条只走到半截，尾巴只剩虚线
     "替换失败_pixeltable": ("fence", "bar", "outlier"),  # 唯一一份落到临时名下，目标名已经空了
+    "图像缓冲_pypdf": ("steps", "bar", "swap"),  # 记的字节与实分的字节对调了，台阶上多出一道错位
 }
 
 # ---- 记号：point 画在线段中点，line 画整条线段 ----
