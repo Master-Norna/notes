@@ -16,6 +16,18 @@
 
 <table>
 <tr>
+<td width="88" align="center" valign="top"><a href="漏扫_skylos/skylos_漏扫_中文版.md"><img src="漏扫_skylos/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[`MATCH(` 少一个空格，skylos 跳过了这次安全扫描](漏扫_skylos/skylos_漏扫_中文版.md)**
+
+`MATCH(` 少一个空格，整支 Python 安全扫描就不跑。预筛拿三个带空格的字面量决定要不要进规则，规则自己的正则用 `\s*` 什么都认——同一个 PR 里两处各写一份词表。我把父版、第一版 hint、合并版摆在一起，11 种拼写逐个过一遍，顺带量了第一版在长空格串上的回溯。
+
+<sub>2026-11-17 · [English](漏扫_skylos/skylos_Missing_Space_Skips_Scan_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
 <td width="88" align="center" valign="top"><a href="图像缓冲_pypdf/pypdf_图像缓冲区按名字长度_中文版.md"><img src="图像缓冲_pypdf/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
@@ -395,6 +407,7 @@ PostgreSQL 代理 pgdog 连续跑了 12 天以后，定时任务全都不再触�
 
 | 工程 | 跑出来的是什么 |
 | --- | --- |
+| [prefilter_demo](漏扫_skylos/prefilter_demo/) | 两版 `python_security_gaps.py` 各 3 个文件原样 vendor，两版 `danger.py` 的预筛条件逐字抄出来；看 11 种 `MATCH` 拼写各在哪一版被挡、`re.match (` 这类形似调用两边各怎么判，`--measure` 在任意 Python 源码树上数三种匹配各命中多少文件 |
 | [image_buffer_demo](图像缓冲_pypdf/image_buffer_demo/) | 两版 pypdf 完整包各 60 文件，靠 `sys.path` 决定导入哪一版；看 20 个模式的判定与记下的字节数、三张真实文件压低上限后哪张被放行，`--mem` 另起进程逐模式量 Pillow 实际分了多少字节每像素 |
 | [null_box_demo](空裁剪框_pypdf/null_box_demo/) | 两版 pypdf 原样 vendor，8 个用例各在隔离子进程里读同一份 `/CropBox null` 的页面，看回退停在哪一格、写回把哪个键换成了数组、`scale_by(0.5)` 先撞上哪个框 |
 | [npm_cache_demo](缓存没落盘_skylos/npm_cache_demo/) | 两版缓存写入对同一个依赖连跑两次 `verify_npm_mirrors()`，看请求数与命中数、锁收到的参数，以及跑完之后缓存路径上是文件、是目录、还是什么都没有 |
