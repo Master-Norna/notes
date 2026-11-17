@@ -16,6 +16,18 @@
 
 <table>
 <tr>
+<td width="88" align="center" valign="top"><a href="忽略标记_skylos/skylos_忽略标记_中文版.md"><img src="忽略标记_skylos/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[引号里的 `skylos: ignore`，让一条 HIGH 告警消失了](忽略标记_skylos/skylos_忽略标记_中文版.md)**
+
+发布命令写在 `name` 里，引号中夹一段 `skylos: ignore`，一条 HIGH 就没了。忽略标记只在锚行和它上一行里按字面量搜，真正的 YAML 注释和引号里的文字在它眼里一样——而前一笔修复把 D340 的锚上移到 `run:` 键，窗口跟着上移，`name` 正好落进来。三版、12 份 workflow 摆在一起逐格对照。
+
+<sub>2026-11-17 · [English](忽略标记_skylos/skylos_Quoted_Ignore_Marker_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
 <td width="88" align="center" valign="top"><a href="漏扫_skylos/skylos_漏扫_中文版.md"><img src="漏扫_skylos/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
@@ -407,6 +419,7 @@ PostgreSQL 代理 pgdog 连续跑了 12 天以后，定时任务全都不再触�
 
 | 工程 | 跑出来的是什么 |
 | --- | --- |
+| [cicd_ignore_demo](忽略标记_skylos/cicd_ignore_demo/) | 三版 `github_actions.py` 各裁到导入链最小集（51/52/52 个文件），12 份 workflow 各起一个子进程扫一遍；只看 D340 与 D327，看引号里的标记、真注释、被别处命令文本拉走的锚各在哪一版报出、报在第几行 |
 | [prefilter_demo](漏扫_skylos/prefilter_demo/) | 两版 `python_security_gaps.py` 各 3 个文件原样 vendor，两版 `danger.py` 的预筛条件逐字抄出来；看 11 种 `MATCH` 拼写各在哪一版被挡、`re.match (` 这类形似调用两边各怎么判，`--measure` 在任意 Python 源码树上数三种匹配各命中多少文件 |
 | [image_buffer_demo](图像缓冲_pypdf/image_buffer_demo/) | 两版 pypdf 完整包各 60 文件，靠 `sys.path` 决定导入哪一版；看 20 个模式的判定与记下的字节数、三张真实文件压低上限后哪张被放行，`--mem` 另起进程逐模式量 Pillow 实际分了多少字节每像素 |
 | [null_box_demo](空裁剪框_pypdf/null_box_demo/) | 两版 pypdf 原样 vendor，8 个用例各在隔离子进程里读同一份 `/CropBox null` 的页面，看回退停在哪一格、写回把哪个键换成了数组、`scale_by(0.5)` 先撞上哪个框 |

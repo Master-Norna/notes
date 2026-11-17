@@ -40,6 +40,7 @@ TOPICS = {
     "替换失败_pixeltable": ("fence", "bar", "outlier"),  # 唯一一份落到临时名下，目标名已经空了
     "图像缓冲_pypdf": ("steps", "bar", "swap"),  # 记的字节与实分的字节对调了，台阶上多出一道错位
     "漏扫_skylos": ("fence", "tick", "gap"),  # 门口的词表窄一截，这一格中间断开，这个拼写过不去
+    "忽略标记_skylos": ("ring", "dot", "outlier"),  # 标记偏在注释位置之外，却和行尾注释一样算数
 }
 
 # ---- 记号：point 画在线段中点，line 画整条线段 ----
