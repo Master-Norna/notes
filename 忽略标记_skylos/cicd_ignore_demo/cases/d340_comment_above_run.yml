@@ -1,0 +1,9 @@
+on: push
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ship
+        # skylos: ignore[SKY-D340]
+        run: |
+          twine upload dist/*

