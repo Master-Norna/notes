@@ -93,9 +93,9 @@ pypdf 7.0.0 判断一张图要占多少内存，拿模式名的长度当每个�
 
 **[Git 给路径加了引号，这个文件就从 review 里消失了](Git路径_skylos/skylos_Git路径_中文版.md)**
 
-一个删掉 `@login_required` 的改动能从 skylos 的 PR 审查里整条走过去：文件在改动列表里，安全回归那一栏是空的。同一个 `git diff`，`get_changed_line_ranges` 走的是认引号、TAB 和 `/dev/null` 的解析器，`_get_per_file_diffs` 直接 `line[6:]`；引号、空格、hunk 里的假文件头、源码里的裸 CR、非 UTF-8 字节，五种形状各让后一个读错一次。
+一个删掉 `@login_required` 的改动能从 skylos 的 PR 审查里整条走过去：文件在改动列表里，安全回归那一栏是空的。同一个 `git diff`，`get_changed_line_ranges` 走的是认引号、TAB 和 `/dev/null` 的解析器，`_get_per_file_diffs` 直接 `line[6:]`；引号、空格、hunk 里的假文件头、源码里的裸 CR、非 UTF-8 字节，五种形状各让后一个读错一次。5.4.0 里两处都还这么读，5.5.0 起才合回一个解析器；自查命令与版本分界在文末。
 
-<sub>2026-11-10 · [English](Git路径_skylos/skylos_Quoted_Diff_Path_EN.md)</sub>
+<sub>2026-11-10 · 2026-11-19 改版 · [English](Git路径_skylos/skylos_Quoted_Diff_Path_EN.md)</sub>
 
 </td>
 </tr>
