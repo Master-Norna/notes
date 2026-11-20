@@ -107,7 +107,7 @@ pypdf 7.0.0 判断一张图要占多少内存，拿模式名的长度当每个�
 
 并行静态扫描的日志里每个文件都跟着一条 `Can't get local object '_CallableIndex.flow.<locals>.outer'`，退出码却是 0。worker 的结果里带着 `Definition` 的 `parent` 指针，一路把挂过索引的 module 拖进 pickle，而索引的 flow 缓存里有个闭包。兜底把结果救回来了，代价是每个文件两遍。
 
-<sub>2026-11-10 · [English](跨进程结果_skylos/skylos_Pickle_Worker_Result_EN.md)</sub>
+<sub>2026-11-10 · 2026-11-20 改版 · [English](跨进程结果_skylos/skylos_Pickle_Worker_Result_EN.md)</sub>
 
 </td>
 </tr>
