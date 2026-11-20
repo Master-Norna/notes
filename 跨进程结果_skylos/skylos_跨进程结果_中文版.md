@@ -28,21 +28,9 @@ except Exception:
 
 这个 `except` 不是为 pickle 写的。它要接的是「worker 里这个文件出了普通异常」，兜底办法是在父进程里再算一次。[`_retry_in_parent`](https://github.com/duriantaco/skylos/blob/a10d85d31fbad2e4ad4c5059c3106c00625880fb/skylos/scale/parallel_static.py#L143) 拿到的参数和 worker 那份一样，父进程重新解析 module、重新跑规则。pickle 失败也是普通 `Exception`，于是走了同一条路。
 
-异常抛在 `fut.result()`。结果是在 `for fut in as_completed(...)` 里取的，这一步会把 worker 的返回值反序列化：
+异常抛在 `fut.result()`。结果是在 `for fut in as_completed(...)` 里取的，这一步会把 worker 的返回值反序列化，反序列化失败就落进上面那个 `except`。worker 里的分析其实已经做完，是返回值过不去；父进程这边拿到的只有异常，没有那个算好的结果。
 
-```python
-for fut in as_completed(fut_to_file):
-    f = fut_to_file[fut]
-    try:
-        file_str, out = fut.result()
-    except Exception:
-        logger.warning(...)
-        out = _retry_in_parent(f, modmap, changed_files, proc_kwargs)
-```
-
-worker 里的分析其实已经做完，是返回值过不去。父进程这边拿到的只有异常，没有那个算好的结果。
-
-`run_proc_file_parallel` 是并行扫描的入口，`skylos` 扫目录时文件一多就走这里。每个并行扫描都会经过这条路径；会不会失败，取决于结果里有没有那个带闭包的索引。
+每个并行扫描都会经过这条路径；会不会失败，取决于结果里有没有那个带闭包的索引。
 
 ## 结果里带着一个 module
 
@@ -64,20 +52,16 @@ if index is None:
 
 ## 缓存里有一个局部函数
 
-`_CallableIndex.flow(scope)` 为每个作用域算一份 flow。module 层的作用域里，`outer` 长这样：
+`_CallableIndex.flow(scope)` 为每个作用域算一份 flow。module 层和函数作用域各有一个 `outer`，后一个闭包捕获 `parent_engine`、`snapshot`、`anchor`：
 
 ```python
-if scope is self.module:
+# module 层
+def outer(name):
+    if name.startswith(_MEMBER):
+        return {name.removeprefix(_MEMBER)}
+    return {name} if name in _BUILTINS else {_UNKNOWN}
 
-    def outer(name):
-        if name.startswith(_MEMBER):
-            return {name.removeprefix(_MEMBER)}
-        return {name} if name in _BUILTINS else {_UNKNOWN}
-```
-
-函数作用域里还有另一个 `outer`，它闭包捕获 `parent_engine`、`snapshot`、`anchor`：
-
-```python
+# 函数作用域
 def outer(name):
     labels = snapshot.get(name, parent_engine._absent(name))
     for line, assigned in parent_engine.bindings.get(name, ()):
@@ -133,17 +117,7 @@ def _ensure_ready(self):
 
 默认的 pickling 按 `__dict__` 走，对象上挂着的属性会被逐个递归序列化。`_CallableIndex` 的 `__dict__` 里有 `module`、`parents`、`flows`、`watched`、`reads`，后四个都从 module 派生，又带着闭包和 `id()` 键；`__getstate__` 换掉的就是这一份状态。PR 还带了 `test_unpickler_callable_bindings.py`，专门测「反序列化出来的对象还能用」这件事。
 
-`_RandomBindings` 的 [`__getstate__`](https://github.com/duriantaco/skylos/blob/a10d85d31fbad2e4ad4c5059c3106c00625880fb/skylos/rules/danger/calls.py#L507) 多留了两个字段：
-
-```python
-return {
-    "module": self.module,
-    "filename": self.filename,
-    "project_root": self.project_root,
-}
-```
-
-它的缓存键是 `(filename, project_root)` 加上作用域 id，前两个是构造参数，不是从 module 推出来的，所以要一起送过去。
+`_RandomBindings` 的 [`__getstate__`](https://github.com/duriantaco/skylos/blob/a10d85d31fbad2e4ad4c5059c3106c00625880fb/skylos/rules/danger/calls.py#L507) 多留了两个字段：除了 `module`，还有 `filename` 和 `project_root`。它的缓存键是 `(filename, project_root)` 加上作用域 id，前两个是构造参数，不是从 module 推出来的，所以要一起送过去。
 
 ## 同一批文件，两版各跑一遍
 
@@ -179,12 +153,39 @@ ALL PASS
 | 2 个 fixture 文件 | 2/2 | 0/2 | 两边都是 8 个 definition、2 条 finding |
 | `skylos/rules/danger` 前 20 个文件 | 17/20 | 0/20 | — |
 
-同一台机器上，20 文件那组父版用了 23.7 秒，合并版 11.4 秒。这不是基准测试，两次运行也没有隔离其他负载；它只能说明「同一批文件被算了两遍」这件事在时间上看得见。
+同一台机器上，20 文件那组父版用了 23.7 秒，合并版 11.4 秒。两次运行前后都有别的负载，这个差当数量级看：同一批文件被算了两遍，时间上看得见。
 
 ## 重走的代价
 
 1579 字节本身也是这次修复的一个读数：worker 结果里只带着 module，原来跟着走的 `parents`、`flows`、`watched`、`reads` 全部丢掉。代价挪到了接收方——反序列化后第一次调用 `scope`、`flow`、`names` 之类的入口，要先把索引从 module 重建一遍。重建要遍历 AST，`__init__` 就是这一步，但它不重新解析文件；第一次调用的延迟会比后续高。
 
 `_RandomBindings` 的两个字段也要跟着改，说明这个模式不止一处：挂在 module 上、缓存里带闭包的类，都要单独写一遍 `__getstate__`。上游的 CHANGELOG 把这条列在 `scale` 下，一行。
+
+## 什么时候进来，什么时候修好
+
+模块级索引不是一开始就有的。装着它的 `skylos/rules/danger/callable_bindings.py` 在 [#1189](https://github.com/duriantaco/skylos/pull/1189) 里新增，326 行；那一笔 2026-11-08 01:43Z 合并，动了 133 个文件。[#1200](https://github.com/duriantaco/skylos/pull/1200) 在 29 小时 15 分后把它送过了进程边界。
+
+这段时间里，PyPI 上没有对应的包。5.4.0 的 wheel 里根本没有 `callable_bindings.py`；[5.5.0](https://pypi.org/project/skylos/5.5.0/) 的轮子里，`__getstate__` 和 `_ensure_ready` 已经在。
+
+| 时间（UTC） | 事件 | PyPI |
+| --- | --- | --- |
+| 11-02 15:33 | [v5.4.0](https://github.com/duriantaco/skylos/releases/tag/v5.4.0) 发布 | 无 `callable_bindings.py` |
+| 11-08 01:43 | [#1189](https://github.com/duriantaco/skylos/pull/1189) 合并，新增模块级索引 | 未变 |
+| 11-09 06:59 | [#1200](https://github.com/duriantaco/skylos/pull/1200) 合并 | 未变 |
+| 11-10 08:27 | [v5.5.0](https://github.com/duriantaco/skylos/releases/tag/v5.5.0) 发布 | 轮子里已带 `__getstate__` |
+
+这个 bug 在 main 上活了 29 小时，没随任何一个 PyPI 发行版出去。`pip install skylos` 装到 5.4.0 的人看不到它；11-08 到 11-09 之间从 main 构建的版本会踩到。
+
+## 查一遍自己的扫描
+
+判断有没有踩到不用读代码，数日志就行：
+
+```powershell
+skylos . 2>&1 | Select-String -SimpleMatch "retrying in parent process" | Measure-Object
+```
+
+`Count` 是 0，这一轮没有文件被重算；大于 0，就有一批文件算了第二遍，退出码仍然是 0。上面那个 20 文件样本，父版是 17，合并版是 0。
+
+兜底能保住结果，保不住「算了几遍」。worker 里算不出来，和 worker 里算完送不回来，是两种故障；同一个 `except Exception` 接住两者，日志里就只剩一行 WARNING，重复的工作量要等你自己去数。
 
 上游：`duriantaco/skylos`，[#1200](https://github.com/duriantaco/skylos/pull/1200)，父提交 [`c05b6305`](https://github.com/duriantaco/skylos/commit/c05b6305c5fe5167d94d24c95f88c8891052a6a5)，合并提交 [`a10d85d3`](https://github.com/duriantaco/skylos/commit/a10d85d31fbad2e4ad4c5059c3106c00625880fb)。

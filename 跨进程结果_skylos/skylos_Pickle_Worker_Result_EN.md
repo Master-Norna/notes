@@ -28,21 +28,9 @@ except Exception:
 
 That `except` was not written for pickle. It is there for "this file hit an ordinary exception in the worker", and the fallback is to compute it again in the parent. [`_retry_in_parent`](https://github.com/duriantaco/skylos/blob/a10d85d31fbad2e4ad4c5059c3106c00625880fb/skylos/scale/parallel_static.py#L143) takes the same arguments the worker had, and the parent re-parses the module and re-runs the rules. A pickle failure is an ordinary `Exception` too, so it takes the same road.
 
-The exception is raised at `fut.result()`. Results are taken inside `for fut in as_completed(...)`, and that step is what deserialises the worker's return value:
+The exception is raised at `fut.result()`. Results are taken inside `for fut in as_completed(...)`, and that step is what deserialises the worker's return value; when deserialisation fails, control lands in the `except` above. The analysis in the worker is already done; it is the return value that will not cross. All the parent gets is the exception, not the result that was computed.
 
-```python
-for fut in as_completed(fut_to_file):
-    f = fut_to_file[fut]
-    try:
-        file_str, out = fut.result()
-    except Exception:
-        logger.warning(...)
-        out = _retry_in_parent(f, modmap, changed_files, proc_kwargs)
-```
-
-The analysis in the worker is already done; it is the return value that will not cross. All the parent gets is the exception, not the result that was computed.
-
-`run_proc_file_parallel` is the entry point for parallel scanning, and `skylos` takes it whenever a directory has enough files. Every parallel scan goes through this path; whether it fails depends on whether the result carries an index that holds a closure.
+Every parallel scan goes through this path; whether it fails depends on whether the result carries an index that holds a closure.
 
 ## The result carries a module
 
@@ -64,20 +52,16 @@ Every `Definition` in the analysis result carries its AST node, and a node can w
 
 ## The cache holds a local function
 
-`_CallableIndex.flow(scope)` computes a flow per scope. At module scope, `outer` looks like this:
+`_CallableIndex.flow(scope)` computes a flow per scope. Both the module level and the function scope define a local `outer`; the second one closes over `parent_engine`, `snapshot` and `anchor`:
 
 ```python
-if scope is self.module:
+# module scope
+def outer(name):
+    if name.startswith(_MEMBER):
+        return {name.removeprefix(_MEMBER)}
+    return {name} if name in _BUILTINS else {_UNKNOWN}
 
-    def outer(name):
-        if name.startswith(_MEMBER):
-            return {name.removeprefix(_MEMBER)}
-        return {name} if name in _BUILTINS else {_UNKNOWN}
-```
-
-Inside a function scope there is another `outer`, closing over `parent_engine`, `snapshot` and `anchor`:
-
-```python
+# function scope
 def outer(name):
     labels = snapshot.get(name, parent_engine._absent(name))
     for line, assigned in parent_engine.bindings.get(name, ()):
@@ -133,17 +117,7 @@ Those caches can be dropped because the keys are `id(node)`. After deserialisati
 
 Default pickling goes through `__dict__`, serialising every attribute recursively. `_CallableIndex.__dict__` holds `module`, `parents`, `flows`, `watched` and `reads`; the last four are derived from the module and carry closures and `id()` keys, and `__getstate__` replaces exactly that state. The PR also adds `test_unpickler_callable_bindings.py`, which tests the other half: that the object still works after deserialisation.
 
-[`__getstate__`](https://github.com/duriantaco/skylos/blob/a10d85d31fbad2e4ad4c5059c3106c00625880fb/skylos/rules/danger/calls.py#L507) on `_RandomBindings` keeps two more fields:
-
-```python
-return {
-    "module": self.module,
-    "filename": self.filename,
-    "project_root": self.project_root,
-}
-```
-
-Its cache key is `(filename, project_root)` plus a scope id, and the first two are constructor arguments rather than something derived from the module, so they have to travel.
+[`__getstate__`](https://github.com/duriantaco/skylos/blob/a10d85d31fbad2e4ad4c5059c3106c00625880fb/skylos/rules/danger/calls.py#L507) on `_RandomBindings` keeps two more fields: besides `module`, there are `filename` and `project_root`. Its cache key is `(filename, project_root)` plus a scope id, and the first two are constructor arguments rather than something derived from the module, so they have to travel.
 
 ## The same files through both versions
 
@@ -179,12 +153,39 @@ The full pool numbers come from running `run_proc_file_parallel` with both versi
 | 2 fixture files | 2/2 | 0/2 | both give 8 definitions and 2 findings |
 | first 20 files under `skylos/rules/danger` | 17/20 | 0/20 | — |
 
-On the same machine, the 20-file group took 23.7 s in the parent and 11.4 s merged. This is not a benchmark, and the two runs did not isolate other load; all it shows is that "the same files computed twice" is visible in wall time.
+On the same machine, the 20-file group took 23.7 s in the parent and 11.4 s merged. There was other load before and after both runs, so read the gap as an order of magnitude: the same files computed twice is visible in wall time.
 
 ## The cost of the rerun
 
 The 1579 bytes are themselves a reading of this fix: the worker result now carries only the module, and `parents`, `flows`, `watched` and `reads` are all dropped. The cost moves to the receiving side — the first call into `scope`, `flow`, `names` or the like after deserialisation has to rebuild the index from the module. Rebuilding walks the AST, which is what `__init__` does, but it does not re-parse the file; that first call is slower than the ones after it.
 
 That `_RandomBindings` needed its own two fields says the pattern is not in one place: a class that hangs on a module and caches closures needs its own `__getstate__`. The upstream CHANGELOG lists this under `scale`, one line.
+
+## When it arrived, when it was fixed
+
+The module-level index was not there from the start. The file that holds it, `skylos/rules/danger/callable_bindings.py`, was added in [#1189](https://github.com/duriantaco/skylos/pull/1189), 326 lines; that merge landed on 2026-11-08 at 01:43Z and touched 133 files. [#1200](https://github.com/duriantaco/skylos/pull/1200) sent it across a process boundary 29 hours 15 minutes later.
+
+No package on PyPI covers that window. The 5.4.0 wheel does not contain `callable_bindings.py` at all; in [5.5.0](https://pypi.org/project/skylos/5.5.0/), `__getstate__` and `_ensure_ready` are already there.
+
+| Time (UTC) | Event | PyPI |
+| --- | --- | --- |
+| 11-02 15:33 | [v5.4.0](https://github.com/duriantaco/skylos/releases/tag/v5.4.0) released | no `callable_bindings.py` |
+| 11-08 01:43 | [#1189](https://github.com/duriantaco/skylos/pull/1189) merged, module-level index added | unchanged |
+| 11-09 06:59 | [#1200](https://github.com/duriantaco/skylos/pull/1200) merged | unchanged |
+| 11-10 08:27 | [v5.5.0](https://github.com/duriantaco/skylos/releases/tag/v5.5.0) released | wheel already carries `__getstate__` |
+
+The bug lived on main for 29 hours and never left in a PyPI release. Anyone who ran `pip install skylos` got 5.4.0 and never saw it; builds taken from main between 11-08 and 11-09 did.
+
+## Check your own scan
+
+You do not have to read code to tell whether you hit this; count the log lines:
+
+```powershell
+skylos . 2>&1 | Select-String -SimpleMatch "retrying in parent process" | Measure-Object
+```
+
+A `Count` of 0 means nothing was computed twice in that run; anything above 0 means a batch of files went through a second pass, with the exit code still 0. On the 20-file sample above, the count was 17 for the parent and 0 for the merge.
+
+The fallback keeps the result; it does not keep the count. A worker that cannot compute and a worker that computed but cannot send are two different failures, and one `except Exception` catches both, leaving a single WARNING line — the repeated work is yours to count.
 
 Upstream: `duriantaco/skylos`, [#1200](https://github.com/duriantaco/skylos/pull/1200), parent commit [`c05b6305`](https://github.com/duriantaco/skylos/commit/c05b6305c5fe5167d94d24c95f88c8891052a6a5), merge commit [`a10d85d3`](https://github.com/duriantaco/skylos/commit/a10d85d31fbad2e4ad4c5059c3106c00625880fb).
