@@ -16,6 +16,30 @@
 
 <table>
 <tr>
+<td width="88" align="center" valign="top"><a href="格式尾随换行_jsonschema/jsonschema_尾随换行_中文版.md"><img src="格式尾随换行_jsonschema/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[`http://foo.bar/\n` 过了 jsonschema 的格式校验，`urllib` 却把它当成另一个地址](格式尾随换行_jsonschema/jsonschema_尾随换行_中文版.md)**
+
+官方测试套件在 8 月到 9 月给七个 `format` 逐个补了「尾随换行是非法值」的用例，jsonschema 4.26.0 和 main 上七条全判合法。它自己没有写这些格式的语法，三条委托链分别落在 `rfc3339-validator`、`rfc3987`、`fqdn`，收尾都是 `$`——在 Python 里，`$` 停在末尾换行之前。三个包的发布版文件收在一个零依赖工程里，发布版与加一行守卫之后的两组结果并排跑。
+
+<sub>2026-11-21 · [English](格式尾随换行_jsonschema/jsonschema_Trailing_Newline_Format_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
+<td width="88" align="center" valign="top"><a href="top吞投影_sqlglot/sqlglot_列名叫top投影被读成LIMIT_中文版.md"><img src="top吞投影_sqlglot/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[列名叫 `top`，sqlglot 把投影读成了 LIMIT](top吞投影_sqlglot/sqlglot_列名叫top投影被读成LIMIT_中文版.md)**
+
+`SELECT top, x FROM t` 解析完，投影空了，`x` 成了 LIMIT 的行数，snowflake、oracle、tsql、teradata、redshift 五个方言都是。我把它报成 issue，维护者五小时四十五分钟后合并了方言层的守卫；我提的 retreat 补丁与 base 层剩下的三个方言还在另一个 issue 里等。15 个形状 × 2 版摆在一起逐格对照。
+
+<sub>2026-11-21 · [English](top吞投影_sqlglot/sqlglot_Column_Named_top_Read_as_LIMIT_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
 <td width="88" align="center" valign="top"><a href="忽略标记_skylos/skylos_忽略标记_中文版.md"><img src="忽略标记_skylos/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
@@ -419,6 +443,8 @@ PostgreSQL 代理 pgdog 连续跑了 12 天以后，定时任务全都不再触�
 
 | 工程 | 跑出来的是什么 |
 | --- | --- |
+| [trailing_newline_demo](格式尾随换行_jsonschema/trailing_newline_demo/) | 三个包（rfc3339-validator 0.1.4、rfc3987 1.3.8、fqdn 1.6.0）的发布版文件原样 vendor，七个 `format` 的裸值与「裸值 + 换行」共 14 条并排跑，看发布版怎么全部放行、每次委托前加一句 `endswith` 之后怎么全部拒绝 |
+| [top_demo](top吞投影_sqlglot/top_demo/) | 两版 sqlglot 源码原样 vendor（`provenance.txt` 记 372 个文件的 SHA-256），15 个 SQL 形状在 PyPI 30.33.0 与合并提交 `dc4afaf5` 上各跑一遍，逐条断言输出与投影列表 |
 | [cicd_ignore_demo](忽略标记_skylos/cicd_ignore_demo/) | 三版 `github_actions.py` 各裁到导入链最小集（51/52/52 个文件），12 份 workflow 各起一个子进程扫一遍；只看 D340 与 D327，看引号里的标记、真注释、被别处命令文本拉走的锚各在哪一版报出、报在第几行 |
 | [prefilter_demo](漏扫_skylos/prefilter_demo/) | 两版 `python_security_gaps.py` 各 3 个文件原样 vendor，两版 `danger.py` 的预筛条件逐字抄出来；看 11 种 `MATCH` 拼写各在哪一版被挡、`re.match (` 这类形似调用两边各怎么判，`--measure` 在任意 Python 源码树上数三种匹配各命中多少文件 |
 | [image_buffer_demo](图像缓冲_pypdf/image_buffer_demo/) | 两版 pypdf 完整包各 60 文件，靠 `sys.path` 决定导入哪一版；看 20 个模式的判定与记下的字节数、三张真实文件压低上限后哪张被放行，`--mem` 另起进程逐模式量 Pillow 实际分了多少字节每像素 |

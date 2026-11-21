@@ -41,6 +41,8 @@ TOPICS = {
     "图像缓冲_pypdf": ("steps", "bar", "swap"),  # 记的字节与实分的字节对调了，台阶上多出一道错位
     "漏扫_skylos": ("fence", "tick", "gap"),  # 门口的词表窄一截，这一格中间断开，这个拼写过不去
     "忽略标记_skylos": ("ring", "dot", "outlier"),  # 标记偏在注释位置之外，却和行尾注释一样算数
+    "top吞投影_sqlglot": ("stack", "bar", "outlier"),  # 投影里的词整条偏进了 LIMIT 的槽
+    "格式尾随换行_jsonschema": ("fence", "bar", "truncate"),  # 正则只画到 Z，末尾那一段没吃到
 }
 
 # ---- 记号：point 画在线段中点，line 画整条线段 ----
