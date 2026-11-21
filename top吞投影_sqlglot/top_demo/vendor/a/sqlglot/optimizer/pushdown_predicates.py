@@ -1,0 +1,349 @@
+from __future__ import annotations
+
+from collections.abc import Iterable, Mapping
+import typing as t
+
+from sqlglot import exp
+from sqlglot.optimizer.helpers import projection_has_aggregate
+from sqlglot.optimizer.normalize import normalized
+from sqlglot.optimizer.scope import build_scope, find_in_scope, Scope
+from sqlglot.optimizer.simplify import simplify
+from sqlglot import Dialect
+
+if t.TYPE_CHECKING:
+    from sqlglot._typing import E
+    from sqlglot.dialects.dialect import DialectType
+
+    Sources = Mapping[str, tuple[exp.Selectable, t.Union[exp.Table, Scope]]]
+
+
+def pushdown_predicates(expression: E, dialect: DialectType = None) -> E:
+    """
+    Rewrite sqlglot AST to pushdown predicates in FROMS and JOINS
+
+    Example:
+        >>> import sqlglot
+        >>> sql = "SELECT y.a AS a FROM (SELECT x.a AS a FROM x AS x) AS y WHERE y.a = 1"
+        >>> expression = sqlglot.parse_one(sql)
+        >>> pushdown_predicates(expression).sql()
+        'SELECT y.a AS a FROM (SELECT x.a AS a FROM x AS x WHERE x.a = 1) AS y WHERE TRUE'
+
+    Args:
+        expression (sqlglot.Expr): expression to optimize
+    Returns:
+        sqlglot.Expr: optimized expression
+    """
+    from sqlglot.dialects.athena import Athena
+    from sqlglot.dialects.presto import Presto
+
+    root = build_scope(expression)
+
+    dialect = Dialect.get_or_raise(dialect)
+    unnest_requires_cross_join = isinstance(dialect, (Athena, Presto))
+
+    if root:
+        scope_ref_count = root.ref_count()
+
+        for scope in reversed(list(root.traverse())):
+            select = scope.expression
+            where: exp.Expr | None = select.args.get("where")
+            joins: list[exp.Join] = select.args.get("joins") or []
+
+            # Filtering join inputs can change which rows these joins pair or select.
+            if any(
+                join.method in ("ASOF", "POSITIONAL")
+                or join.kind in ("ASOF", "ANY", "PASTE")
+                or join.args.get("nearest")
+                for join in scope.find_all(exp.Join)
+            ):
+                continue
+
+            if where:
+                selected_sources: Sources = scope.selected_sources
+                source_positions: dict[str, int] = {}
+
+                # A RIGHT or FULL join null-extends everything joined before it, and an outer WHERE filter
+                # removes those rows, so a source can only be pushed into if no such join comes after it.
+                last_null_extending = max(
+                    (i for i, join in enumerate(joins) if join.side in ("RIGHT", "FULL")),
+                    default=-1,
+                )
+
+                # Presto, trino and athena don't support inner joins where the RHS is an UNNEST expression
+                pushdown_allowed = True
+                reachable: dict[str, tuple[exp.Selectable, exp.Table | Scope]] = {}
+                for k, (node, source) in selected_sources.items():
+                    parent = node.find_ancestor(exp.Join, exp.From)
+                    if isinstance(parent, exp.Join):
+                        if isinstance(node, exp.Unnest) and unnest_requires_cross_join:
+                            pushdown_allowed = False
+                            break
+                        position = parent.index if parent.parent is select else None
+                    elif isinstance(parent, exp.From) and parent.parent is select:
+                        position = -1
+                    else:
+                        continue
+
+                    # Only direct joins have a position in this select.
+                    if position is None:
+                        continue
+
+                    # Keep dependency positions even for sources we cannot safely push filters into.
+                    source_positions[k] = position
+
+                    if position >= last_null_extending:
+                        reachable[k] = (node, source)
+
+                selected_sources = reachable
+
+                if pushdown_allowed:
+                    pushdown(
+                        where.this, selected_sources, scope_ref_count, dialect, source_positions
+                    )
+
+            # joins should only pushdown into itself, not to other joins
+            # so we limit the selected sources to only itself
+            for join in joins:
+                name = join.alias_or_name
+
+                if join.side in ("RIGHT", "FULL"):
+                    continue
+
+                if name in scope.selected_sources:
+                    pushdown(
+                        join.args.get("on"),
+                        {name: scope.selected_sources[name]},
+                        scope_ref_count,
+                        dialect,
+                    )
+
+    return expression
+
+
+def pushdown(
+    condition: exp.Expr | None,
+    sources: Sources,
+    scope_ref_count: Mapping[int, int],
+    dialect: DialectType,
+    source_positions: Mapping[str, int] | None = None,
+) -> None:
+    if not condition:
+        return
+
+    condition = condition.replace(simplify(condition, dialect=dialect))
+    cnf_like = normalized(condition) or not normalized(condition, dnf=True)
+
+    predicates = list(
+        condition.flatten()
+        if isinstance(condition, exp.And if cnf_like else exp.Or)
+        else [condition]
+    )
+
+    if cnf_like:
+        pushdown_cnf(predicates, sources, scope_ref_count, source_positions=source_positions)
+    else:
+        pushdown_dnf(predicates, sources, scope_ref_count, source_positions=source_positions)
+
+
+def pushdown_cnf(
+    predicates: Iterable[exp.Expr],
+    sources: Sources,
+    scope_ref_count: Mapping[int, int],
+    source_positions: Mapping[str, int] | None = None,
+) -> None:
+    """
+    If the predicates are in CNF like form, we can simply replace each block in the parent.
+    """
+    for predicate in predicates:
+        for name, node in nodes_for_predicate(predicate, sources, scope_ref_count).items():
+            if isinstance(node, exp.Join):
+                predicate_tables = exp.column_table_names(predicate, name)
+
+                if source_positions is not None:
+                    # Only push if every other referenced source precedes this join.
+                    this_index = source_positions[name]
+                    if all(
+                        table in source_positions and source_positions[table] < this_index
+                        for table in predicate_tables
+                    ):
+                        predicate.replace(exp.true())
+                        node.on(predicate, copy=False)
+                        break
+            if isinstance(node, exp.Select):
+                predicate.replace(exp.true())
+                inner_predicate = replace_aliases(node, predicate)
+                if _is_scalar_aggregate(node):
+                    node.having(inner_predicate, copy=False)
+                else:
+                    node.where(inner_predicate, copy=False)
+
+
+def pushdown_dnf(
+    predicates: Iterable[exp.Expr],
+    sources: Sources,
+    scope_ref_count: Mapping[int, int],
+    source_positions: Mapping[str, int] | None = None,
+) -> None:
+    """
+    If the predicates are in DNF form, we can only push down conditions that are in all blocks.
+    Additionally, we can't remove predicates from their original form.
+    """
+    # find all the tables that can be pushdown too
+    # these are tables that are referenced in all blocks of a DNF
+    # (a.x AND b.x) OR (a.y AND c.y)
+    # only table a can be push down
+    pushdown_tables: set[str] = set()
+
+    for i, predicate in enumerate(predicates):
+        tables = exp.column_table_names(predicate)
+        if i == 0:
+            pushdown_tables = tables
+        else:
+            pushdown_tables &= tables
+
+        if not pushdown_tables:
+            break
+
+    conditions: dict[str, exp.Expr] = {}
+
+    # pushdown all predicates to their respective nodes
+    for table in sorted(pushdown_tables):
+        table_node: exp.Expr | None = None
+        incomplete = False
+
+        for predicate in predicates:
+            nodes = nodes_for_predicate(predicate, sources, scope_ref_count)
+
+            if table not in nodes:
+                # An arm that can't be pushed would leave an incomplete OR, so skip this table
+                incomplete = True
+                break
+
+            table_node = nodes[table]
+            conditions[table] = (
+                exp.or_(conditions[table], predicate) if table in conditions else predicate
+            )
+
+        if incomplete:
+            conditions.pop(table, None)
+            continue
+
+        predicate = conditions[table]
+
+        if isinstance(table_node, exp.Join):
+            if source_positions is not None:
+                this_index = source_positions[table]
+                predicate_tables = exp.column_table_names(predicate, table)
+                if not all(
+                    t in source_positions and source_positions[t] < this_index
+                    for t in predicate_tables
+                ):
+                    continue
+            table_node.on(predicate, copy=False)
+        elif isinstance(table_node, exp.Select):
+            inner_predicate = replace_aliases(table_node, predicate)
+            if _is_scalar_aggregate(table_node):
+                table_node.having(inner_predicate, copy=False)
+            else:
+                table_node.where(inner_predicate, copy=False)
+
+
+def nodes_for_predicate(
+    predicate: exp.Expr,
+    sources: Sources,
+    scope_ref_count: Mapping[int, int],
+) -> dict[str, exp.Expr]:
+    nodes: dict[str, exp.Expr] = {}
+    tables = exp.column_table_names(predicate)
+    where_condition = isinstance(predicate.find_ancestor(exp.Join, exp.Where), exp.Where)
+
+    for table in sorted(tables):
+        node: exp.Expr | None
+        node, source = sources.get(table) or (None, None)
+
+        # if the predicate is in a where statement we can try to push it down
+        # we want to find the root join or from statement
+        if node and where_condition:
+            node = node.find_ancestor(exp.Join, exp.From)
+
+        # a node can reference a CTE which should be pushed down
+
+        if isinstance(node, exp.From) and not isinstance(source, exp.Table) and source is not None:
+            parent = source.parent
+            if parent is None:
+                raise ValueError("Source node has no parent")
+            with_: exp.With | None = parent.expression.args.get("with_")
+            if with_ and with_.recursive:
+                return {}
+            node = source.expression
+
+        if isinstance(node, exp.Join):
+            if node.side:
+                # A right join preserves its own source, so a WHERE predicate on it can only be
+                # pushed into that source, never into the match-only ON clause.
+                pushable_source = (
+                    source if node.side == "RIGHT" and not isinstance(source, exp.Table) else None
+                )
+                if not pushable_source:
+                    return {}
+
+                node = pushable_source.expression
+            else:
+                nodes[table] = node
+
+        if isinstance(node, exp.Select) and len(tables) == 1:
+            distinct = node.args.get("distinct")
+            has_window_or_srf = any(
+                find_in_scope(select, exp.Window, *exp.SET_RETURNING_FUNCTIONS)
+                for select in node.selects
+            )
+            # we can't push down predicates to select statements if they are referenced in
+            # multiple places.
+            if (
+                not node.args.get("group")
+                and scope_ref_count[id(source)] < 2
+                and not has_window_or_srf
+                # These clauses select rows before the outer predicate runs
+                and not node.args.get("limit")
+                and not node.args.get("offset")
+                and not node.args.get("qualify")
+                and not (distinct and distinct.args.get("on"))
+            ):
+                nodes[table] = node
+    return nodes
+
+
+def _is_scalar_aggregate(select: exp.Select) -> bool:
+    if select.args.get("having"):
+        return True
+
+    windows = select.args.get("windows")
+    order = select.args.get("order")
+    return any(projection_has_aggregate(s, windows) for s in select.selects) or (
+        order is not None and projection_has_aggregate(order, windows)
+    )
+
+
+OPERATOR_EXPRESSIONS = (exp.Binary, exp.Unary, exp.Predicate)
+
+
+def replace_aliases(source: exp.Select, predicate: exp.Expr) -> exp.Expr:
+    aliases: dict[str, exp.Expr] = {}
+
+    for select in source.selects:
+        if isinstance(select, exp.Alias):
+            aliases[select.alias] = select.this
+        else:
+            aliases[select.name] = select
+
+    def _replace_alias(column: exp.Expr) -> exp.Expr:
+        if isinstance(column, exp.Column) and column.name in aliases:
+            replaced = aliases[column.name].copy()
+            if isinstance(replaced, OPERATOR_EXPRESSIONS) and isinstance(
+                column.parent, OPERATOR_EXPRESSIONS
+            ):
+                replaced = exp.paren(replaced, copy=False)
+            return replaced
+        return column
+
+    return predicate.transform(_replace_alias)

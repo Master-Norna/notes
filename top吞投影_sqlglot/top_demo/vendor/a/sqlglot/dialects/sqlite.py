@@ -1,0 +1,60 @@
+from __future__ import annotations
+
+from sqlglot import exp, tokens
+from sqlglot.dialects.dialect import (
+    AliasPrecedence,
+    Dialect,
+    NormalizationStrategy,
+    UsingColumnOrder,
+)
+from sqlglot.generators.sqlite import SQLiteGenerator
+from sqlglot.parsers.sqlite import SQLiteParser
+from sqlglot.tokens import TokenType
+from sqlglot.typing.sqlite import EXPRESSION_METADATA
+
+
+class SQLite(Dialect):
+    # https://sqlite.org/forum/forumpost/5e575586ac5c711b?raw
+    NORMALIZATION_STRATEGY = NormalizationStrategy.CASE_INSENSITIVE
+    ASCII_ONLY_NORMALIZATION = True
+    TYPED_DIVISION = True
+    SAFE_DIVISION = True
+    COLUMN_ALIAS_PRECEDENCE = {
+        exp.Having: AliasPrecedence.SOURCE,
+        exp.Qualify: AliasPrecedence.SOURCE,
+    }
+    SAFE_TO_ELIMINATE_DOUBLE_NEGATION = False
+    USING_COLUMN_ORDER = UsingColumnOrder.IN_PLACE
+    CONCAT_COALESCE = True
+    CONCAT_WS_COALESCE = True
+    INTERSECT_BINDS_TIGHTER_THAN_UNION_AND_EXCEPT = False
+    NUMBERS_CAN_BE_UNDERSCORE_SEPARATED = True
+    EXPRESSION_METADATA = EXPRESSION_METADATA.copy()
+
+    class Tokenizer(tokens.Tokenizer):
+        IDENTIFIERS = ['"', ("[", "]"), "`"]
+        HEX_STRINGS = [("x'", "'"), ("X'", "'"), ("0x", ""), ("0X", "")]
+
+        NESTED_COMMENTS = False
+        COMMENTS_TERMINATE_AT_NEWLINE_ONLY = True
+
+        KEYWORDS = {
+            **tokens.Tokenizer.KEYWORDS,
+            "ATTACH": TokenType.ATTACH,
+            "DETACH": TokenType.DETACH,
+            # REAL, FLOAT and DOUBLE are all 8-byte IEEE floats in SQLite (REAL affinity),
+            # so they must not become a 4-byte float in dialects where REAL/FLOAT means FLOAT4
+            "FLOAT": TokenType.DOUBLE,
+            "INDEXED BY": TokenType.INDEXED_BY,
+            "MATCH": TokenType.MATCH,
+            "REAL": TokenType.DOUBLE,
+            "REINDEX": TokenType.COMMAND,
+        }
+
+        KEYWORDS.pop("/*+")
+
+        COMMANDS = {*tokens.Tokenizer.COMMANDS, TokenType.REPLACE}
+
+    Parser = SQLiteParser
+
+    Generator = SQLiteGenerator

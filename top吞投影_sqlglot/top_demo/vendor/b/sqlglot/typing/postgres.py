@@ -1,0 +1,109 @@
+from __future__ import annotations
+
+import typing as t
+
+from sqlglot import exp
+from sqlglot.typing import EXPRESSION_METADATA, annotate_int_as_double
+
+if t.TYPE_CHECKING:
+    from sqlglot.optimizer.annotate_types import TypeAnnotator
+
+
+def _annotate_extract(self: TypeAnnotator, expression: exp.Extract) -> exp.Expr:
+    # PostgreSQL 14 changed EXTRACT's return type from double precision to numeric.
+    if expression.args.get("date_part") or (
+        self.dialect.version < (14,) and self.dialect == "postgres"
+    ):
+        return self._set_type(expression, exp.DType.DOUBLE)
+    return self._set_type(expression, exp.DType.DECIMAL)
+
+
+def _annotate_math_function(self: TypeAnnotator, expression: exp.Expr) -> exp.Expr:
+    if expression.this.is_type(exp.DType.FLOAT):
+        return self._set_type(expression, exp.DType.DOUBLE)
+    return annotate_int_as_double(self, expression)
+
+
+def _annotate_add_sub(self: TypeAnnotator, expression: exp.Add | exp.Sub) -> exp.Expr:
+    self._annotate_binary(expression)
+    left, right = expression.left, expression.right
+
+    if isinstance(expression, exp.Add) and left.is_type(exp.DType.INTERVAL):
+        left, right = right, left
+
+    if right.is_type(exp.DType.INTERVAL):
+        if left.is_type(exp.DType.DATE):
+            self._set_type(expression, exp.DType.TIMESTAMP)
+        elif left.is_type(*exp.DataType.TEMPORAL_TYPES):
+            self._set_type(expression, left.type)
+
+    return expression
+
+
+EXPRESSION_METADATA = {
+    **EXPRESSION_METADATA,
+    **{
+        expr_type: {"returns": exp.DType.INT}
+        for expr_type in {
+            exp.Ntile,
+            exp.WidthBucket,
+        }
+    },
+    **{
+        expr_type: {"returns": exp.DType.TEXT}
+        for expr_type in {
+            exp.Encode,
+            exp.Left,
+            exp.Right,
+            exp.Overlay,
+            exp.Reverse,
+            exp.Pad,
+            exp.Format,
+            exp.Hex,
+            exp.SplitPart,
+            exp.Normalize,
+            exp.RegexpReplace,
+            exp.Replace,
+        }
+    },
+    **{
+        expr_type: {"returns": exp.DType.VARBINARY}
+        for expr_type in {
+            exp.ConvertToCharset,
+            exp.Decode,
+        }
+    },
+    **{
+        expr_type: {"returns": exp.DType.TIME}
+        for expr_type in {
+            exp.TimeFromParts,
+        }
+    },
+    **{
+        expr_type: {"returns": exp.DType.TIMESTAMP}
+        for expr_type in {
+            exp.TimestampFromParts,
+            exp.Localtimestamp,
+        }
+    },
+    **{
+        expr_type: {"annotator": _annotate_math_function}
+        for expr_type in {
+            exp.Ceil,
+            exp.Floor,
+            exp.Sign,
+        }
+    },
+    **{
+        expr_type: {"annotator": lambda self, e: self._annotate_by_args(e, "this")}
+        for expr_type in {
+            exp.BitwiseAndAgg,
+            exp.BitwiseOrAgg,
+            exp.BitwiseXorAgg,
+        }
+    },
+    exp.Extract: {"annotator": _annotate_extract},
+    exp.ToNumber: {"returns": exp.DType.DECIMAL},
+    exp.Add: {"annotator": _annotate_add_sub},
+    exp.Sub: {"annotator": _annotate_add_sub},
+}
