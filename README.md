@@ -163,11 +163,11 @@ Yarn 工作区导出 SPDX 2.3，根包多出一条指向 `child` 的 `DEPENDS_ON
 <td width="88" align="center" valign="top"><a href="覆盖输入_skylos/skylos_退出码0锁文件没了_中文版.md"><img src="覆盖输入_skylos/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
-**[退出码 0，Cargo.lock 没了](覆盖输入_skylos/skylos_退出码0锁文件没了_中文版.md)**
+**[skylos sbom -o Cargo.lock 退出码 0，锁文件变成了一份 SBOM](覆盖输入_skylos/skylos_退出码0锁文件没了_中文版.md)**
 
 `skylos sbom . -o Cargo.lock` 退出 0，把 7 个包的锁文件写成了一份 CycloneDX JSON。守卫认识 11 个依赖文件名，收集器认识 24 个；差的 13 个里有 6 个是手写清单，丢了没有命令能重建。
 
-<sub>2026-11-05 · [English](覆盖输入_skylos/skylos_Exit_Code_0_Lockfile_Gone_EN.md)</sub>
+<sub>2026-11-05 · 2026-11-21 改版 · [English](覆盖输入_skylos/skylos_Exit_Code_0_Lockfile_Gone_EN.md)</sub>
 
 </td>
 </tr>
