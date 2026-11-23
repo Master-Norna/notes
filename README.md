@@ -16,6 +16,18 @@
 
 <table>
 <tr>
+<td width="88" align="center" valign="top"><a href="空方括号_ralphex/ralphex_空方括号_中文版.md"><img src="空方括号_ralphex/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[计划里还留着 `- [ ]`，ralphex 已经开始 code review](空方括号_ralphex/ralphex_空方括号_中文版.md)**
+
+`- [ ] convert []string to []T in the callers` 这一项还没勾，ralphex 第一轮就跑完，进了 code review。判据是一条正则，字符类后面多了个问号，空 `[]` 于是也算格式示例；它本来是 #222 用来堵死循环的。仓库自己的计划里数出 16 行任务文字带 `[]`，逐行放回未勾选跑两版；41 分钟后维护者把这块豁免整个删掉了。
+
+<sub>2026-11-23 · [English](空方括号_ralphex/ralphex_Empty_Brackets_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
 <td width="88" align="center" valign="top"><a href="格式尾随换行_jsonschema/jsonschema_尾随换行_中文版.md"><img src="格式尾随换行_jsonschema/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
@@ -443,6 +455,7 @@ PostgreSQL 代理 pgdog 连续跑了 12 天以后，定时任务全都不再触�
 
 | 工程 | 跑出来的是什么 |
 | --- | --- |
+| [plan_bracket_demo](空方括号_ralphex/plan_bracket_demo/) | 两版 `pkg/plan/parse.go` 原样放进 `before/` 与 `after/`，同一份计划交给两版；13 个合成用例加仓库 `docs/plans/` 里 16 行真实任务逐行放回未勾选，看完成门在哪一版放行、`[` 与 `]` 之间只有一个 tab 时又怎么判 |
 | [trailing_newline_demo](格式尾随换行_jsonschema/trailing_newline_demo/) | 三个包（rfc3339-validator 0.1.4、rfc3987 1.3.8、fqdn 1.6.0）的发布版文件原样 vendor，七个 `format` 的裸值与「裸值 + 换行」共 14 条并排跑，看发布版怎么全部放行、每次委托前加一句 `endswith` 之后怎么全部拒绝 |
 | [top_demo](top吞投影_sqlglot/top_demo/) | 两版 sqlglot 源码原样 vendor（`provenance.txt` 记 372 个文件的 SHA-256），15 个 SQL 形状在 PyPI 30.33.0 与合并提交 `dc4afaf5` 上各跑一遍，逐条断言输出与投影列表 |
 | [cicd_ignore_demo](忽略标记_skylos/cicd_ignore_demo/) | 三版 `github_actions.py` 各裁到导入链最小集（51/52/52 个文件），12 份 workflow 各起一个子进程扫一遍；只看 D340 与 D327，看引号里的标记、真注释、被别处命令文本拉走的锚各在哪一版报出、报在第几行 |
