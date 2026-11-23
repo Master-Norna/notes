@@ -1,0 +1,16 @@
+docs/plans/completed/2026-01-25-interactive-plan-creation.md:138	create `Collector` interface with `AskQuestion(question string, options []string) (string, error)`
+docs/plans/completed/2026-01-25-interactive-plan-creation.md:173	add `LogQuestion(question string, options []string)` method
+docs/plans/completed/2026-01-29-error-patterns.md:22	Add `ClaudeErrorPatterns []string` to `Values` struct
+docs/plans/completed/2026-01-29-error-patterns.md:23	Add `CodexErrorPatterns []string` to `Values` struct
+docs/plans/completed/2026-01-29-error-patterns.md:35	Add `checkErrorPatterns(output string, patterns []string) *ErrPatternMatch` helper
+docs/plans/completed/2026-01-29-error-patterns.md:45	Add `ErrorPatterns []string` field to `ClaudeOptions`
+docs/plans/completed/2026-01-29-error-patterns.md:56	Add `ErrorPatterns []string` field to `CodexOptions`
+docs/plans/completed/20260228-wait-on-limit.md:53	add `LimitPatterns []string` field to `ClaudeExecutor` struct
+docs/plans/completed/20260228-wait-on-limit.md:55	add `LimitPatterns []string` field to `CodexExecutor` struct with same priority logic in `Run()`
+docs/plans/completed/20260228-wait-on-limit.md:56	add `LimitPatterns []string` field to `CustomExecutor` struct with same priority logic in `Run()`
+docs/plans/completed/20260228-wait-on-limit.md:72	add `ClaudeLimitPatterns []string`, `CodexLimitPatterns []string`, `WaitOnLimit time.Duration` fields to `config.Config`/`Values`
+docs/plans/completed/20260303-docker-wrapper-argparse.md:51	define `-E/--env` flag with `action="append"`, `default=[]`
+docs/plans/completed/20260303-docker-wrapper-argparse.md:52	define `-v/--volume` flag with `action="append"`, `default=[]`
+docs/plans/completed/20260315-code-smells-cleanup.md:98	add method `func (vl *valuesLoader) parseCommaSeparated(section *ini.Section, key string) []string` that reads a key, splits by comma, trims whitespace, filters empty strings
+docs/plans/completed/20260514-codex-first-class-mode.md:325	implement `(o codexConfigOpts) cliArgs() []string`: returns a slice of args ready to splice into codex CLI invocation. Builds `-c features.multi_agent=true` when `o.multiAgent`; builds `-c agents.reviewer.description="general code review specialist; behavior driven by the task argument"` when `o.multiAgent` (paired with multi_agent — agent registration is meaningless without it); builds `-c project_doc_fallback_filenames=["CLAUDE.md"]` when `o.fallbackToClaudeMd`. Empty options produce an empty slice
+docs/plans/completed/20260529-refactor-smells-and-duplication.md:164	extract `buildPendingSectionEvents(name, phase, ts) []Event` consumed by both the loader (`session_progress.go`) and live tailer (`tail.go`)
