@@ -19,9 +19,9 @@
 <td width="88" align="center" valign="top"><a href="空方括号_ralphex/ralphex_空方括号_中文版.md"><img src="空方括号_ralphex/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
-**[计划里还留着 `- [ ]`，ralphex 已经开始 code review](空方括号_ralphex/ralphex_空方括号_中文版.md)**
+**[`[]string` 写在计划里，ralphex 把这行当成做完了](空方括号_ralphex/ralphex_空方括号_中文版.md)**
 
-`- [ ] convert []string to []T in the callers` 这一项还没勾，ralphex 第一轮就跑完，进了 code review。判据是一条正则，字符类后面多了个问号，空 `[]` 于是也算格式示例；它本来是 #222 用来堵死循环的。仓库自己的计划里数出 16 行任务文字带 `[]`，逐行放回未勾选跑两版；41 分钟后维护者把这块豁免整个删掉了。
+`- [ ] convert []string to []T in the callers` 这一项还没勾，ralphex 第一轮就跑完，进了 code review。判据是一条正则，字符类后面多了个问号，空的 `[]` 也算格式示例；它本来是 #222 用来堵死循环的。v1.7.0 仍是最新版，`s[x]`、`mark all tasks [x]` 同样会被跳过；仓库自己的计划里数出 16 行这种任务，逐行放回未勾选跑两版，41 分钟后维护者把整块豁免删掉了。
 
 <sub>2026-11-23 · [English](空方括号_ralphex/ralphex_Empty_Brackets_EN.md)</sub>
 
