@@ -295,7 +295,7 @@ Yarn 工作区导出 SPDX 2.3，根包多出一条指向 `child` 的 `DEPENDS_ON
 <td width="88" align="center" valign="top"><a href="字节删除_nushell_bytes/nushell_bytes_remove_中文版.md"><img src="字节删除_nushell_bytes/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
-**[panic 消失以后，字节却少了](字节删除_nushell_bytes/nushell_bytes_remove_中文版.md)**
+**[bytes remove --end 没找到模式，nushell 删掉了开头的一段字节](字节删除_nushell_bytes/nushell_bytes_remove_中文版.md)**
 
 `0x[10 11 12 13] | bytes remove --end 0x[AA BB]` 没找到模式，返回的却是 `0x[11 12 13]`：第一个字节没了。两年前那次修复只挡住了 panic，没有把扫描跳过的前缀补回来。我的首稿把结果修对了，review 却要求把那条已经出过两次问题的游标整个换掉。
 

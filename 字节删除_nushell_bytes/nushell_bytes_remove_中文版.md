@@ -1,4 +1,6 @@
-# panic 消失以后，字节却少了
+# bytes remove --end 没找到模式，nushell 删掉了开头的一段字节
+
+`bytes remove --end` 找不到模式时，命令应该原样返回输入。0.116.1 返回的却是少了开头几个字节的输入：
 
 ```nushell
 # 修前
@@ -20,7 +22,9 @@
 
 这不是一条新规则，而是一次修复留下的缝。
 
-## 1. 窗口向左滑，前缀没有进入结果
+[0.116.1](https://github.com/nushell/nushell/releases/tag/0.116.1)（2026-10-04）里的 `remove.rs` 与 #19107 的父提交逐字节相同，这个行为就在里面；[0.117.0](https://github.com/nushell/nushell/releases/tag/0.117.0)（2026-11-10）发行时带上的是合并后的 `rposition` 版本。
+
+## 窗口向左滑，前缀没有进入结果
 
 `bytes remove --end` 不带 `--all` 时，走的是[这段逆向扫描](https://github.com/nushell/nushell/blob/8696b5246f7a920156a0be08f29ce7fefe16d885/crates/nu-command/src/bytes/remove.rs#L151-L169)：
 
@@ -58,7 +62,7 @@ result = result.into_iter().rev().collect();
 
 这段代码里的 `if left > 0` 是两年多前加上的。下一节回到它。
 
-## 2. 两年多前的那次 panic，和一道只挡住 panic 的守卫
+## 两年多前的那次 panic，和一道只挡住 panic 的守卫
 
 这条路径不是第一次出问题。2023 年 12 月，[issue #11426](https://github.com/nushell/nushell/issues/11426) 报告了同一个分支的另一种失败：模式找不到时，命令不是返回原输入，而是直接 panic。最小输入只有一个字节：
 
@@ -85,7 +89,7 @@ let mut remain = input[..left as usize].iter().copied().rev().collect();
 +}
 ```
 
-注意这里没有换整型类型。固定父源码里，`left` 和 `right` 已经是 `isize`；#11428 改的是那道 `if`。这个区别值得说清楚，因为 [#19107 的描述](https://github.com/nushell/nushell/pull/19107)在回顾 #11426 时写的是「fixed in v0.89.0 by switching to isize」。按固定父源码和[旧合并补丁](https://github.com/nushell/nushell/commit/15421dc45e6b8b831b6cacebe80b37eda46fbcd9)看，类型早已是 `isize`，真正加上的是守卫；描述里那句与固定补丁不符。
+注意这里没有换整型类型。固定父源码里，`left` 和 `right` 已经是 `isize`；#11428 改的是那道 `if`。[#19107 的描述](https://github.com/nushell/nushell/pull/19107)在回顾 #11426 时写的是「fixed in v0.89.0 by switching to isize」；按固定父源码和[旧合并补丁](https://github.com/nushell/nushell/commit/15421dc45e6b8b831b6cacebe80b37eda46fbcd9)看，类型早已是 `isize`，加上的是这道守卫。
 
 守卫让 panic 消失，却没有把扫描跳过的前缀补回来。#11428 同时新增的「找不到则保持原样」示例是：
 
@@ -97,7 +101,7 @@ let mut remain = input[..left as usize].iter().copied().rev().collect();
 
 **panic 消失和结果正确，是两项性质。**
 
-## 3. 首稿已经修对，review 要求换掉那条游标
+## 首稿已经修对，review 要求换掉那条游标
 
 到 #19107，最直接的修法是给未命中补一个早退。我的[首稿](https://github.com/nushell/nushell/blob/9e99b50de7dd8cb37b5b8b4187d3972afe6e291c/crates/nu-command/src/bytes/remove.rs#L152-L182)就是这样：
 
@@ -120,7 +124,7 @@ if left < 0 {
 
 我在[回复](https://github.com/nushell/nushell/pull/19107#discussion_r4235787984)里采纳，并在重写提交 [`bb2c7f5a`](https://github.com/nushell/nushell/commit/bb2c7f5a748c6ca21a415dcf681b17b7302d4b7e) 里改掉了整段游标。
 
-## 4. 最终版：把找不到变成一个显式分支
+## 最终版：把找不到变成一个显式分支
 
 [最终实现](https://github.com/nushell/nushell/blob/65a22bfa4512e061ef7142914d032e2ad4a5d2ae/crates/nu-command/src/bytes/remove.rs#L147-L184)里，`end && !all` 分支只剩下一个 `match`：
 
@@ -131,13 +135,13 @@ match input.windows(pattern_len).rposition(|w| w == arg.pattern) {
 }
 ```
 
-`rposition` 从右往左找最后一次出现。`Some(pos)` 时，匹配前的 `input[..pos]` 和匹配后的 `input[pos + pattern_len..]` 拼起来；`None` 时，原输入原样返回。没有 `isize` 强转，没有「先收集再反转」，也没有「先构造再丢弃」。
+[`rposition`](https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.rposition) 从右往左找最后一次出现。`Some(pos)` 时，匹配前的 `input[..pos]` 和匹配后的 `input[pos + pattern_len..]` 拼起来；`None` 时，原输入原样返回。没有 `isize` 强转，没有「先收集再反转」，也没有「先构造再丢弃」。
 
-`windows` 在模式为空时会 panic，但 `run()` 在进入 `remove_impl` 之前就拒绝了空模式；最终代码用注释记录了这个依赖。这个 PR 没有改 `run()` 的空模式检查，也没有把 `remove_impl` 变成能独立处理空模式的函数。
+[`windows`](https://doc.rust-lang.org/std/primitive.slice.html#method.windows) 在模式为空时会 panic，但 `run()` 在进入 `remove_impl` 之前就拒绝了空模式；最终代码用注释记录了这个依赖。这个 PR 没有改 `run()` 的空模式检查，也没有把 `remove_impl` 变成能独立处理空模式的函数。
 
 **最终版没有再加一个特判，而是把「找到」和「没找到」写成两个显式分支。**
 
-## 5. 五个固定版本，同场对照
+## 五个固定版本，同场对照
 
 为了看清每一步改变了什么，复现工程从五个固定提交里提取 `remove_impl`，用最小的 `Value`、`Span`、`Arguments` 代用品编译。它不是完整 Nushell，不跑解析器、管道或 metadata；比较的只是这个函数的返回值。
 
@@ -166,9 +170,9 @@ match input.windows(pattern_len).rposition(|w| w == arg.pattern) {
 
 474 个残缺结果丢失的字节数，全部等于 `min(n, m−1)`；这是工程里的断言，不是从几个例子里归纳出来的。
 
-本文的数字全部来自这次 882 对运行。PR 讨论里还有更大范围的历史对照，本文没有复刻，也不把那些数字当作这次实跑的结果。
+本文的数字全部来自这次 882 对运行。
 
-## 6. 这次修复没有覆盖的边界
+## `--end` 的几处既有行为
 
 **`--end` 不是「只匹配后缀」。** 它删的是输入里最后一次出现，出现位置可以在中间。`0x[01 02 01 02 01] | bytes remove --end 0x[01 02]` 返回 `0x[01 02 01]`，尾部的 `01` 仍在。最终版把注释改成了「Remove the last occurrence of the pattern anywhere in the input」，说的就是这件事。
 
@@ -176,9 +180,9 @@ match input.windows(pattern_len).rposition(|w| w == arg.pattern) {
 
 **空模式仍由 `run()` 拒绝。** `windows(0)` 会 panic，但正常命令路径不会把空模式送进来。最终代码的注释明确记录了这个前提，复现工程也只测非空模式。
 
-**metadata 仍会被清空。** `run()` 在返回前无条件把 `content_type` 设为 `None`。所以「原样返回」在字节层面成立，不保证管道里的 `image/png` 等元数据也保留。PR 描述把这个行为归到 #16500。
+**metadata 仍会被清空。** `run()` 在返回前无条件把 `content_type` 设为 `None`。所以「原样返回」在字节层面成立，不保证管道里的 `image/png` 等元数据也保留。PR 描述把这个行为归到 [#16500](https://github.com/nushell/nushell/pull/16500)。
 
-## 7. 一个恰好通过的示例
+## 一个恰好通过的示例
 
 把两次「通过」放在一起看：
 
@@ -191,4 +195,4 @@ match input.windows(pattern_len).rposition(|w| w == arg.pattern) {
 
 [离线复现工程](bytes_demo/)保存五个固定提交的 `remove.rs`，构建时自动提取 `remove_impl`，附上游 MIT 许可证、来源 SHA 与哈希；运行方法和适用范围见[工程 README](bytes_demo/README.md)。它直接编译提取出的函数，不需要完整 Nushell，也不需要联网。
 
-本文依据的最终实现已随 [#19107 合并](https://github.com/nushell/nushell/commit/65a22bfa4512e061ef7142914d032e2ad4a5d2ae)。
+上游：`nushell/nushell`，[#19107](https://github.com/nushell/nushell/pull/19107)，父提交 [`8696b524`](https://github.com/nushell/nushell/commit/8696b5246f7a920156a0be08f29ce7fefe16d885)，合并提交 [`65a22bfa`](https://github.com/nushell/nushell/commit/65a22bfa4512e061ef7142914d032e2ad4a5d2ae)。

@@ -2,17 +2,17 @@
 
 `jsonschema.Draft202012Validator.FORMAT_CHECKER.conforms("http://foo.bar/\n", "uri")` 返回 `True`。同一个字符串交给 `urllib.parse.urlsplit`，换行被悄悄删掉，得到的是 `http://foo.bar/`；交给 `http.client`，请求行里带换行直接抛 `InvalidURL`。
 
-三个组件，三种看法。而且不止 URI：`date-time`、`time`、`uri`、`uri-reference`、`iri`、`iri-reference`、`hostname` 七个 format 都会放行末尾多出来的一个换行（U+000A）。
+三个组件，三种看法。而且不止 URI：`date-time`、`time`、`uri`、`uri-reference`、`iri`、`iri-reference`、`hostname` 七个 format 都会放行末尾多出来的一个换行（U+000A）。4.26.0（当前 PyPI 最新版）和 `main`（2026-11-25）都是这个结果。
 
-先说清楚前提：`format` 在 JSON Schema 里默认只是注解。只有把 `format_checker` 显式交给 validator，这些检查才会真的跑。下面说的都是「已经开了 format 校验」的情形。
+`format` 在 JSON Schema 里默认只是注解，只有把 `format_checker` 显式交给 validator，这些检查才会跑。下面说的都是已经开了 format 校验的情形。
 
 ## 官方套件已经说这些值非法
 
-2026 年 8 月到 9 月，JSON-Schema-Test-Suite 给这七个 format 逐个补了「尾随换行 invalid」的用例：date-time [#959](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/959)（8 月 3 日）、hostname [#1023](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1023)（8 月 4 日）、iri [#1067](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1067)（8 月 13 日）、uri-reference [#1083](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1083) 与 iri-reference [#1144](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1144)（8 月 24 日）、time [#1135](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1135)（8 月 25 日）、uri [#1169](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1169)（9 月 3 日）。10 月 hostname 又补了一条空白字符的用例（[#1226](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1226)）。这些 PR 是同一轮清理：在这之前，套件里没有一条 `data` 含换行的 format 用例，末尾多一个换行这种「看起来对、实际不对」的形状一直没被断言过。
+2026 年 8 月到 9 月，[JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite) 给这七个 format 逐个补了「尾随换行 invalid」的用例：date-time [#959](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/959)（8 月 3 日）、hostname [#1023](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1023)（8 月 4 日）、iri [#1067](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1067)（8 月 13 日）、uri-reference [#1083](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1083) 与 iri-reference [#1144](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1144)（8 月 24 日）、time [#1135](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1135)（8 月 25 日）、uri [#1169](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1169)（9 月 3 日）。10 月 hostname 又补了一条空白字符的用例（[#1226](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1226)）。这些 PR 是同一轮清理：在这之前，套件里没有一条 `data` 含换行的 format 用例，末尾多一个换行这种「看起来对、实际不对」的形状一直没被断言过。
 
 用例本身很短，比如 URI 那条是 `"http://foo.bar/\n"`、`valid: false`；date-time 那条是 `"1985-04-12T23:20:50Z\n"`、`valid: false`。同一份文件里，去掉换行的原值仍然是 `valid: true`。也就是说，套件认定的问题就是末尾那一个 `\n`，不是别的。
 
-把这几条交给 jsonschema 4.26.0（当前 PyPI 最新版）的 `Draft202012Validator.FORMAT_CHECKER`，结果是这样：
+把这几条交给 [jsonschema 4.26.0](https://pypi.org/project/jsonschema/4.26.0/) 的 `Draft202012Validator.FORMAT_CHECKER`，结果是这样：
 
 | format | 套件里的值 | 套件判 | 4.26.0 判 |
 | --- | --- | --- | --- |
@@ -24,7 +24,7 @@
 | `iri` | `"http://ƒøø.ßår/\n"` | 非法 | 合法 |
 | `iri-reference` | `"/âππ\n"` | 非法 | 合法 |
 
-七条全部判成合法——和套件的结论正好相反。`main` 上 `_format.py` 最近一次改动停在 2026 年 10 月 4 日的 `84bae0ea`，到 11 月 16 日也没有加过针对尾随换行的守卫。
+七条全部判成合法——和套件的结论正好相反。`main` 上 `_format.py` 最近一次改动停在 2026 年 10 月 4 日的 `84bae0ea`；到 2026 年 11 月 25 日，`main` 上仍是这份文件，没有加过针对尾随换行的守卫。
 
 ## 三条委托链，收尾都用了 `$`
 
@@ -42,7 +42,7 @@ jsonschema 自己没有写这些格式的语法。`date-time` 交给 `rfc3339-va
 
 ## `$` 不是字符串结尾
 
-Python 的 `re` 里，`$` 匹配「字符串末尾，或者末尾换行符之前」。所以：
+[Python 的 `re`](https://docs.python.org/3/library/re.html#regular-expression-syntax) 里，`$` 匹配「字符串末尾，或者末尾换行符之前」。所以：
 
 ```python
 import re
@@ -57,7 +57,7 @@ re.fullmatch(r"1985-04-12T23:20:50Z", "1985-04-12T23:20:50Z\n") # None
 
 `$` 在 `re.MULTILINE` 下还会匹配每一行的行尾，范围更宽。这三处都没有开 `MULTILINE`，所以只漏掉最后那一个换行。
 
-Python 3.14 起，标准库补了一个 `\z`，文档写的是「只匹配字符串末尾」，`\Z` 保留为它的兼容别名。三个包里写的 `$` 是老写法，在 3.14 上语义也没有变——它仍然在末尾换行之前收尾。
+Python 3.14 起，标准库补了一个 [`\z`](https://docs.python.org/3/library/re.html#regular-expression-syntax)，文档写的是「只匹配字符串末尾」，`\Z` 保留为它的兼容别名。三个包里写的 `$` 是老写法，在 3.14 上语义也没有变——它仍然在末尾换行之前收尾。
 
 ## 同一个库里的反例
 
@@ -82,7 +82,7 @@ jsonschema 并不是所有 format 都这样。同一份 `_format.py` 里：
 | `datetime.fromisoformat` | `1985-04-12T23:20:50Z\n` | `ValueError: Invalid isoformat string` |
 | `json.dumps` | 任何带尾随换行的值 | 转义成 `\\n`，日志里看不出来 |
 
-`urlsplit` 那一行是这次最值得记的：它在解析前会删掉 `\t`、`\r`、`\n` 三个字节（`_UNSAFE_URL_BYTES_TO_REMOVE`，为的是对齐浏览器的容错行为）。所以 `"http://foo.bar/a\nb"` 解析出来是 `http://foo.bar/ab`——**斜杠后面那一格的内容变了**，不是报错，是静默变成了另一个地址。校验器看到的是 A，下游拿到的是 B。
+`urlsplit` 那一行是这次最值得记的：它在解析前会删掉 `\t`、`\r`、`\n` 三个字节（[`_UNSAFE_URL_BYTES_TO_REMOVE`](https://github.com/python/cpython/blob/main/Lib/urllib/parse.py)，为的是对齐浏览器的容错行为）。所以 `"http://foo.bar/a\nb"` 解析出来是 `http://foo.bar/ab`——**斜杠后面那一格的内容变了**，不是报错，是静默变成了另一个地址。校验器看到的是 A，下游拿到的是 B。
 
 `json.dumps` 那一行则解释了为什么这类值不容易在日志里被发现：换行被转义成两个字符 `\n`，日志上是一条完整的 JSON。
 
@@ -118,7 +118,7 @@ for fmt, value in CASES.items():
 
 改 `$` 为 `\Z` 是最小的改法：`rfc3987` 的 pattern 是 `'^%%(%s)s$'` 这样拼出来的，只动末尾一个字符；`fqdn` 有两份 pattern（一份允许下划线），两份都要改。`fullmatch` 更彻底，但要把 pattern 开头的 `^` 一并去掉，对拼接式的 pattern 来说反而动得多。形状守卫则不动上游包，只在调用前多一次 `endswith` 判断——代价是每个委托点都要记得加。
 
-三个包的发布节奏也影响改在哪一侧：rfc3987 的 1.3.8 停在 2018 年，rfc3339-validator 的 0.1.4 停在 2021 年，fqdn 的 1.6.0 是 2026 年 9 月发的。两个多年没动的包，要它们为这条边单独发版不太现实。
+三个包的发布节奏也影响改在哪一侧：[rfc3987](https://pypi.org/project/rfc3987/) 的 1.3.8 停在 2018 年，[rfc3339-validator](https://pypi.org/project/rfc3339-validator/) 的 0.1.4 停在 2021 年，[fqdn](https://pypi.org/project/fqdn/) 的 1.6.0 是 2026 年 9 月发的。两个多年没动的包，要它们为这条边单独发版不太现实。
 
 `trailing_newline_demo/run.py --test` 里两组结果是这样的：
 
@@ -127,4 +127,4 @@ for fmt, value in CASES.items():
 
 两组都符合预期时输出 `ALL PASS`。工程里 vendor 的是三个包的发布版文件（rfc3339-validator 0.1.4、rfc3987 1.3.8、fqdn 1.6.0），许可证随附；把同样的 14 条交给真正的 jsonschema 4.26.0，判定与本工程逐条一致。
 
-上游：`python-jsonschema/jsonschema`，[#1588](https://github.com/python-jsonschema/jsonschema/issues/1588)。
+上游：`python-jsonschema/jsonschema`，[#1588](https://github.com/python-jsonschema/jsonschema/issues/1588)（2026-10-14 提出；4.26.0 与 `main` 都还没有修）。
