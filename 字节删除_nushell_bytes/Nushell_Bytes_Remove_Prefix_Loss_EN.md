@@ -1,4 +1,6 @@
-# The panic went away. So did some bytes.
+# bytes remove --end finds no pattern, and nushell drops the first bytes
+
+When `bytes remove --end` finds no pattern, the command should return its input unchanged. 0.116.1 returns input with the first few bytes missing:
 
 ```nushell
 # before the fix
@@ -20,7 +22,9 @@ Both lines come from one rule: on a miss, the first `min(n, m−1)` bytes are dr
 
 This is not a new rule. It is a seam left behind by an earlier fix.
 
-## 1. The window slides left, and the prefix never reaches the result
+The `remove.rs` in [0.116.1](https://github.com/nushell/nushell/releases/tag/0.116.1) (2026-10-04) is byte-for-byte the same as #19107's parent commit, so the behaviour ships in that release. [0.117.0](https://github.com/nushell/nushell/releases/tag/0.117.0) (2026-11-10) shipped with the merged `rposition` version.
+
+## The window slides left, and the prefix never reaches the result
 
 Without `--all`, `bytes remove --end` runs [this backward scan](https://github.com/nushell/nushell/blob/8696b5246f7a920156a0be08f29ce7fefe16d885/crates/nu-command/src/bytes/remove.rs#L151-L169):
 
@@ -58,7 +62,7 @@ Both cases reduce to the same loss: `min(n, m−1)`.
 
 The `if left > 0` in that snippet was added more than two years ago. The next section goes back to it.
 
-## 2. The panic from two years ago, and a guard that only stopped the panic
+## The panic from two years ago, and a guard that only stopped the panic
 
 This path had failed before. In December 2023, [issue #11426](https://github.com/nushell/nushell/issues/11426) reported another failure of the same branch: when the pattern was not found, the command did not return the input, it panicked. The smallest input is a single byte:
 
@@ -85,7 +89,7 @@ let mut remain = input[..left as usize].iter().copied().rev().collect();
 +}
 ```
 
-Note that it did not change the integer type. In the fixed parent source, `left` and `right` are already `isize`; what #11428 added is the `if`. The distinction is worth stating because the [#19107 description](https://github.com/nushell/nushell/pull/19107), looking back at #11426, says "fixed in v0.89.0 by switching to isize". Going by the fixed parent source and the [original merge patch](https://github.com/nushell/nushell/commit/15421dc45e6b8b831b6cacebe80b37eda46fbcd9), the type was `isize` all along; the guard is what appeared. That sentence in the description does not match the fixed patch.
+Note that it did not change the integer type. In the fixed parent source, `left` and `right` are already `isize`; what #11428 changed is the `if`. The [#19107 description](https://github.com/nushell/nushell/pull/19107), looking back at #11426, says "fixed in v0.89.0 by switching to isize"; going by the fixed parent source and the [original merge patch](https://github.com/nushell/nushell/commit/15421dc45e6b8b831b6cacebe80b37eda46fbcd9), the type was `isize` all along, and the guard is what appeared.
 
 The guard made the panic go away. It did not bring back the prefix the scan had skipped. The "not found, keep the input" example added along with #11428 is:
 
@@ -97,7 +101,7 @@ The pattern is a single byte. With `m = 1`, the loss is `min(n, 0) = 0`, so this
 
 **A vanished panic and a correct result are two separate properties.**
 
-## 3. The first draft already gave the right answer; review asked for a different scan
+## The first draft already gave the right answer; review asked for a different scan
 
 By #19107, the most direct fix was an early return on a miss. My [first draft](https://github.com/nushell/nushell/blob/9e99b50de7dd8cb37b5b8b4187d3972afe6e291c/crates/nu-command/src/bytes/remove.rs#L152-L182) did exactly that:
 
@@ -120,7 +124,7 @@ The alternative he proposed was `input.windows(pattern_len).rposition(..)`: spli
 
 I accepted it in [my reply](https://github.com/nushell/nushell/pull/19107#discussion_r4235787984) and dropped the whole cursor in the rewrite commit [`bb2c7f5a`](https://github.com/nushell/nushell/commit/bb2c7f5a748c6ca21a415dcf681b17b7302d4b7e).
 
-## 4. The final version turns "not found" into an explicit branch
+## The final version turns "not found" into an explicit branch
 
 In the [final implementation](https://github.com/nushell/nushell/blob/65a22bfa4512e061ef7142914d032e2ad4a5d2ae/crates/nu-command/src/bytes/remove.rs#L147-L184), the `end && !all` branch is a single `match`:
 
@@ -131,13 +135,13 @@ match input.windows(pattern_len).rposition(|w| w == arg.pattern) {
 }
 ```
 
-`rposition` searches from the right for the last occurrence. With `Some(pos)`, `input[..pos]` and `input[pos + pattern_len..]` are joined. With `None`, the input comes back as it was. No `isize` cast, no "collect then reverse", no "build then discard".
+[`rposition`](https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.rposition) searches from the right for the last occurrence. With `Some(pos)`, `input[..pos]` and `input[pos + pattern_len..]` are joined. With `None`, the input comes back as it was. No `isize` cast, no "collect then reverse", no "build then discard".
 
-`windows` panics on an empty pattern, but `run()` rejects empty patterns before it ever reaches `remove_impl`; the final code records that dependency in a comment. This PR did not touch the empty-pattern check in `run()`, and did not make `remove_impl` a function that handles empty patterns on its own.
+[`windows`](https://doc.rust-lang.org/std/primitive.slice.html#method.windows) panics on an empty pattern, but `run()` rejects empty patterns before it ever reaches `remove_impl`; the final code records that dependency in a comment. This PR did not touch the empty-pattern check in `run()`, and did not make `remove_impl` a function that handles empty patterns on its own.
 
 **The final version does not add another special case; it writes "found" and "not found" as two explicit branches.**
 
-## 5. Five fixed revisions, side by side
+## Five fixed revisions, side by side
 
 To see what each step changed, the reproduction project extracts `remove_impl` from five fixed commits and compiles it against minimal stand-ins for `Value`, `Span`, and `Arguments`. It is not Nushell: no parser, no pipeline, no metadata. What is compared is the return value of this one function.
 
@@ -166,9 +170,9 @@ Of the 498 misses, the post-#11428 version returned a truncated result on 474. T
 
 The number of bytes lost by those 474 truncated results is `min(n, m−1)` in every case; that is an assertion in the project, not a pattern generalised from a few examples.
 
-Every number above comes from this 882-pair run. The PR discussion contains comparisons over a wider range; this article did not reproduce them and does not report their numbers as results of this run.
+Every number above comes from this 882-pair run.
 
-## 6. What this fix leaves alone
+## A few existing behaviours of `--end`
 
 **`--end` does not mean "match the suffix only".** It removes the last occurrence, wherever it is. `0x[01 02 01 02 01] | bytes remove --end 0x[01 02]` returns `0x[01 02 01]`, and the trailing `01` is still there. The final revision changes the comment to "Remove the last occurrence of the pattern anywhere in the input", which is what it does.
 
@@ -176,9 +180,9 @@ Every number above comes from this 882-pair run. The PR discussion contains comp
 
 **Empty patterns are still rejected by `run()`.** `windows(0)` panics, but the normal command path never delivers an empty pattern. The final code records the premise in a comment, and the reproduction only tests non-empty patterns.
 
-**Metadata is still cleared.** Before returning, `run()` unconditionally sets `content_type` to `None`. So "returned unchanged" holds at the byte level; it does not promise that `image/png` and friends survive the pipeline. The PR description attributes this behaviour to #16500.
+**Metadata is still cleared.** Before returning, `run()` unconditionally sets `content_type` to `None`. So "returned unchanged" holds at the byte level; it does not promise that `image/png` and friends survive the pipeline. The PR description attributes this behaviour to [#16500](https://github.com/nushell/nushell/pull/16500).
 
-## 7. A test that passed by accident
+## A test that passed by accident
 
 Two "passing" runs, side by side:
 
@@ -191,4 +195,4 @@ The patch itself is short. What holds it up is a clear statement of the miss sem
 
 The [offline reproduction project](bytes_demo/) keeps the `remove.rs` of five fixed commits, extracts `remove_impl` at build time, and ships the upstream MIT licence, source SHAs, and hashes; commands and scope are in the [project README](bytes_demo/README.md). It compiles the extracted function directly, needs no full Nushell, and runs offline.
 
-The final implementation discussed here was [merged with #19107](https://github.com/nushell/nushell/commit/65a22bfa4512e061ef7142914d032e2ad4a5d2ae).
+Upstream: `nushell/nushell`, [#19107](https://github.com/nushell/nushell/pull/19107), parent commit [`8696b524`](https://github.com/nushell/nushell/commit/8696b5246f7a920156a0be08f29ce7fefe16d885), merge commit [`65a22bfa`](https://github.com/nushell/nushell/commit/65a22bfa4512e061ef7142914d032e2ad4a5d2ae).

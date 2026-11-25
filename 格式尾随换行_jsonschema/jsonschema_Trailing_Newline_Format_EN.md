@@ -2,17 +2,17 @@
 
 `jsonschema.Draft202012Validator.FORMAT_CHECKER.conforms("http://foo.bar/\n", "uri")` returns `True`. Hand the same string to `urllib.parse.urlsplit` and the newline is quietly dropped, leaving `http://foo.bar/`; hand it to `http.client` and a request line containing the newline raises `InvalidURL`.
 
-Three components, three opinions. And it is not only URI: `date-time`, `time`, `uri`, `uri-reference`, `iri`, `iri-reference` and `hostname` — seven formats — all accept one extra newline (U+000A) at the end.
+Three components, three opinions. And it is not only URI: `date-time`, `time`, `uri`, `uri-reference`, `iri`, `iri-reference` and `hostname` — seven formats — all accept one extra newline (U+000A) at the end. 4.26.0 (the current PyPI release) and `main` (2026-11-25) both give this result.
 
-One premise first: in JSON Schema, `format` is an annotation by default. These checks only run when a `format_checker` is handed to the validator. Everything below is about the case where format checking is already on.
+In JSON Schema, `format` is an annotation by default; these checks only run when a `format_checker` is handed to the validator. Everything below assumes format checking is already on.
 
 ## The official test suite already calls these values invalid
 
-Between August and September 2026, JSON-Schema-Test-Suite added a "trailing newline is invalid" case to each of the seven formats: date-time [#959](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/959) (August 3), hostname [#1023](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1023) (August 4), iri [#1067](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1067) (August 13), uri-reference [#1083](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1083) and iri-reference [#1144](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1144) (August 24), time [#1135](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1135) (August 25), uri [#1169](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1169) (September 3). In October, hostname got one more case for whitespace ([#1226](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1226)). These PRs are one sweep: before them, the suite had no format case whose `data` contained a newline, and the shape that "looks right, isn't" — one extra newline at the end — had never been asserted.
+Between August and September 2026, [JSON-Schema-Test-Suite](https://github.com/json-schema-org/JSON-Schema-Test-Suite) added a "trailing newline is invalid" case to each of the seven formats: date-time [#959](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/959) (August 3), hostname [#1023](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1023) (August 4), iri [#1067](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1067) (August 13), uri-reference [#1083](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1083) and iri-reference [#1144](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1144) (August 24), time [#1135](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1135) (August 25), uri [#1169](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1169) (September 3). In October, hostname got one more case for whitespace ([#1226](https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/1226)). These PRs are one sweep: before them, the suite had no format case whose `data` contained a newline, and the shape that "looks right, isn't" — one extra newline at the end — had never been asserted.
 
 The cases are short. The URI one is `"http://foo.bar/\n"` with `valid: false`; the date-time one is `"1985-04-12T23:20:50Z\n"` with `valid: false`. In the same file, the value without the newline is still `valid: true`. The problem the suite names is exactly the trailing `\n`, nothing else.
 
-Hand those cases to `Draft202012Validator.FORMAT_CHECKER` in jsonschema 4.26.0 (the current release on PyPI) and this comes back:
+Hand those cases to `Draft202012Validator.FORMAT_CHECKER` in [jsonschema 4.26.0](https://pypi.org/project/jsonschema/4.26.0/) and this comes back:
 
 | format | value in the suite | suite says | 4.26.0 says |
 | --- | --- | --- | --- |
@@ -24,7 +24,7 @@ Hand those cases to `Draft202012Validator.FORMAT_CHECKER` in jsonschema 4.26.0 (
 | `iri` | `"http://ƒøø.ßår/\n"` | invalid | valid |
 | `iri-reference` | `"/âππ\n"` | invalid | valid |
 
-All seven come back valid — the opposite of the suite. On `main`, the last change to `_format.py` is `84bae0ea` on 2026-10-04, and as of November 16 nothing has added a guard for the trailing newline.
+All seven come back valid — the opposite of the suite. On `main`, the last change to `_format.py` is `84bae0ea` on 2026-10-04; as of 2026-11-25 that is still the file on `main`, with no guard for the trailing newline.
 
 ## Three delegation chains, all ending in `$`
 
@@ -42,7 +42,7 @@ Three packages, three periods of time, one and the same shape. Nobody copied any
 
 ## `$` is not the end of the string
 
-In Python's `re`, `$` matches "the end of the string, or just before a newline at the end of the string". So:
+In [Python's `re`](https://docs.python.org/3/library/re.html#regular-expression-syntax), `$` matches "the end of the string, or just before a newline at the end of the string". So:
 
 ```python
 import re
@@ -57,7 +57,7 @@ That explains two details that are easy to miss. First, a value ending in `\r\n`
 
 Under `re.MULTILINE`, `$` also matches every line end, which is wider still. None of the three chains sets `MULTILINE`, so only the final newline leaks through.
 
-Starting with Python 3.14 the standard library has `\z`, documented as matching only at the end of the string, with `\Z` kept as a compatibility alias. The `$` written in these three packages is the old spelling, and its meaning on 3.14 has not changed — it still stops before a trailing newline.
+Starting with Python 3.14 the standard library has [`\z`](https://docs.python.org/3/library/re.html#regular-expression-syntax), documented as matching only at the end of the string, with `\Z` kept as a compatibility alias. The `$` written in these three packages is the old spelling, and its meaning on 3.14 has not changed — it still stops before a trailing newline.
 
 ## Counterexamples in the same library
 
@@ -82,7 +82,7 @@ Values like these are rarely typed by hand. Reading a file line by line, `readli
 | `datetime.fromisoformat` | `1985-04-12T23:20:50Z\n` | `ValueError: Invalid isoformat string` |
 | `json.dumps` | any value with a trailing newline | escaped to `\\n`, invisible in logs |
 
-The `urlsplit` row is the one worth keeping: before parsing it deletes three bytes — `\t`, `\r`, `\n` (`_UNSAFE_URL_BYTES_TO_REMOVE`, there to match browser tolerance). So `"http://foo.bar/a\nb"` parses as `http://foo.bar/ab` — **what follows the slash has changed**. Not an error: it quietly becomes another URL. The validator sees A, the downstream gets B.
+The `urlsplit` row is the one worth keeping: before parsing it deletes three bytes — `\t`, `\r`, `\n` ([`_UNSAFE_URL_BYTES_TO_REMOVE`](https://github.com/python/cpython/blob/main/Lib/urllib/parse.py), there to match browser tolerance). So `"http://foo.bar/a\nb"` parses as `http://foo.bar/ab` — **what follows the slash has changed**. Not an error: it quietly becomes another URL. The validator sees A, the downstream gets B.
 
 The `json.dumps` row explains why values like this are hard to spot in logs: the newline is escaped into the two characters `\n`, and the log line is one complete JSON document.
 
@@ -118,7 +118,7 @@ There are two granularities. One is to change the ending from `$` to `\Z` (or `f
 
 Changing `$` to `\Z` is the smallest edit: `rfc3987` builds its pattern as `'^%%(%s)s$'`, so it is one character at the end; `fqdn` has two patterns (one allowing underscores), and both need it. `fullmatch` is more thorough but also requires dropping the leading `^`, which is more work for a composed pattern. The shape guard leaves the upstream packages alone and adds one `endswith` check beforehand — at the cost of remembering it at every delegation point.
 
-The release cadence of the three packages also decides which side to fix on: rfc3987's last release, 1.3.8, is from 2018; rfc3339-validator's 0.1.4 is from 2021; fqdn's 1.6.0 came out in September 2026. Asking two packages that have not moved in years to cut a release for this edge is not realistic.
+The release cadence of the three packages also decides which side to fix on: [rfc3987](https://pypi.org/project/rfc3987/)'s last release, 1.3.8, is from 2018; [rfc3339-validator](https://pypi.org/project/rfc3339-validator/)'s 0.1.4 is from 2021; [fqdn](https://pypi.org/project/fqdn/)'s 1.6.0 came out in September 2026. Asking two packages that have not moved in years to cut a release for this edge is not realistic.
 
 Inside `trailing_newline_demo/run.py --test` the two sets look like this:
 
@@ -127,4 +127,4 @@ Inside `trailing_newline_demo/run.py --test` the two sets look like this:
 
 When both hold, it prints `ALL PASS`. The project vendors the released files of the three packages (rfc3339-validator 0.1.4, rfc3987 1.3.8, fqdn 1.6.0) with their licences; the same 14 cases run through the real jsonschema 4.26.0 give the same verdict, row for row.
 
-Upstream: `python-jsonschema/jsonschema`, [#1588](https://github.com/python-jsonschema/jsonschema/issues/1588).
+Upstream: `python-jsonschema/jsonschema`, [#1588](https://github.com/python-jsonschema/jsonschema/issues/1588) (opened 2026-10-14; still unfixed in 4.26.0 and on `main`).
