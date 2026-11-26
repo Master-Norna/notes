@@ -223,9 +223,9 @@ Yarn 工作区导出 SPDX 2.3，根包多出一条指向 `child` 的 `DEPENDS_ON
 <td width="88" align="center" valign="top"><a href="零阈值_scrapling/scrapling_零阈值仍过滤_中文版.md"><img src="零阈值_scrapling/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
-**[阈值写 0，过滤为什么没关](零阈值_scrapling/scrapling_零阈值仍过滤_中文版.md)**
+**[阈值写 0，Scrapling 还是丢掉了同层的元素](零阈值_scrapling/scrapling_零阈值仍过滤_中文版.md)**
 
-参考链接没有属性、候选多一个 `class`，`checks` 停在 0；旧代码把「没有可比的属性」当成「不相似」，直接返回。修复只把 `return False` 换成了 `0 >= similarity_threshold`，14 行对照里只有两行变了。
+参考链接没有属性、候选多一个 `class`，`checks` 停在 0；旧代码把「没有可比的属性」当成「不相似」，直接返回。0.5 及更早会因此丢掉同一层的元素，v0.5.1 把这一步交回给阈值，14 行对照里只有两行变了。
 
 <sub>2026-11-03 · [English](零阈值_scrapling/scrapling_Zero_Threshold_Still_Filters_EN.md)</sub>
 

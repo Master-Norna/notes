@@ -1,14 +1,26 @@
-# Why a threshold of 0 did not turn the filter off
+# `find_similar(similarity_threshold=0)` does not switch attribute filtering off, and Scrapling drops same-level elements
 
-`find_similar(similarity_threshold=0)` — the docstring calls the threshold a percentage for attribute comparison, so writing 0 should switch attribute filtering off. On this page the first link has no attributes and the second carries `class="sale"`:
+`find_similar(similarity_threshold=0)` — the docstring calls the threshold a percentage for attribute comparison, so writing 0 should switch that step off. But when the reference element has no comparable attributes and the candidate carries `class="sale"`, the candidate is still dropped: the denominator `checks` counts to 0, and the code returns `False` without ever looking at the threshold.
+
+[Scrapling v0.5 `parser.py:1018-1020`](https://github.com/D4Vinci/Scrapling/blob/v0.5/scrapling/parser.py#L1018-L1020) is those three lines:
+
+```python
+if checks:
+    return round(score / checks, 2) >= similarity_threshold
+return False
+```
+
+v0.5.1 (2026-11-04) replaces them with [`return 0 >= similarity_threshold`](https://github.com/D4Vinci/Scrapling/blob/v0.5.1/scrapling/parser.py#L1027-L1029), and the release notes list the fix. If you are still on 0.5 or earlier, the upgrade is `pip install -U scrapling`.
+
+Two elements reproduce it:
 
 ```python
 page = Selector('<div><a>Alpha</a><a href="/beta" class="sale">Beta</a></div>')
 reference = page.css("a")[0]
-reference.find_similar(similarity_threshold=0)   # []
+reference.find_similar(similarity_threshold=0)   # [] on v0.5
 ```
 
-It returns nothing. Beta shares the tag, the depth and the parent with Alpha; the structural pass had already selected it; attribute filtering at 0 was supposed to let it through, and that is exactly where it was dropped.
+Beta shares the tag, the depth and the parent with Alpha; the structural prefilter had already selected it; attribute filtering at 0 was supposed to let it through, and that is exactly where it was dropped.
 
 ## Structure runs first, attributes are the last step
 
@@ -20,23 +32,24 @@ A threshold of 0 switches off the second stage. The first stage has already deci
 
 `__are_alike` adds each comparison's similarity into `score` and counts `checks` as the denominator. Where `checks` comes from depends on whether the reference element has attributes:
 
-| Reference attributes | Candidate attributes | `checks` | `score` | Old result |
+| Reference attributes | Candidate attributes | `checks` | `score` | v0.5 result |
 | --- | --- | --- | --- | --- |
-| present | any | `max(len(original), len(candidate))` | sum of per-attribute similarity | compared with the threshold |
+| present | any | `max(len(original_attributes), len(candidate_attributes))` | sum of per-attribute similarity | compared with the threshold |
 | none | none | 1 | 1 | 100%, passes |
 | none | present | 0 | 0 | `False`, whatever the threshold |
 
 The first two rows have a score to compute. The third has none: without attributes on the reference there is no "key" to compare against the candidate's `class="sale"`, and `checks` stays at 0.
 
-The old code ended at [lines 1020-1022](https://github.com/D4Vinci/Scrapling/blob/49eaff11da8de7c8067cf048a5dc3e0f95b53715/scrapling/parser.py#L1020-L1022):
-
-```python
-if checks:
-    return round(score / checks, 2) >= similarity_threshold
-return False
-```
-
 **`checks == 0` does not mean "not alike". It means "there is no attribute to compare".** The old code turned that into a verdict and skipped the threshold. Under a zero threshold the result was a strange split: a candidate with attributes and zero similarity passed (score 0, and `0 >= 0` is true), while a candidate with nothing to compare could not. That is not the semantics of a threshold, it is the semantics of a sentinel value.
+
+## Who actually hits this: four conditions at once
+
+- The threshold really is 0. `find_similar` defaults to `0.2`. Outside the tests the library calls it in only two places — `benchmarks.py` and the docstring example in the Scrapy integration ([`integrations/scrapy.py:69`](https://github.com/D4Vinci/Scrapling/blob/104294c2d87abe35898327ae788826a3a79887bf/scrapling/integrations/scrapy.py#L69)) — and neither changes the threshold. Whoever hits this passed 0 explicitly.
+- The reference element has no comparable attributes. `ignore_attributes` defaults to `("href", "src")`, so `<a href="/alpha">Alpha</a>` also counts as attribute-free — its only attribute is ignored.
+- The candidate does have attributes. The candidate is filtered through the same ignore list first, so it needs something like `class` or `id` left over.
+- `match_text` is the default `False`. With text comparison on, `checks` gains at least 1 and the `if checks` branch is never skipped.
+
+A page that satisfies all four is not exotic: in a navigation bar every link except the current one has only `href`, which is ignored by default. Take the first link as the reference and look for its kin: the current item carries `class="active"`, 0.2 will miss it, and to get "every sibling link, no exceptions" you write the threshold as 0. The docstring itself, in [the `similarity_threshold` paragraph](https://github.com/D4Vinci/Scrapling/blob/104294c2d87abe35898327ae788826a3a79887bf/scrapling/parser.py#L1041-L1046), says the prefiltered elements are "99% likely to be correct" and attribute comparison is only the last gate — 0 is how you say "I trust the structure".
 
 ## Earlier: the `max` fixed the other direction
 
@@ -56,20 +69,9 @@ It is not `return True`, because a positive threshold still has to exclude these
 
 The docstring also says that two attribute-free elements are a 100% match. That is the cell with a denominator — `score += 1; checks += 1`. This patch covers its reverse: when the denominator cannot be counted, the score is 0, not "no result". Together the two sentences make the attribute stage total.
 
-## When you actually hit this
-
-Four conditions have to hold at once:
-
-- The threshold really is 0. `find_similar` defaults to `0.2`; the only call inside the library is the documentation example in the Scrapy integration ([`integrations/scrapy.py:69`](https://github.com/D4Vinci/Scrapling/blob/104294c2d87abe35898327ae788826a3a79887bf/scrapling/integrations/scrapy.py#L69)), and it uses the default, so it never reaches this branch. Whoever hits it passed 0 explicitly.
-- The reference element has no comparable attributes. `ignore_attributes` defaults to `("href", "src")`, so `<a href="/alpha">Alpha</a>` also counts as attribute-free — its only attribute is ignored.
-- The candidate does have attributes. The candidate is filtered through the same ignore list first, so it needs something like `class` or `id` left over.
-- `match_text` is the default `False`. With text comparison on, `checks` gains at least 1 and the `if checks` branch is never skipped.
-
-A page that satisfies all four is not exotic: in a navigation bar every link except the current one has only `href`, which is ignored by default. Take the first link as the reference and look for its kin: the current item carries `class="active"`, 0.2 will miss it, and to get "every sibling link, no exceptions" you write the threshold as 0. The docstring itself, in [the `similarity_threshold` paragraph](https://github.com/D4Vinci/Scrapling/blob/104294c2d87abe35898327ae788826a3a79887bf/scrapling/parser.py#L1041-L1046), says the prefiltered elements are "99% likely to be correct" and attribute comparison is only the last gate — 0 is how you say "I trust the structure".
-
 ## Fourteen rows
 
-The demo runs the same set of pages through the `parser.py` of both fixed commits: 7 cases, two thresholds each, 14 rows. Every page is `<div class="list"><a ref>Alpha</a><a cand>Beta</a></div>`, and the first link is the reference for `find_similar`.
+The demo runs the same set of pages through the `parser.py` of both fixed commits: 7 cases, two thresholds each, 14 rows. Every page is `<div class="list"><a ref>Alpha</a><a cand>Beta</a></div>`, and the first link is the reference for `find_similar`. The two `parser.py` files are taken verbatim from parent commit `49eaff11` and merge commit `104294c2`; everything else comes from `scrapling==0.5.0` on PyPI, and the project lives in `零阈值_scrapling/threshold_demo/`.
 
 | Case | Threshold | Before | After |
 | --- | ---: | --- | --- |
@@ -129,4 +131,4 @@ The docstring is the maintainer's statement of the contract: a zero threshold tu
 
 Zero is not "a lower bar", it is "this step is off". With the step off, the only judgement left is the structural prefilter — the one the docstring itself calls 99% reliable. The old code made that decision once more at the last step, on the strength of a sentinel value: if the denominator cannot be counted, call it not alike.
 
-The full page construction, the provenance of the two snapshots and how to run it are in `threshold_demo/README.md`; the complete output of this run is in `.yan/scrapling-threshold/runs/scrapling-demo-publish-20261103.txt`.
+Upstream: `D4Vinci/Scrapling`, [#539](https://github.com/D4Vinci/Scrapling/pull/539), parent commit [`49eaff11`](https://github.com/D4Vinci/Scrapling/commit/49eaff11da8de7c8067cf048a5dc3e0f95b53715), merge commit [`104294c2`](https://github.com/D4Vinci/Scrapling/commit/104294c2d87abe35898327ae788826a3a79887bf).
