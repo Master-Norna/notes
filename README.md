@@ -235,9 +235,9 @@ Yarn 工作区导出 SPDX 2.3，根包多出一条指向 `child` 的 `DEPENDS_ON
 <td width="88" align="center" valign="top"><a href="第366天_dateutil/dateutil_第366天_中文版.md"><img src="第366天_dateutil/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
-**[第 366 天，落回了 12 月 30 日](第366天_dateutil/dateutil_第366天_中文版.md)**
+**[dateutil 4.0.0 之前，闰年的第 366 天落回 12 月 30 日](第366天_dateutil/dateutil_第366天_中文版.md)**
 
-从 2000 年 1 月 1 日取第 366 天，dateutil 返回的还是 12 月 30 日，和第 365 天同一个日期。`yearday` 先被换算成 12 月 32 日，clamp 把它压回月末，闰年的补偿又减了一天；2000–2399 逐日枚举，97 个闰年全错在这一天。
+从 2000 年 1 月 1 日取第 366 天，dateutil 返回的还是 12 月 30 日，和第 365 天同一个日期。`yearday` 先被换算成 12 月 32 日，clamp 把它压回月末，闰年的补偿又减了一天；2000–2399 逐日枚举，97 个闰年全错在这一天。4.0.0 修好了这一格。
 
 <sub>2026-11-03 · [English](第366天_dateutil/dateutil_Day_366_Lands_on_Dec_30_EN.md)</sub>
 

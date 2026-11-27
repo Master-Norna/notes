@@ -1,4 +1,6 @@
-# 第 366 天，落回了 12 月 30 日
+# dateutil 4.0.0 之前，闰年的第 366 天落回 12 月 30 日
+
+`pip install -U python-dateutil` 升到 4.0.0，`date(2000, 1, 1) + relativedelta(yearday=366)` 才给出 12 月 31 日。在此之前，它和 `yearday=365` 返回同一个日期：12 月 30 日。
 
 2000 年 12 月 30 日，是这一年的第 365 天。
 
@@ -102,7 +104,7 @@ datetime.date(1999, 12, 31)   # 两版相同
 
 合并版还留了四行注释，把上面那条链写清楚：二月之后的日号按平年转换，`leapdays=-1` 在闰年把它们移回 2 月 29 日；第 366 天变成 12 月 32 日，已经被 clamp 到 12 月 31 日，不能再移。
 
-366 不再设 `leapdays`。平年的行为不变（本来就不应用），59/60 边界不变，365 及以下不变；改动只落在「闰年的第 366 天」这一格。
+366 不再设 `leapdays`。平年的行为不变（本来就不应用），59/60 边界不变，365 及以下不变；改动只落在「闰年的第 366 天」这一格。手里这个库是哪个版本，`relativedelta(yearday=366).leapdays` 一行就能看出来：修前的版本是 -1，4.0.0 里是 0。
 
 为什么不去改 `__add__` 里的顺序，比如先减 `leapdays` 再 clamp？从代码结构看（这是推论），`leapdays` 是 `relativedelta` 的公开参数，用户可以显式传入，也可以和 `day=32` 这样的字段自由组合；把两步合并成一步，会改变所有显式组合的语义。而构造时的这条条件只影响「由 `yearday` 推导出的 `leapdays`」，面最小。
 
@@ -131,16 +133,45 @@ demo 用固定父提交和合并提交的源码快照，枚举 2000–2399：400
 
 97 个失配全是闰年的第 366 天，第一个是 2000，最后一个是 2396。修前的错误不是随机的：每一个闰年都错在同一天。
 
+工程在 `第366天_dateutil/yearday_demo/`：两版 `relativedelta.py` 原样放在 `vendor/`，附上游许可证与逐文件 SHA-256；`python -B run.py --test` 跑完对照与这一轮枚举并逐条断言，只用标准库，不需要装 dateutil，也不联网。
+
 review 里 [Wkhanex 独立跑了同一范围](https://github.com/dateutil/dateutil/pull/1583#pullrequestreview-5498927830)：
 
 > I checked every valid `yearday` for every year 2000–2399 (146,097 date cases) against `date(year, 1, 1) + timedelta(days=ordinal - 1)`. All matched, including day 366 in every leap year and the day-59/day-60 boundary. I used Python 3.12.14 against commit `2a14487`.
 
 他测的是已经修好的版本。两边数字一样，各算各的。他还特意点了 59/60 边界——那是 `leapdays` 开始生效的位置，修复没有碰它。
 
-合并两个多小时后，dateutil 4.0.0 发布。[`NEWS` 第 38 行](https://github.com/dateutil/dateutil/blob/4.0.0/NEWS#L38-L40)写着：
+合并两个多小时后，dateutil 4.0.0 发布（2026-11-01）。[`NEWS` 第 38 行](https://github.com/dateutil/dateutil/blob/4.0.0/NEWS#L38-L40)写着：
 
 > `relativedelta(yearday=366)` now resolves to December 31 in leap years. Previously it gave December 30, the same date as `yearday=365`. Reported and fixed by @Master-Norna (gh pr #1583).
 
 4.0.0 的 sdist 里，`relativedelta.py` 与合并提交逐行一致。
 
 `testInvalidYearDay` 还在，367 照旧抛错。现在 366 也有了自己的成功断言：`first + relativedelta(yearday=366)` 在闰年必须等于 `first + timedelta(days=365)`。边界的这一侧，原来没有人看。
+
+## 五、同一个第 366 天，两个答案
+
+标准库自己认得第 366 天：
+
+```python
+>>> datetime.strptime("2000-366", "%Y-%j").date()
+datetime.date(2000, 12, 31)
+```
+
+`%j` 是一年中的第几天，从 001 到 366。同一个「2000 年的第 366 天」，标准库解析出 12 月 31 日，dateutil 的 `relativedelta(yearday=366)` 折回去是 12 月 30 日。反过来也一样：12 月 31 日的 `tm_yday` 是 366，12 月 30 日是 365。这个数从一开始就只有一个正确答案。
+
+拿 `yearday` 遍历一整年，错的就是这一格。在 2.9.0.post0（4.0.0 之前）上跑：
+
+```python
+>>> days = [first + relativedelta(yearday=n) for n in range(1, 367)]
+>>> len(days), days.count(date(2000, 12, 30)), date(2000, 12, 31) in days
+(366, 2, False)
+```
+
+366 个日期里，12 月 30 日出现两次，12 月 31 日不在。按「第几天」建的索引从这一天起错位。平年不显（1999 年的第 366 天给 12 月 31 日），只有闰年踩得到，四年一次。
+
+`yearday` 的用途就是把「年份 + 第几天」换成年月日，`strptime` 的 `%j` 与 `time.struct_time` 的 `tm_yday` 都是这个数。走 `relativedelta` 折算这一路，4.0.0 之前都会在闰年的最后一格上差一天。
+
+修复随 4.0.0 发布（2026-11-01），它要求 Python 3.11 及以上，也不再依赖 `six`；还停在 3.10 的工程升不到这一版。升不上去的，用 `first + timedelta(days=n - 1)` 算同一件事——这条路两版都对。
+
+上游：`dateutil/dateutil`，[#1583](https://github.com/dateutil/dateutil/pull/1583)，父提交 [5391455e](https://github.com/dateutil/dateutil/commit/5391455e7c7839e300b63649041806fb5219432e)，合并提交 [d23ff760](https://github.com/dateutil/dateutil/commit/d23ff760f8448b51579016d96f39590018445724)。

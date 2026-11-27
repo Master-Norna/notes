@@ -1,4 +1,6 @@
-# The 366th day of the year lands on December 30
+# Before dateutil 4.0.0, day 366 of a leap year lands on December 30
+
+Upgrade with `pip install -U python-dateutil` to 4.0.0, and `date(2000, 1, 1) + relativedelta(yearday=366)` gives December 31. Before that, it returns the same date as `yearday=365`: December 30.
 
 December 30, 2000 is the 365th day of that year.
 
@@ -102,7 +104,7 @@ The fix tightens the compensation by one day:
 
 The merged version also leaves four lines of comment spelling the chain out: day numbers past February are converted on a common-year basis, `leapdays=-1` moves them back to February 29 in a leap year; day 366 becomes December 32, already clamped to December 31, and must not be moved again.
 
-366 no longer sets `leapdays`. Common-year behaviour is unchanged (it never applied), the 59/60 boundary is unchanged, 365 and below are unchanged; the change lands on exactly one cell — day 366 of a leap year.
+366 no longer sets `leapdays`. Common-year behaviour is unchanged (it never applied), the 59/60 boundary is unchanged, 365 and below are unchanged; the change lands on exactly one cell — day 366 of a leap year. Which version you have is one line away: `relativedelta(yearday=366).leapdays` is -1 before the fix and 0 in 4.0.0.
 
 Why not reorder `__add__`, applying `leapdays` before the clamp? Judging from the code structure (this is an inference), `leapdays` is a public `relativedelta` argument; a user can pass it explicitly and combine it freely with something like `day=32`. Merging the two steps into one would change the meaning of every explicit combination. The constructor condition only affects the `leapdays` derived from `yearday`, the smallest surface.
 
@@ -131,16 +133,45 @@ The demo uses pinned snapshots of the parent commit and the merge commit and enu
 
 All 97 mismatches are day 366 of a leap year, the first 2000 and the last 2396. The old error was not random: every leap year was wrong on the same day.
 
+The project is in `第366天_dateutil/yearday_demo/`: both `relativedelta.py` snapshots sit under `vendor/` with the upstream licence and per-file SHA-256; `python -B run.py --test` runs the comparisons and this sweep with assertions, standard library only, no dateutil install, no network.
+
 In review, [Wkhanex independently ran the same range](https://github.com/dateutil/dateutil/pull/1583#pullrequestreview-5498927830):
 
 > I checked every valid `yearday` for every year 2000–2399 (146,097 date cases) against `date(year, 1, 1) + timedelta(days=ordinal - 1)`. All matched, including day 366 in every leap year and the day-59/day-60 boundary. I used Python 3.12.14 against commit `2a14487`.
 
 He tested the fixed version; the two numbers agree, computed separately. He also called out the 59/60 boundary, where `leapdays` starts to apply — the fix does not touch it.
 
-A little over two hours after the merge, dateutil 4.0.0 was released. [Line 38 of `NEWS`](https://github.com/dateutil/dateutil/blob/4.0.0/NEWS#L38-L40) reads:
+A little over two hours after the merge, dateutil 4.0.0 was released (2026-11-01). [Line 38 of `NEWS`](https://github.com/dateutil/dateutil/blob/4.0.0/NEWS#L38-L40) reads:
 
 > `relativedelta(yearday=366)` now resolves to December 31 in leap years. Previously it gave December 30, the same date as `yearday=365`. Reported and fixed by @Master-Norna (gh pr #1583).
 
 In the 4.0.0 sdist, `relativedelta.py` matches the merge commit line for line.
 
 `testInvalidYearDay` is still there, and 367 still raises. 366 now has a success assertion of its own: in a leap year, `first + relativedelta(yearday=366)` must equal `first + timedelta(days=365)`. That side of the boundary had nobody watching.
+
+## The same day 366, two answers
+
+The standard library knows day 366:
+
+```python
+>>> datetime.strptime("2000-366", "%Y-%j").date()
+datetime.date(2000, 12, 31)
+```
+
+`%j` is the day of the year, 001 through 366. For the same "day 366 of 2000" the standard library parses December 31; dateutil's `relativedelta(yearday=366)` folds back to December 30. The other direction agrees: December 31 has `tm_yday` 366, December 30 has 365. The number always had exactly one right answer.
+
+Walking a whole year through `yearday` is where that cell shows. On 2.9.0.post0 (before 4.0.0):
+
+```python
+>>> days = [first + relativedelta(yearday=n) for n in range(1, 367)]
+>>> len(days), days.count(date(2000, 12, 30)), date(2000, 12, 31) in days
+(366, 2, False)
+```
+
+Across 366 dates December 30 appears twice and December 31 is missing. An index keyed by "day of year" slips from that day on; a common year is right (day 366 of 1999 gives December 31) — only leap years hit it, once every four.
+
+`yearday` exists to turn "year + day number" into a date; both `strptime`'s `%j` and `time.struct_time`'s `tm_yday` carry that number. Going through `relativedelta` for the conversion is off by one on the last cell of every leap year before 4.0.0.
+
+The fix ships in 4.0.0 (2026-11-01). It requires Python 3.11 or later and no longer depends on `six`; projects still on 3.10 cannot move to it. Where you cannot upgrade, `first + timedelta(days=n - 1)` computes the same thing — that path is right in both versions.
+
+Upstream: `dateutil/dateutil`, [#1583](https://github.com/dateutil/dateutil/pull/1583), parent commit [5391455e](https://github.com/dateutil/dateutil/commit/5391455e7c7839e300b63649041806fb5219432e), merge commit [d23ff760](https://github.com/dateutil/dateutil/commit/d23ff760f8448b51579016d96f39590018445724).
