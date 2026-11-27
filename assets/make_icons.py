@@ -44,6 +44,7 @@ TOPICS = {
     "top吞投影_sqlglot": ("stack", "bar", "outlier"),  # 投影里的词整条偏进了 LIMIT 的槽
     "格式尾随换行_jsonschema": ("fence", "bar", "truncate"),  # 正则只画到 Z，末尾那一段没吃到
     "空方括号_ralphex": ("ring", "bar", "missing"),  # 一圈格子都该有内容，这一格空着也算数
+    "加法交换律_pypdf": ("row", "bar", "gap"),  # 同样两段区间，看谁写在前面，中间那个空区间才冒得出 gap
 }
 
 # ---- 记号：point 画在线段中点，line 画整条线段 ----

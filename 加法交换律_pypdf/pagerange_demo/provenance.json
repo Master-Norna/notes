@@ -1,0 +1,28 @@
+{
+  "upstream": "py-pdf/pypdf",
+  "pr": "https://github.com/py-pdf/pypdf/pull/4468",
+  "parent": {
+    "sha": "8ffe8f2e3dda1fc34c312b71e1112ad9a361de6e",
+    "tarball_sha256": "df5ef390032a8849255129cbda5db422d64f6fee44d5a5102699d1ffdeeef997",
+    "pagerange_sha256": "84d8bfab42e5ddafab750aef4c20787fd77db54b4edd5fdf03d7a8bfb58b393f"
+  },
+  "merged": {
+    "sha": "d0620116c87df3dcb97365ae3d631af2f8c8dfa9",
+    "tarball_sha256": "6712a353b3a5e8792ef5cce292253c063b48975f963a6768770c1d8ee6dd0ff8",
+    "pagerange_sha256": "f2e5f3ca7b224a3032bca21b018a458b8ed8dfcf31e067061d22ef8d9562db62"
+  },
+  "vendor": {
+    "parent": {
+      "files": 60,
+      "bytes": 1816347
+    },
+    "merged": {
+      "files": 60,
+      "bytes": 1816572
+    }
+  },
+  "license": "LICENSE (pypdf)",
+  "measured_with": {
+    "python": "3.12.14"
+  }
+}

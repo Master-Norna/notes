@@ -16,6 +16,18 @@
 
 <table>
 <tr>
+<td width="88" align="center" valign="top"><a href="加法交换律_pypdf/pypdf_加法交换律_中文版.md"><img src="加法交换律_pypdf/assets/icon.svg" width="64"></a></td>
+<td valign="top">
+
+**[pypdf 7.2.0 之前，两个 PageRange 相加，还要看谁写在前面](加法交换律_pypdf/pypdf_加法交换律_中文版.md)**
+
+`PageRange("2:0") + PageRange("2:5")` 抛 `ValueError`，同一个加法换个顺序却返回 `PageRange("2:5")`。排序只比起点，起点相同时先排谁全看谁写在左边，gap 检查参照谁的终点也就随写法走；7.2.0 给比较键补上第二个维度，起点相同时终点大的排前。我把两个固定提交的完整包放进一份复现逐文件比下来，差的只有 `pagerange.py`。
+
+<sub>2026-11-27 · [English](加法交换律_pypdf/pypdf_PageRange_Addition_Order_EN.md)</sub>
+
+</td>
+</tr>
+<tr>
 <td width="88" align="center" valign="top"><a href="空方括号_ralphex/ralphex_空方括号_中文版.md"><img src="空方括号_ralphex/assets/icon.svg" width="64"></a></td>
 <td valign="top">
 
@@ -455,6 +467,7 @@ PostgreSQL 代理 pgdog 连续跑了 12 天以后，定时任务全都不再触�
 
 | 工程 | 跑出来的是什么 |
 | --- | --- |
+| [pagerange_demo](加法交换律_pypdf/pagerange_demo/) | 两个固定提交的完整 pypdf 包各 60 文件原样 vendor，10 页文档上把两种写法与一组真 gap 各跑一遍合并与 `writer.append`，看修前哪一顺序抛、修后两顺序页数是否一致；两份包逐文件差分只有 `pagerange.py` |
 | [plan_bracket_demo](空方括号_ralphex/plan_bracket_demo/) | 两版 `pkg/plan/parse.go` 原样放进 `before/` 与 `after/`，同一份计划交给两版；13 个合成用例加仓库 `docs/plans/` 里 16 行真实任务逐行放回未勾选，看完成门在哪一版放行、`[` 与 `]` 之间只有一个 tab 时又怎么判 |
 | [trailing_newline_demo](格式尾随换行_jsonschema/trailing_newline_demo/) | 三个包（rfc3339-validator 0.1.4、rfc3987 1.3.8、fqdn 1.6.0）的发布版文件原样 vendor，七个 `format` 的裸值与「裸值 + 换行」共 14 条并排跑，看发布版怎么全部放行、每次委托前加一句 `endswith` 之后怎么全部拒绝 |
 | [top_demo](top吞投影_sqlglot/top_demo/) | 两版 sqlglot 源码原样 vendor（`provenance.txt` 记 372 个文件的 SHA-256），15 个 SQL 形状在 PyPI 30.33.0 与合并提交 `dc4afaf5` 上各跑一遍，逐条断言输出与投影列表 |
